@@ -14,6 +14,7 @@ const databaseConfigurations = {
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => databaseConfigurations[process.env.NODE_ENV],
+      
     }),
   ],
 })
