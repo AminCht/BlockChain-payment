@@ -17,6 +17,6 @@ export class Category {
   lock: boolean;
   @Column()
   status: boolean;
-  @OneToOne(() => Transaction)
+  @OneToOne(() => Transaction, (transaction) => transaction.wallet)
   transaction: Transaction;
 }
