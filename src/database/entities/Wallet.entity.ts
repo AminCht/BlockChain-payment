@@ -2,7 +2,7 @@ import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import {Transaction} from "./Transaction.entity";
 
 @Entity()
-export class Category {
+export class Wallet {
   @PrimaryGeneratedColumn()
   id: number;
   @Column({ unique: true })

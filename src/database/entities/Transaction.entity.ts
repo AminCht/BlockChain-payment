@@ -1,5 +1,6 @@
 import { flatten } from '@nestjs/common';
 import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinTable, JoinColumn } from 'typeorm';
+import { Wallet } from './Wallet.entity';
 
 enum Network{
     ETHEREUM= "Ethereum",
