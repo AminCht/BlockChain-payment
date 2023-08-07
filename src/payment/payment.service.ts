@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-
+import { CreatePaymentDto } from './dto/createPayment.dto';
 @Injectable()
 export class PaymentService {
 
-    getHello(){
-        return 'hello';
+    createPayment(dto: CreatePaymentDto){
+        const currency = dto.currency;
+        const network = dto.network;
+        if(currency == 'eth' && network == 'ethereum'){
+
+
+        }else{
+
+        }
     }
 }
