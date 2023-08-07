@@ -7,30 +7,32 @@ import { Transaction } from '../database/entities/Transaction.entity';
 
 @Injectable()
 export class PaymentService {
-    constructor( @InjectRepository(WalletEntity) private walletRepo: Repository<WalletEntity>,
-    @InjectRepository(WalletEntity) private tranasctionRepo: Repository<Transaction>,
-    @InjectEntityManager() private readonly entityManager: EntityManager){}
-    async createPayment(dto: CreatePaymentDto){
-        const currency = dto.currency;
-        const network = dto.network;
+    constructor(
+        @InjectRepository(WalletEntity) private walletRepo: Repository<WalletEntity>,
+        @InjectRepository(WalletEntity) private tranasctionRepo: Repository<Transaction>,
+        @InjectEntityManager() private readonly entityManager: EntityManager
+    ){}
+
+    async createPayment(createPaymnetDto: CreatePaymentDto){
+        const {currency, network} = createPaymnetDto;
         if(currency == 'eth' && network == 'ethereum'){
 
             await this.entityManager.transaction(async transactionManger=>{
                 const query = await this.walletRepo.createQueryBuilder().select().from(WalletEntity, 'Wallets').
-                where('lock = :lock', { lock: true })
+                where('lock = :lock', { lock: false })
                 .setLock('pessimistic_read').getOne();
 
-                if(query){
-                    query.lock= true;
-                }
+               
+                query.lock= Boolean(query);
+                
 
                 await transactionManger.save(query);
                 const transaction = this.tranasctionRepo.create({
                     wallet:{
                         id:query.id
                     },
-                    amount:dto.amount,
-                    currency:dto.currency
+                    amount:createPaymnetDto.amount,
+                    currency:createPaymnetDto.currency
                 });
 
                 await this.tranasctionRepo.save(transaction);
