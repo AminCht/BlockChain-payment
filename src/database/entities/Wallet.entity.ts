@@ -10,7 +10,7 @@ export class Wallet {
   @Column({ unique: true })
   private_key: string;
   @Column()
-  network: string;
+  wallet_network: string;
   @Column()
   type: string;
   @Column()

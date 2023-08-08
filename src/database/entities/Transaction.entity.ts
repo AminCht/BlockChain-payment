@@ -22,9 +22,6 @@ export class Transaction{
     @Column({nullable:false})
     currency: string
 
-    @Column({nullable:false})
-    Network: Network
-
     @OneToOne(() => Wallet, (wallet) => wallet.transaction,{cascade:true})
     @JoinColumn()
     wallet: Wallet

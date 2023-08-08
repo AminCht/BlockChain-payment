@@ -20,8 +20,10 @@ export class CreateWalletCommand extends CommandRunner {
     const createdWallet = await this.walletRepo.create({
       private_key: wallet.privateKey,
       address: wallet.address,
-      network: 'etc',
+      wallet_network: 'etc',
       type: 'token',
+      lock: true,
+      status: true,
     });
     const savedWallet = await this.walletRepo.save(createdWallet);
     console.log(savedWallet);
