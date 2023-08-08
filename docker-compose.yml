@@ -8,6 +8,6 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: ${DEV_DB_USERNAME}
-      POSTGRES_PASSWORD: ${DEV_DB_PASSWORD}
-      POSTGRES_DB: ${DEV_DB_NAME}
+      POSTGRES_USER: process.env.DEV_DB_USERNAME
+      POSTGRES_PASSWORD: process.env.DEV_DB_PASSWORD
+      POSTGRES_DB: process.env.DEV_DB_NAME
