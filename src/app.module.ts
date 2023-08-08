@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaymentModule } from './payment/payment.module';
 import { WalletModule } from './wallet/wallet.module';
+import { TransactionModule } from './transaction/transaction.module';
 import DatabaseModule from './database/database.module';
 
 @Module({
-  imports: [DatabaseModule, PaymentModule, WalletModule],
+  imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule],
   controllers: [AppController],
   providers: [AppService],
 })
