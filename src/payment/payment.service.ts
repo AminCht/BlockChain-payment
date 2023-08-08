@@ -1,43 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/createPayment.dto';
 import { InjectRepository, InjectEntityManager } from '@nestjs/typeorm';
-import { Wallet, Wallet as WalletEntity }  from '../database/entities/Wallet.entity';
-import { Repository , EntityManager } from 'typeorm';
+import { Wallet }  from '../database/entities/Wallet.entity';
+import { Repository , EntityManager, DataSource } from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 
 @Injectable()
 export class PaymentService {
     constructor(
-        @InjectRepository(WalletEntity) private walletRepo: Repository<WalletEntity>,
-        @InjectRepository(WalletEntity) private tranasctionRepo: Repository<Transaction>,
-        @InjectEntityManager() private readonly entityManager: EntityManager
+        @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
+        @InjectRepository(Wallet) private tranasctionRepo: Repository<Transaction>,
+        @InjectEntityManager() private readonly entityManager: EntityManager,
+        private dataSource: DataSource
     ){}
 
     async createPayment(createPaymnetDto: CreatePaymentDto){
         const {currency, network} = createPaymnetDto;
+
         if(currency == 'eth' && network == 'ethereum'){
-
-            await this.entityManager.transaction(async transactionManger=>{
-                const query = await this.walletRepo.createQueryBuilder().select().from(WalletEntity, 'Wallets').
-                where('lock = :lock', { lock: false })
-                .setLock('pessimistic_read').getOne();
-
-               
-                query.lock= Boolean(query);
-                
-
-                await transactionManger.save(query);
-                const transaction = this.tranasctionRepo.create({
-                    wallet:{
-                        id:query.id
-                    },
-                    amount:createPaymnetDto.amount,
-                    currency:createPaymnetDto.currency
-                });
-
-                await this.tranasctionRepo.save(transaction);
-                return transaction;
-            })
+            const queryRunner = this.dataSource.createQueryRunner();
+            queryRunner.connect();
+            await queryRunner.startTransaction();
+            try{
+                const wallet = await queryRunner.manager.getRepository(Wallet).createQueryBuilder('wallet')
+                .where('wallet.lock = :lock', { lock: false })
+                .setLock('pessimistic_write').getOne();
+                if(wallet){
+                    wallet.lock = true;
+                    await this.walletRepo.save(wallet);
+                    const transaction = this.tranasctionRepo.create({
+                        wallet:{
+                            id:wallet.id
+                        }
+                    });
+                    await this.tranasctionRepo.save(transaction);
+                    return {walletAdress: wallet.address, transactionId: transaction.id};
+                }
+            }
+            catch(error){
+                await queryRunner.rollbackTransaction();
+                return new ForbiddenException()
+            }finally{
+                await queryRunner.release()
+            }
+            
         }else{
 
         }
