@@ -18,6 +18,7 @@ export class CreateWalletCommand extends CommandRunner {
   ): Promise<void> {
     let i: number = 0;
     const walletCount = +passedParams[0]
+
     while(i<walletCount){
     const wallet = Wallet.createRandom();
     const createdWallet = await this.walletRepo.create({

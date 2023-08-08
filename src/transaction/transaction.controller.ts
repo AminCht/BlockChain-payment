@@ -9,7 +9,7 @@ export class TransactionController {
     
   @UseFilters(UserNotFoundExceptionFilter)
   @Get(':id')
-  getTransactionById(@Param('id', ParseIntPipe) id:number){
-    return this.transactionService.getTransactionById(id);
+  async getTransactionById(@Param('id', ParseIntPipe) id:number){
+    return await this.transactionService.getTransactionById(id);
   }
 }
