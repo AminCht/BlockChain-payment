@@ -17,8 +17,8 @@ describe('PaymentService', () => {
     expect(service).toBeDefined();
   });
   describe('Test create payment',()=>{
-    it('should create a payment with status code 201',async ()=>{
-      const payment = await service.createPayment('USSD','100');
+    it('should create a payment with status code 201', async () => {
+      const payment = await service.createPayment('USSD', '100');
       expect(payment.body.currency).toEqual('USSD');
       expect(payment.status).toBe(201);
     })
