@@ -3,27 +3,24 @@ import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column,
 import { Wallet } from './Wallet.entity';
 
 enum Network{
-    ETHEREUM= "Ethereum",
+  ETHEREUM = 'Ethereum',
     MAIN="main"
 }
 
 
 @Entity({name:"Transctions"})
 export class Transaction{
-    @Column(PrimaryGeneratedColumn)
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({nullable: false})
-    amount: number
+  @Column({ nullable: false })
+  amount: number
 
     @Column({nullable: false})
     network: string
 
     @Column({nullable:false})
     currency: string
-
-    @Column({nullable:false})
-    Network: Network
 
     @OneToOne(() => Wallet, (wallet) => wallet.transaction,{cascade:true})
     @JoinColumn()
@@ -38,7 +35,7 @@ export class Transaction{
     @CreateDateColumn()
     createdDate: Date;
 
-    @Column({ type: 'timestamptz' }) 
+    @Column()
     expireTime: Date;
     
     @BeforeInsert()
