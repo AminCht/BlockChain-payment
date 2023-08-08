@@ -26,10 +26,10 @@ export class Transaction{
     @JoinColumn()
     wallet: Wallet
     
-    @Column({ type: 'double', scale: 2, nullable: false })
+    @Column({ type: 'numeric', scale: 2, nullable: false })
     wallet_balance_before: number
 
-    @Column({ type: 'double', scale: 2, nullable: false })
+    @Column({ type: 'numeric', scale: 2, nullable: false })
     wallet_balance_after: number
 
     @CreateDateColumn()
