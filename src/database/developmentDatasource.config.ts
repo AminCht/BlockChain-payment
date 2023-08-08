@@ -6,11 +6,11 @@ const configService = new ConfigService();
 
 export const developmentDbConfig = {
   type: 'postgres',
-  host: process.env.STAGE_DB_HOST,
-  port: process.env.STAGE_DB_PORT,
-  username: process.env.STAGE_DB_USERNAME,
-  password: process.env.STAGE_DB_PASSWORD,
-  database: process.env.STAGE_DB_NAME,
+  host: process.env.DEV_DB_HOST,
+  port: process.env.DEV_DB_PORT,
+  username: process.env.DEV_DB_USERNAME,
+  password: process.env.DEV_DB_PASSWORD,
+  database: process.env.DEV_DB_NAME,
   synchronize: true,
   logging: true,
   entities: [__dirname + '/entities/*.entity{.js,.ts}'],
