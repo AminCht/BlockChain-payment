@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  dev-db:
+    image: postgres
+    env_file:
+      - development.env
+    container_name: blockchain-dev
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${DEV_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DEV_DB_NAME}
