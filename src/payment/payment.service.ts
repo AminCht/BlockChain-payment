@@ -19,12 +19,14 @@ export class PaymentService {
 
         if(currency == 'eth' && network == 'ethereum'){
             const queryRunner = this.dataSource.createQueryRunner();
+            console.log(1)
             queryRunner.connect();
             await queryRunner.startTransaction();
-            try{
-                const wallet = await queryRunner.manager.getRepository(Wallet).createQueryBuilder('wallet')
-                .where('wallet.lock = :lock', { lock: false })
-                .setLock('pessimistic_write').getOne();
+            try{   
+                /*const wallet = await this.walletRepo.createQueryBuilder('Wallets').
+                setLock('').where('Wallets.lock=:lock', { lock: false }).getRawOne();*/
+                const wallet = await queryRunner.query('SELECT * FROM Wallets WHERE "lock" = false FOR UPDATE SKIP LOCKED');
+                console.log(wallet);
                 if(wallet){
                     wallet.lock = true;
                     await this.walletRepo.save(wallet);
@@ -34,12 +36,13 @@ export class PaymentService {
                         }
                     });
                     await this.tranasctionRepo.save(transaction);
+                    await queryRunner.commitTransaction();
                     return {walletAdress: wallet.address, transactionId: transaction.id};
                 }
             }
             catch(error){
                 await queryRunner.rollbackTransaction();
-                return new ForbiddenException()
+                return error;
             }finally{
                 await queryRunner.release()
             }
