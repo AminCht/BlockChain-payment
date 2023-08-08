@@ -1,7 +1,7 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import {Transaction} from "./Transaction.entity";
 
-@Entity()
+@Entity('Wallets')
 export class Wallet {
   @PrimaryGeneratedColumn()
   id: number;
@@ -13,9 +13,9 @@ export class Wallet {
   wallet_network: string;
   @Column()
   type: string;
-  @Column()
+  @Column({default: false})
   lock: boolean;
-  @Column()
+  @Column({default: 1})
   status: boolean;
   @OneToOne(() => Transaction, (transaction) => transaction.wallet)
   transaction: Transaction;

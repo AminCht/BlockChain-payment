@@ -16,16 +16,19 @@ export class CreateWalletCommand extends CommandRunner {
     passedParams: string[],
     options?: Record<string, any>,
   ): Promise<void> {
+    let i: number = 0;
+    const walletCount = +passedParams[0]
+    while(i<walletCount){
     const wallet = Wallet.createRandom();
     const createdWallet = await this.walletRepo.create({
       private_key: wallet.privateKey,
       address: wallet.address,
       wallet_network: 'etc',
       type: 'token',
-      lock: true,
-      status: true,
     });
     const savedWallet = await this.walletRepo.save(createdWallet);
     console.log(savedWallet);
+    i++;
+  }
   }
 }
