@@ -4,11 +4,11 @@ import { Wallet } from './Wallet.entity';
 
 enum Network{
   ETHEREUM = 'Ethereum',
-    MAIN="main"
+  MAIN = 'main',
 }
 
 
-@Entity({name:"Transctions"})
+@Entity({ name: 'Transctions' })
 export class Transaction{
   @PrimaryGeneratedColumn()
   id: number;

@@ -16,6 +16,5 @@ async function bootstrapCmd() {
 if (process.env.MODE === 'cmd') {
   bootstrapCmd();
 } else {
-  console.log(1);
   bootstrap();
 }
