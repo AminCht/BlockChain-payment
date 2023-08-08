@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 
 @Command({ name: 'check-balance' })
-export class CreateWalletCommand extends CommandRunner {
+export class CheckBallanceCommand extends CommandRunner {
   constructor(
     @InjectRepository(Transaction) private readonly transactionRepo: Repository<Transaction>,
     @InjectRepository(WalletEntity) private readonly walletRepo: Repository<WalletEntity> 
@@ -18,12 +18,26 @@ export class CreateWalletCommand extends CommandRunner {
   ): Promise<void> {
     const wallet = await this.walletRepo.find({
         where:{
-            lock:true
+            lock:false
         }
     });
-    console.log(wallet);
+    for(var walletItem of wallet){
+        await this.checkBalance(walletItem);
+    }
   }
-  checkBalance(item: WalletEntity){
-    
+
+  async checkBalance(walletItem: WalletEntity){
+    const transaction = await this.transactionRepo.findOne({
+        where:{
+            wallet:{
+                id:walletItem.id
+            }
+        }
+    });
+    const amount = transaction.wallet_balance_after - transaction.wallet_balance_before;
+    if(transaction.amount=amount){
+        walletItem.lock = false;
+        await this.transactionRepo.save(walletItem);
+    }
   }
 }
