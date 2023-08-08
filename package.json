@@ -14,6 +14,7 @@
     "start:stage": "dotenv -e stage.env nest start --watch",
     "start:debug": "nest start --debug --watch",
     "create-wallet": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main create-wallet",
+    "check-balance": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main check-balance",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "createmigration:dev": "dotenv -e development.env -- npm run typeorm -- -d ./src/database/developmentDatasource.config.ts migration:generate ./src/database/dev_migrations/dev_migrations/",
     "migrate:dev": "npm run build && dotenv -e development.env -- npm run typeorm migration:run -- -d ./src/database/developmentDatasource.config.ts",
