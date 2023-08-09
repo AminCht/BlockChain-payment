@@ -40,8 +40,9 @@ export class Transaction{
     
     @BeforeInsert()
     setExpirationTime(){
-        const currentDateTime = new Date()
-        this.expireTime.setHours(currentDateTime.getHours()+1)
+        this.expireTime =new Date();
+        this.expireTime.setHours(this.expireTime.getHours()+1)
+        console.log(this.expireTime)
     }
 
 }

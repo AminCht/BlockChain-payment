@@ -30,23 +30,23 @@ export class PaymentService {
         const wallet = await queryRunner.query(
           'SELECT * FROM "Wallets" WHERE "lock" = false FOR UPDATE SKIP LOCKED LIMIT 1',
         );
-        console.log(wallet);
-        if (wallet) {
+       // console.log(wallet);
+        if (wallet[0]) {
           //await this.getWalletBalance(wallet.address);
-          wallet.lock = true;
+          wallet[0].lock = true;
+          console.log(wallet[0]);
           const transaction = this.transactionRepo.create({
-            wallet: {
-              id: wallet.id,
-            },
+            wallet: wallet[0],
             amount: createPaymentDto.amount,
             currency: createPaymentDto.currency,
             network: createPaymentDto.network,
           });
+          console.log(transaction);
           await this.transactionRepo.save(transaction);
-          await this.walletRepo.save(wallet);
+          await this.walletRepo.save(wallet[0]);
           await queryRunner.commitTransaction();
           return {
-            walletAddress: wallet.address,
+            walletAddress: wallet[0].address,
             transactionId: transaction.id,
           };
         }
