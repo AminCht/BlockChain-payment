@@ -38,14 +38,14 @@ export class PaymentService {
             network: createPaymentDto.network,
             wallet_balance_before: 2000,
           });
-          await queryRunner.manager.update(
-            Wallet,
-            { id: wallet[0].id },
-            { lock: false },
-          );
-
+          //await queryRunner.manager.save(updatedWallet);
           console.log(transaction);
           await queryRunner.manager.save(transaction);
+          const updatedWallet = await queryRunner.manager.update(
+            Wallet,
+            { id: wallet[0].id },
+            { lock: true },
+          );
           await queryRunner.commitTransaction();
           return {
             walletAddress: wallet[0].address,
