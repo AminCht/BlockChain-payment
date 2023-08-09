@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 import { CommandFactory } from 'nest-commander';
 import { CommandModule } from './commands/command.module';
 import * as process from 'process';
-import { ValidationPipe } from "@nestjs/common";
+import { ValidationPipe } from '@nestjs/common';
 config();
 
 async function bootstrap() {

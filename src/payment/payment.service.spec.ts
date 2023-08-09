@@ -7,7 +7,7 @@ describe('PaymentService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [PaymentService],
-      imports:[]
+      imports: [],
     }).compile();
 
     service = module.get<PaymentService>(PaymentService);
@@ -16,12 +16,18 @@ describe('PaymentService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  describe('Test create payment',()=>{
-    it('should create a payment with status code 201', async () => {
-      const payment = await service.createPayment('USSD', '100');
-      expect(payment.body.currency).toEqual('USSD');
-      expect(payment.status).toBe(201);
-    })
-  })
-  
+  describe('Test create payment', () => {
+    it('should create a payment and return wallet address and id', async () => {
+      const paymentDto = {
+        network: 'ethereum',
+        currency: 'eth',
+        amount: 100,
+      };
+      const payment = await service.createPayment(paymentDto);
+      expect(payment.body).toEqual({
+        walletAddress: 1,
+        transactionId: 1,
+      });
+    });
+  });
 });

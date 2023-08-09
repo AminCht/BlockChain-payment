@@ -1,9 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/createPayment.dto';
-import { InjectRepository, InjectEntityManager } from '@nestjs/typeorm';
-import { Wallet } from '../database/entities/Wallet.entity';
-import { Repository, EntityManager, DataSource } from 'typeorm';
-import { Transaction } from '../database/entities/Transaction.entity';
+import {Injectable} from '@nestjs/common';
+import {CreatePaymentDto} from './dto/createPayment.dto';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Wallet} from '../database/entities/Wallet.entity';
+import {DataSource, Repository} from 'typeorm';
+import {Transaction} from '../database/entities/Transaction.entity';
+import {InfuraProvider} from "ethers";
 
 @Injectable()
 export class PaymentService {
@@ -31,6 +32,7 @@ export class PaymentService {
         );
         console.log(wallet);
         if (wallet) {
+          await this.getWalletBalance(wallet.address);
           wallet.lock = true;
           await this.walletRepo.save(wallet);
           const transaction = this.transactionRepo.create({
@@ -56,5 +58,17 @@ export class PaymentService {
       }
     } else {
     }
+  }
+  async getWalletBalance(address: string) {
+    const provider = this.infuraConnect();
+    const pay = await provider.getBalance(address);
+    console.log(pay);
+  }
+
+  infuraConnect() {
+    return new InfuraProvider(
+      'goerli',
+      'https://mainnet.infura.io/v3/409d3a1c6c6f485cbfa0dd53901ab632',
+    );
   }
 }
