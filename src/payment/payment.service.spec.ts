@@ -6,6 +6,8 @@ import { Transaction } from "../database/entities/Transaction.entity";
 import { Repository } from "typeorm";
 import DatabaseModule from "../database/database.module";
 import * as process from "process";
+import { WalletService } from '../wallet/wallet.service';
+import { TransactionService } from '../transaction/transaction.service';
 describe('PaymentService', () => {
   let service: PaymentService;
   let walletRepo: Repository<Wallet>;
@@ -32,7 +34,7 @@ describe('PaymentService', () => {
       const paymentDto = {
         network: 'ethereum',
         currency: 'eth',
-        amount: 100,
+        amount: "10000000000000",
       };
       const payment = await service.createPayment(paymentDto);
       expect(payment.body).toEqual({

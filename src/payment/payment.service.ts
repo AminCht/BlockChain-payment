@@ -67,7 +67,6 @@ export class PaymentService {
   async getWalletBalance(address: string) {
     const provider = this.infuraConnect();
     const promiseObject = await provider.getBalance(address); // Replace with your actual Promise
-    return promiseObject.BigNumber();
     return await this.processBigIntPromise(promiseObject);
   }
 
