@@ -1,11 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WalletService } from './wallet.service';
+import { Wallet } from '../database/entities/Wallet.entity';
+import { Repository } from 'typeorm';
+import DatabaseModule from '../database/database.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 describe('WalletService', () => {
   let service: WalletService;
-
+  let walletRepo: Repository<Wallet>;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        DatabaseModule,
+        TypeOrmModule.forFeature([Wallet]),
+      ],
       providers: [WalletService],
     }).compile();
 
