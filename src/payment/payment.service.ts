@@ -28,13 +28,12 @@ export class PaymentService {
         /*const wallet = await this.walletRepo.createQueryBuilder('Wallets').
             setLock('').where('Wallets.lock=:lock', { lock: false }).getRawOne();*/
         const wallet = await queryRunner.query(
-          'SELECT * FROM Wallets WHERE "lock" = false FOR UPDATE SKIP LOCKED',
+          'SELECT * FROM "Wallets" WHERE "lock" = false FOR UPDATE SKIP LOCKED LIMIT 1',
         );
         console.log(wallet);
         if (wallet) {
-          await this.getWalletBalance(wallet.address);
+          //await this.getWalletBalance(wallet.address);
           wallet.lock = true;
-          await this.walletRepo.save(wallet);
           const transaction = this.transactionRepo.create({
             wallet: {
               id: wallet.id,
@@ -44,6 +43,7 @@ export class PaymentService {
             network: createPaymentDto.network,
           });
           await this.transactionRepo.save(transaction);
+          await this.walletRepo.save(wallet);
           await queryRunner.commitTransaction();
           return {
             walletAddress: wallet.address,
