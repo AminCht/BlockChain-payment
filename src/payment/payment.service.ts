@@ -33,14 +33,13 @@ export class PaymentService {
         );
         if (wallet[0]) {
           const balance = await this.getWalletBalance(wallet[0].address);
-          const balanceBigInt = balance.toString()
-          console.log('balance:'+balance);
+          console.log('balance:' + balance);
           const transaction = this.transactionRepo.create({
             wallet: wallet[0],
             amount: createPaymentDto.amount,
             currency: createPaymentDto.currency,
             network: createPaymentDto.network,
-            wallet_balance_before: balanceBigInt,
+            wallet_balance_before: balance,
           });
           //await queryRunner.manager.save(updatedWallet);
           console.log(transaction);
