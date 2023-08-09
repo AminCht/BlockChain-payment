@@ -4,7 +4,7 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Wallet} from '../database/entities/Wallet.entity';
 import {DataSource, Repository} from 'typeorm';
 import {Transaction} from '../database/entities/Transaction.entity';
-import {InfuraProvider} from "ethers";
+import {InfuraProvider, ethers} from "ethers";
 import { checkDatabase } from 'typeorm-extension';
 
 @Injectable()
@@ -32,14 +32,15 @@ export class PaymentService {
           'SELECT * FROM "Wallets" WHERE "lock" = false FOR UPDATE SKIP LOCKED LIMIT 1',
         );
         if (wallet[0]) {
-          const balance = this.getWalletBalance(wallet[0].address);
+          const balance = await this.getWalletBalance(wallet[0].address);
+          const balanceBigInt = balance.toString()
           console.log('balance:'+balance);
           const transaction = this.transactionRepo.create({
             wallet: wallet[0],
             amount: createPaymentDto.amount,
             currency: createPaymentDto.currency,
             network: createPaymentDto.network,
-            wallet_balance_before: balance.toString(),
+            wallet_balance_before: balanceBigInt,
           });
           //await queryRunner.manager.save(updatedWallet);
           console.log(transaction);
@@ -64,24 +65,18 @@ export class PaymentService {
     } else {
     }
   }
-  async getWalletBalance(address: string) {
+  async getWalletBalance(address: string): Promise<string> {
     const provider = this.infuraConnect();
-    const promiseObject = await provider.getBalance(address); // Replace with your actual Promise
-    return await this.processBigIntPromise(promiseObject);
-  }
-
-  async processBigIntPromise(promise) {
-    const bigIntValue = await promise;
-    return bigIntValue; // This will log the resolved bigint value
-    // Perform any other operations with the resolved bigint value
-  }
+    const balancePromise = await provider.getBalance(address);
+    const balanceString: string = balancePromise.toString();
+    return balanceString;
   
-  
+  }
 
   infuraConnect() {
     return new InfuraProvider(
       'goerli',
-      'https://mainnet.infura.io/v3/409d3a1c6c6f485cbfa0dd53901ab632',
+      '409d3a1c6c6f485cbfa0dd53901ab632',
     );
   }
 }
