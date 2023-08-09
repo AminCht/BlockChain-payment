@@ -29,7 +29,7 @@ export class Transaction{
     @Column({ type: 'numeric', scale: 2, nullable: false })
     wallet_balance_before: number
 
-    @Column({ type: 'numeric', scale: 2, nullable: false })
+    @Column({ type: 'numeric', scale: 2, nullable: true })
     wallet_balance_after: number
 
     @CreateDateColumn()
