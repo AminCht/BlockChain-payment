@@ -13,8 +13,8 @@ export class Transaction{
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
-  amount: number
+  @Column({type:'bigint' ,nullable: false })
+  amount: string
 
     @Column({nullable: false})
     network: string
@@ -25,12 +25,15 @@ export class Transaction{
     @OneToOne(() => Wallet, (wallet) => wallet.transaction,{cascade:true})
     @JoinColumn()
     wallet: Wallet
-    
-    @Column({ type: 'numeric', scale: 2, nullable: false })
-    wallet_balance_before: number
 
-    @Column({ type: 'numeric', scale: 2, nullable: true })
-    wallet_balance_after: number
+    @Column({default: 'Pending'})
+    status: string
+    
+    @Column({type:'bigint' ,nullable: false })
+    wallet_balance_before: string
+
+    @Column({type:'bigint' ,nullable: true })
+    wallet_balance_after: string
 
     @CreateDateColumn()
     createdDate: Date;

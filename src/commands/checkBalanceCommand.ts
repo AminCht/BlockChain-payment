@@ -18,7 +18,7 @@ export class CheckBallanceCommand extends CommandRunner {
   ): Promise<void> {
     const wallet = await this.walletRepo.find({
         where:{
-            lock:false
+            lock:true
         }
     });
     for(var walletItem of wallet){
@@ -34,10 +34,12 @@ export class CheckBallanceCommand extends CommandRunner {
             }
         }
     });
-    const amount = transaction.wallet_balance_after - transaction.wallet_balance_before;
-    if(transaction.amount=amount){
+    const amount = BigInt(transaction.wallet_balance_after) - BigInt(transaction.wallet_balance_before );
+    if(BigInt(transaction.amount)==amount){
         walletItem.lock = false;
-        await this.transactionRepo.save(walletItem);
+        transaction.status = 'Successfully';
+        await this.transactionRepo.save(transaction);
+        await this.walletRepo.save(walletItem);
     }
   }
 }

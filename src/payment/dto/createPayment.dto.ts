@@ -8,7 +8,5 @@ export class CreatePaymentDto{
     currency: string;
 
     @IsNotEmpty()
-    @IsNumber({ maxDecimalPlaces: 2 })
-    @Min(0.01)
-    amount: number;
+    amount: string;
 }

@@ -5,6 +5,7 @@ import {Wallet} from '../database/entities/Wallet.entity';
 import {DataSource, Repository} from 'typeorm';
 import {Transaction} from '../database/entities/Transaction.entity';
 import {InfuraProvider} from "ethers";
+import { checkDatabase } from 'typeorm-extension';
 
 @Injectable()
 export class PaymentService {
@@ -31,12 +32,14 @@ export class PaymentService {
           'SELECT * FROM "Wallets" WHERE "lock" = false FOR UPDATE SKIP LOCKED LIMIT 1',
         );
         if (wallet[0]) {
+          const balance = this.getWalletBalance(wallet[0].address);
+          console.log('balance:'+balance);
           const transaction = this.transactionRepo.create({
             wallet: wallet[0],
             amount: createPaymentDto.amount,
             currency: createPaymentDto.currency,
             network: createPaymentDto.network,
-            wallet_balance_before: 2000,
+            wallet_balance_before: balance.toString(),
           });
           //await queryRunner.manager.save(updatedWallet);
           console.log(transaction);
@@ -63,9 +66,18 @@ export class PaymentService {
   }
   async getWalletBalance(address: string) {
     const provider = this.infuraConnect();
-    const pay = await provider.getBalance(address);
-    console.log(pay);
+    const promiseObject = await provider.getBalance(address); // Replace with your actual Promise
+    return promiseObject.BigNumber();
+    return await this.processBigIntPromise(promiseObject);
   }
+
+  async processBigIntPromise(promise) {
+    const bigIntValue = await promise;
+    return bigIntValue; // This will log the resolved bigint value
+    // Perform any other operations with the resolved bigint value
+  }
+  
+  
 
   infuraConnect() {
     return new InfuraProvider(
