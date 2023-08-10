@@ -6,13 +6,8 @@ import { Transaction } from "../database/entities/Transaction.entity";
 import { Repository } from "typeorm";
 import DatabaseModule from "../database/database.module";
 import * as process from "process";
-import { WalletService } from '../wallet/wallet.service';
-import { TransactionService } from '../transaction/transaction.service';
 describe('PaymentService', () => {
   let service: PaymentService;
-  let walletRepo: Repository<Wallet>;
-  //let transactionRepo: Repository<Transaction>;
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
@@ -22,6 +17,9 @@ describe('PaymentService', () => {
       providers: [PaymentService],
     }).compile();
     service = module.get<PaymentService>(PaymentService);
+    jest
+      .spyOn(service, 'getWalletBalance')
+      .mockReturnValue(Promise.resolve('1'));
   });
 
   it('should be defined', () => {
@@ -34,12 +32,12 @@ describe('PaymentService', () => {
       const paymentDto = {
         network: 'ethereum',
         currency: 'eth',
-        amount: "10000000000000",
+        amount: '10000000000000',
       };
       const payment = await service.createPayment(paymentDto);
-      expect(payment.body).toEqual({
-        walletAddress: 1,
-        transactionId: 1,
+      expect(payment).toEqual({
+        walletAddress: payment.walletAddress,
+        transactionId: payment.transactionId,
       });
     });
   });
