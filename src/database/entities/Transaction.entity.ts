@@ -1,20 +1,19 @@
-import { flatten } from '@nestjs/common';
-import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinTable, JoinColumn } from 'typeorm';
+import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToOne,  JoinColumn } from 'typeorm';
 import { Wallet } from './Wallet.entity';
 
-enum Network{
-  ETHEREUM = 'Ethereum',
-  MAIN = 'main',
+enum Network {
+    ETHEREUM = 'Ethereum',
+        MAIN = 'main',
 }
 
 
 @Entity({ name: 'Transctions' })
 export class Transaction{
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @Column({type:'bigint' ,nullable: false })
-  amount: string
+    @Column({nullable: false })
+    amount: number 
 
     @Column({nullable: false})
     network: string
@@ -28,11 +27,11 @@ export class Transaction{
 
     @Column({default: 'Pending'})
     status: string
-    
-    @Column({type:'bigint' ,nullable: false })
+
+    @Column({nullable: false })
     wallet_balance_before: string
 
-    @Column({type:'bigint' ,nullable: true })
+    @Column({nullable: true })
     wallet_balance_after: string
 
     @CreateDateColumn()
@@ -40,12 +39,11 @@ export class Transaction{
 
     @Column()
     expireTime: Date;
-    
+
     @BeforeInsert()
     setExpirationTime(){
         this.expireTime =new Date();
         this.expireTime.setHours(this.expireTime.getHours()+1)
-        console.log(this.expireTime)
     }
 
 }
