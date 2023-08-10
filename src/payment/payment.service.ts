@@ -30,18 +30,19 @@ export class PaymentService {
         }
     }
 
-    private async getWalletBalance(address: string): Promise<string> {
+    public async getWalletBalance(address: string): Promise<string> {
         const balancePromise = await this.provider.getBalance(address);
         return balancePromise.toString();
     }
 
     private async createEthPayment(createPaymentDto: CreatePaymentDto){
+
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             // TODO: not enugh
-            const wallet = await queryRunner.query('SELECT * FROM "Wallets" WHERE "lock" = false FOR UPDATE SKIP LOCKED LIMIT 1');
+            const wallet = await queryRunner.query('SELECT * FROM "Wallets" WHERE "lock" = false AND "wallet_network" = $1 FOR UPDATE SKIP LOCKED LIMIT 1', ['ethereum']);
             if (wallet.length == 1) {
                 const balance = await this.getWalletBalance(wallet[0].address);
                 const transaction = this.transactionRepo.create({

@@ -6,6 +6,7 @@ import { Transaction } from "../database/entities/Transaction.entity";
 import DatabaseModule from "../database/database.module";
 describe('PaymentService', () => {
     let service: PaymentService;
+    let getWalletBalanceMock: jest.SpyInstance<Promise<string>>
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [
@@ -28,7 +29,7 @@ describe('PaymentService', () => {
         const paymentDto = {
             network: 'ethereum',
             currency: 'eth',
-            amount: '10000000000000',
+            amount: 12,
         };
         const payment = await service.createPayment(paymentDto);
         expect(payment).toEqual({
