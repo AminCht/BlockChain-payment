@@ -1,72 +1,67 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { Command, CommandRunner } from 'nest-commander';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet as WalletEntity } from '../database/entities/Wallet.entity';
-import { Repository } from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
-import { InfuraProvider } from "ethers/lib.esm";
+import { InfuraProvider } from "ethers";
+import { ethers } from 'ethers';
+import { DataSource, Repository } from "typeorm";
 
 @Command({ name: 'check-balance' })
 export class CheckBallanceCommand extends CommandRunner {
-  constructor(
-    @InjectRepository(Transaction)
-    private readonly transactionRepo: Repository<Transaction>,
-    @InjectRepository(WalletEntity)
-    private readonly walletRepo: Repository<WalletEntity>,
-  ) {
-    super();
-  }
-  async run(
-    passedParams: string[],
-    options?: Record<string, any>,
-  ): Promise<void> {
-    const provider = this.infuraConnect();
-    const wallet = await this.walletRepo.find({
-      where: {
-        lock: true,
-      },
-    });
-    for (const walletItem of wallet) {
-      await this.checkBalance(walletItem, provider);
-    }
-  }
 
-  async checkBalance(walletItem: WalletEntity, provider: InfuraProvider) {
-    const transaction = await this.transactionRepo.findOne({
-      where: {
-        wallet: {
-          id: walletItem.id,
-        },
-      },
-    });
-    const currentBalance = await this.getCurrentBalance(
-      transaction.wallet.address,
-      provider,
-    );
-    const expectedAmount =
-      BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
-    if (expectedAmount == BigInt(transaction.amount)) {
-      walletItem.lock = false;
-      transaction.status = 'Successfully';
-      await this.transactionRepo.save(transaction);
-      await this.walletRepo.save(walletItem);
-    } else if (
-      expectedAmount > BigInt(transaction.amount) ||
-      expectedAmount < BigInt(transaction.amount)
+    public provider: InfuraProvider;
+
+    constructor(
+        @InjectRepository(Transaction)
+        private readonly transactionRepo: Repository<Transaction>,
+        @InjectRepository(WalletEntity)
+        private dataSource: DataSource,
     ) {
-      walletItem.lock = false;
-      transaction.status = 'failed';
-      await this.transactionRepo.save(transaction);
-      await this.walletRepo.save(walletItem);
+        super();
+        this.provider = new InfuraProvider(process.env.DEV_NETWORK, process.env.DEV_API_KEY);
     }
-  }
-  infuraConnect() {
-    return new InfuraProvider(process.env.DEV_NETWORK, process.env.DEV_API_KEY);
-  }
-  async getCurrentBalance(
-    address: string,
-    provider: InfuraProvider,
-  ): Promise<string> {
-    const balancePromise = await provider.getBalance(address);
-    return balancePromise.toString();
-  }
+
+    async run(): Promise<void> {
+        const transactions = await this.transactionRepo.find({ where: { status: "Pending"} });
+        for (const transation of transactions) {
+            await this.updateTransactionStatus(transation);
+        }
+    }
+
+    async updateTransactionStatus(transaction: Transaction) {
+        const now = new Date();
+        const currentBalance = await this.getCurrentBalance(transaction.wallet.address);
+        const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
+        const expectedAmount = ethers.parseEther(transaction.amount.toString());
+        if (receivedAmount >= expectedAmount) {
+            await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);
+        } else if (now >= transaction.expireTime) {
+            await this.changeTransactionStatus(transaction, 'failed', currentBalance);
+        }
+    }
+
+    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'failed', afterBalance: string) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        const wallet = transaction.wallet;
+        wallet.lock = false;
+        transaction.status = status;
+        transaction.wallet_balance_after = afterBalance;
+        try {
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            await queryRunner.manager.save(transaction);
+            await queryRunner.manager.save(wallet);
+            await queryRunner.commitTransaction();
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            return error;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    async getCurrentBalance(address: string): Promise<string> {
+        const balancePromise = await this.provider.getBalance(address);
+        return balancePromise.toString();
+    }
 }

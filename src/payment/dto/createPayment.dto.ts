@@ -8,5 +8,5 @@ export class CreatePaymentDto{
     currency: string;
 
     @IsNotEmpty()
-    amount: string;
+    amount: number;
 }
