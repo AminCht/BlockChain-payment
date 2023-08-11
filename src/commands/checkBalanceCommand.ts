@@ -1,6 +1,6 @@
 import { Command, CommandRunner } from 'nest-commander';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Wallet as WalletEntity } from '../database/entities/Wallet.entity';
+import { Wallet, Wallet as WalletEntity } from "../database/entities/Wallet.entity";
 import { Transaction } from '../database/entities/Transaction.entity';
 import { InfuraProvider } from "ethers";
 import { ethers } from 'ethers';
@@ -14,7 +14,9 @@ export class CheckBallanceCommand extends CommandRunner {
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
-        @InjectRepository(WalletEntity)
+        @InjectRepository(Wallet)
+        private readonly walletRepo: Repository<Wallet>,
+
         private dataSource: DataSource,
     ) {
         super();
@@ -22,9 +24,9 @@ export class CheckBallanceCommand extends CommandRunner {
     }
 
     async run(): Promise<void> {
-        const transactions = await this.transactionRepo.find({ where: { status: "Pending"} });
+        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
         for (const transation of transactions) {
-            await this.updateTransactionStatus(transation);
+            await this.updateTransactionStatus(transation)
         }
     }
 
@@ -50,7 +52,11 @@ export class CheckBallanceCommand extends CommandRunner {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             await queryRunner.manager.save(transaction);
-            await queryRunner.manager.save(wallet);
+            await queryRunner.manager.update(
+              Wallet,
+              { id: transaction.wallet.id },
+              { lock: true },
+            );
             await queryRunner.commitTransaction();
         } catch (error) {
             await queryRunner.rollbackTransaction();
