@@ -29,7 +29,7 @@ describe('PaymentService', () => {
         const paymentDto = {
             network: 'ethereum',
             currency: 'eth',
-            amount: 12,
+            amount: "12",
         };
         const payment = await service.createPayment(paymentDto);
         expect(payment).toEqual({
