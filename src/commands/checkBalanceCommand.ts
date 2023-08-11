@@ -18,7 +18,7 @@ export class CheckBallanceCommand extends CommandRunner {
         private dataSource: DataSource,
     ) {
         super();
-        this.provider = new InfuraProvider(process.env.DEV_NETWORK, process.env.DEV_API_KEY);
+        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
 
     async run(): Promise<void> {
@@ -32,7 +32,7 @@ export class CheckBallanceCommand extends CommandRunner {
         const now = new Date();
         const currentBalance = await this.getCurrentBalance(transaction.wallet.address);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
-        const expectedAmount = ethers.parseEther(transaction.amount.toString());
+        const expectedAmount = ethers.parseEther(transaction.amount);
         if (receivedAmount >= expectedAmount) {
             await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);
         } else if (now >= transaction.expireTime) {

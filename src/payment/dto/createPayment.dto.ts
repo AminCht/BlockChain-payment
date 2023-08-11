@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, Min, MinLength } from "class-validator"
+import { IsDecimal, IsNotEmpty } from "class-validator";
 
 export class CreatePaymentDto{
     @IsNotEmpty()
@@ -8,5 +8,6 @@ export class CreatePaymentDto{
     currency: string;
 
     @IsNotEmpty()
-    amount: number;
+    @IsDecimal()
+    amount: string;
 }

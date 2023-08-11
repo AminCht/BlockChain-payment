@@ -13,7 +13,7 @@ export class Transaction{
     id: number;
 
     @Column({nullable: false })
-    amount: number 
+    amount: string
 
     @Column({nullable: false})
     network: string
