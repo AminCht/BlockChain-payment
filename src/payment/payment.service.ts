@@ -16,7 +16,7 @@ export class PaymentService {
         private transactionRepo: Repository<Transaction>,
         private dataSource: DataSource,
     ) {
-       this.provider = new InfuraProvider(process.env.DEV_NETWORK, process.env.DEV_API_KEY);
+       this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
 
     public async createPayment(createPaymentDto: CreatePaymentDto) {
@@ -42,7 +42,9 @@ export class PaymentService {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             // TODO: not enugh
-            const wallet = await queryRunner.query('SELECT * FROM "Wallets" WHERE "lock" = false AND "wallet_network" = $1 FOR UPDATE SKIP LOCKED LIMIT 1', ['ethereum']);
+            const wallet = await queryRunner
+              .query('SELECT * FROM "Wallets" WHERE "lock" = false AND' +
+                ' "wallet_network" = $1 FOR UPDATE SKIP LOCKED LIMIT 1', ['ethereum']);
             if (wallet.length == 1) {
                 const balance = await this.getWalletBalance(wallet[0].address);
                 const transaction = this.transactionRepo.create({
