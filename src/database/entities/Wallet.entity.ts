@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import {Transaction} from "./Transaction.entity";
 
 @Entity('Wallets')
@@ -17,6 +17,6 @@ export class Wallet {
   lock: boolean;
   @Column({default: 1})
   status: boolean;
-  @OneToOne(() => Transaction, (transaction) => transaction.wallet)
-  transaction: Transaction;
+  @OneToMany(() => Transaction, (transaction) => transaction.wallet)
+  transactions: Transaction[];
 }

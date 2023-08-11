@@ -1,4 +1,4 @@
-import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToOne,  JoinColumn } from 'typeorm';
+import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToOne,  JoinColumn, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
 
 enum Network {
@@ -21,8 +21,7 @@ export class Transaction{
     @Column({nullable:false})
     currency: string
 
-    @OneToOne(() => Wallet, (wallet) => wallet.transaction,{cascade:true})
-    @JoinColumn()
+    @ManyToOne(() => Wallet, (wallet) => wallet.transactions,{cascade:true})
     wallet: Wallet
 
     @Column({default: 'Pending'})
