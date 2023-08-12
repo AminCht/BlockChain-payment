@@ -8,8 +8,8 @@ import { TransactionModule } from './transaction/transaction.module';
 import DatabaseModule from './database/database.module';
 
 @Module({
-  imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}
