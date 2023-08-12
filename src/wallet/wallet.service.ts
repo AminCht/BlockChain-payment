@@ -24,6 +24,7 @@ export class WalletService {
         }
         throw new WalletNotFoundException(address);
     }
+    
 
         
 }

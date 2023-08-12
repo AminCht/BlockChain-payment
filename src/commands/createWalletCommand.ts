@@ -14,7 +14,6 @@ export class CreateWalletCommand extends CommandRunner {
     }
     async run(
         passedParams: string[],
-        options?: Record<string, any>,
     ): Promise<void> {
         let i = 0;
         let walletCount = 1;

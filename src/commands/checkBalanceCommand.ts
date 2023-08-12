@@ -23,18 +23,28 @@ export class CheckBallanceCommand extends CommandRunner {
         this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
 
-    async run(): Promise<void> {
+    async getCurrentBalance(address: string): Promise<string> {
+        const balancePromise = await this.provider.getBalance(address);
+        return balancePromise.toString();
+    }
+
+    public async run(): Promise<void> {
         const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
-        for (const transation of transactions) {
-            await this.updateTransactionStatus(transation)
+        
+        for (const transaction of transactions) {
+            await this.updateTransactionStatus(transaction)
         }
     }
 
     async updateTransactionStatus(transaction: Transaction) {
         const now = new Date();
+        console.log(transaction.wallet.address);
         const currentBalance = await this.getCurrentBalance(transaction.wallet.address);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         const expectedAmount = ethers.parseEther(transaction.amount);
+        console.log(receivedAmount);
+        console.log(expectedAmount);
+        console.log(receivedAmount >= expectedAmount);
         if (receivedAmount >= expectedAmount) {
             await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);
         } else if (now >= transaction.expireTime) {
@@ -64,10 +74,5 @@ export class CheckBallanceCommand extends CommandRunner {
         } finally {
             await queryRunner.release();
         }
-    }
-
-    async getCurrentBalance(address: string): Promise<string> {
-        const balancePromise = await this.provider.getBalance(address);
-        return balancePromise.toString();
     }
 }
