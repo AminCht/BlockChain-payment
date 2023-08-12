@@ -22,7 +22,7 @@ describe('AppController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule,DatabaseModule,
         TypeOrmModule.forFeature([Wallet, Transaction]),],
-        providers:[PaymentService,CheckBallanceCommand,]
+        providers:[PaymentService,CheckBallanceCommand,CreateWalletCommand]
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -33,10 +33,9 @@ describe('AppController (e2e)', () => {
   });
 
   it('create wallet',async()=>{
-    const createWalletSpy = jest.spyOn(createWallet,'run');
-    const wallet = await createWallet.run(['0']);
-    expect().to
-  })
+    await createWallet.run(['1']);
+    expect(createWallet).toBeDefined();
+  }) 
  
   it('should create transaction', async() => {
     jest.spyOn(paymentService, 'getWalletBalance').mockReturnValue(Promise.resolve('3'));
@@ -53,7 +52,13 @@ describe('AppController (e2e)', () => {
     });
   });
   it('transaction should stay pending',async()=>{
-    jest.spyOn(checkBalance,'getCurrentBalance').mockReturnValue(Promise.resolve('100000000000000000000'));
+    jest.spyOn(checkBalance,'getCurrentBalance').mockReturnValue(Promise.resolve('10000'));
+    await checkBalance.run();
+    const transaction = await paymentService.getTransactionById(transactionId);
+    expect(transaction.status).toBe('Pending');
+  });
+  it('transaction should Successful',async()=>{
+    jest.spyOn(checkBalance,'getCurrentBalance').mockReturnValue(Promise.resolve('10000000000000000000000000000'));
     await checkBalance.run();
     const transaction = await paymentService.getTransactionById(transactionId);
     expect(transaction.status).toBe('Successfully');
