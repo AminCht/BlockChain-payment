@@ -17,7 +17,7 @@ describe('PaymentService', () => {
         }).compile();
         service = module.get<PaymentService>(PaymentService);
         jest
-        .spyOn(service, 'getWalletBalance')
+        .spyOn(service, 'getBalance')
         .mockReturnValue(Promise.resolve('1'));
     });
 
@@ -25,10 +25,22 @@ describe('PaymentService', () => {
         expect(service).toBeDefined();
     });
 
-    it('should create a payment and return wallet address and id', async () => {
+    it('should create a eth payment and return wallet address and id', async () => {
         const paymentDto = {
             network: 'ethereum',
             currency: 'eth',
+            amount: "12",
+        };
+        const payment = await service.createPayment(paymentDto);
+        expect(payment).toEqual({
+            walletAddress: payment.walletAddress,
+            transactionId: payment.transactionId,
+        });
+    });
+    it('should create a token payment on ethereum network and return wallet address and id', async () => {
+        const paymentDto = {
+            network: 'ethereum',
+            currency: 'USDT',
             amount: "12",
         };
         const payment = await service.createPayment(paymentDto);

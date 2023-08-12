@@ -11,7 +11,7 @@ export class WalletService {
         @InjectRepository(WalletEntity) private walletRepo: Repository<WalletEntity>,
         private readonly paymentService: PaymentService
     ){}
-    
+
     async getWalletBalance(address: string){
         const wallet = await this.walletRepo.findOne({
             where:{
@@ -20,8 +20,8 @@ export class WalletService {
         });
         console.log(wallet);
         if(wallet){
-            return await this.paymentService.getWalletBalance(address);
+            return await this.paymentService.getBalance(address);
         }
         throw new WalletNotFoundException(address);
-    }        
+    }
 }
