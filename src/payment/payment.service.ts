@@ -13,7 +13,7 @@ export class PaymentService {
     tokenABI = [
         {
             constant: true,
-            inputs: [{ name: 'address', type: 'address' }],
+            inputs: [{ name: '_owner', type: 'address' }],
             name: 'balanceOf',
             outputs: [{ name: 'balance', type: 'uint256' }],
             type: 'function',
@@ -38,12 +38,12 @@ export class PaymentService {
             createPaymentDto.currency == 'eth' &&
             createPaymentDto.network == 'ethereum'
         ) {
-            return await this.createEthPayment(createPaymentDto);
+            return await this.createEthPayment(createPaymentDto,'main');
         } else if (
             createPaymentDto.currency != 'eth' &&
             createPaymentDto.network == 'ethereum'
         ) {
-            return await this.createTokenPayment(createPaymentDto);
+            return await this.createEthPayment(createPaymentDto,'token');
         }
     }
 
@@ -52,13 +52,15 @@ export class PaymentService {
         return balance.toString();
     }
     async getTokenBalance(address: string, currency: string): Promise<string> {
+        console.log(ethereumTokenAddresses.get(currency));
         const tokenContract = new ethers.Contract(
             ethereumTokenAddresses.get(currency),
             this.tokenABI,
             this.provider,
         );
         const balance = await tokenContract.balanceOf(address);
-        return balance.transactionId;
+        console.log(balance);
+        return balance.toString();
     }
      createTransaction(createPaymentDto: CreatePaymentDto, balance:string,wallet:Wallet) {
         return this.transactionRepo.create({
@@ -70,7 +72,7 @@ export class PaymentService {
         });
     }
 
-    private async createEthPayment(createPaymentDto: CreatePaymentDto) {
+    private async createEthPayment(createPaymentDto: CreatePaymentDto, type: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -78,10 +80,16 @@ export class PaymentService {
             const wallet = await queryRunner.query(
                 'SELECT * FROM "Wallets" WHERE "lock" = false' +
                     ' AND "wallet_network" = $1 AND "type" = $2 FOR UPDATE SKIP LOCKED LIMIT 1',
-                ['ethereum', 'main'],
+                [createPaymentDto.network, type],
             );
             if (wallet.length == 1) {
-                const balance = await this.getBalance(wallet[0].address);
+                let balance: string
+                if(type == 'main'){
+                    balance = await this.getBalance(wallet[0].address);
+                }
+                else{
+                    balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency)
+                }
                 const transaction = this.createTransaction(createPaymentDto,balance,wallet);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
@@ -103,39 +111,7 @@ export class PaymentService {
             await queryRunner.release();
         }
     }
-    private async createTokenPayment(createPaymentDto: CreatePaymentDto) {
-        const queryRunner = this.dataSource.createQueryRunner();
-        try {
-            await queryRunner.connect();
-            await queryRunner.startTransaction();
-            const wallet = await queryRunner.query(
-                'SELECT * FROM "Wallets" WHERE "lock" = false' +
-                    ' AND "wallet_network" = $1 AND "type" = $2 FOR UPDATE SKIP LOCKED LIMIT 1',
-                ['ethereum', 'token'],
-            );
-            if (wallet.length == 1) {
-                const balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency);
-                const transaction = this.createTransaction(createPaymentDto,balance,wallet)
-                await queryRunner.manager.save(transaction);
-                await queryRunner.manager.update(
-                    Wallet,
-                    { id: wallet[0].id },
-                    { lock: true },
-                );
-                await queryRunner.commitTransaction();
-                return {
-                    walletAddress: wallet[0].address,
-                    transactionId: transaction.id,
-                };
-            }
-            throw new NotFoundException('There is no wallet available!');
-        } catch (error) {
-            await queryRunner.rollbackTransaction();
-            return error;
-        } finally {
-            await queryRunner.release();
-        }
-    }
+
     public async getTransactionById(id: number): Promise<Transaction> {
         const transaction = await this.transactionRepo.findOneById(id);
         return transaction;
