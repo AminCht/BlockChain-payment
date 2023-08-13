@@ -9,8 +9,8 @@ import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses'
 
 @Injectable()
 export class PaymentService {
-    public provider: InfuraProvider;
-    tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
+    private readonly provider: InfuraProvider;
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
 
     constructor(
         @InjectRepository(Wallet)
@@ -24,45 +24,6 @@ export class PaymentService {
             process.env.API_KEY,
         );
     }
-
-    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
-        if (
-            createPaymentDto.currency == 'eth' &&
-            createPaymentDto.network == 'ethereum'
-        ) {
-            return await this.createEthPayment(createPaymentDto,'main');
-        } else if (
-            createPaymentDto.currency != 'eth' &&
-            createPaymentDto.network == 'ethereum'
-        ) {
-            return await this.createEthPayment(createPaymentDto,'token');
-        }
-    }
-
-    public async getBalance(address: string): Promise<string> {
-        const balance = await this.provider.getBalance(address);
-        return balance.toString();
-    }
-    async getTokenBalance(address: string, currency: string): Promise<string> {
-        const tokenContract = new ethers.Contract(
-            ethereumTokenAddresses.get(currency),
-            this.tokenABI,
-            this.provider,
-        );
-        const balance = await tokenContract.balanceOf(address);
-        console.log(balance);
-        return balance.toString();
-    }
-     createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
-        return this.transactionRepo.create({
-            wallet: wallet[0],
-            amount: createPaymentDto.amount,
-            currency: createPaymentDto.currency,
-            network: createPaymentDto.network,
-            wallet_balance_before: balance,
-        });
-    }
-
     private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
@@ -75,7 +36,7 @@ export class PaymentService {
             );
             if (wallet.length == 1) {
                 let balance: string;
-                if(type == 'main'){
+                if (type == 'main') {
                     balance = await this.getBalance(wallet[0].address);
                 }
                 else{
@@ -96,11 +57,56 @@ export class PaymentService {
             }
             throw new NotFoundException('There is no wallet available!');
         } catch (error) {
+            if(error.code == "ECONNRESET" ){
+                return 'connection timeout';
+            }
+             else if(error.code == "ENOTFOUND"){
+                return 'no connection';
+            }
+             else {
             await queryRunner.rollbackTransaction();
-            return error;
+                return error;
+            }
         } finally {
             await queryRunner.release();
         }
+    }
+
+    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
+        if (
+            createPaymentDto.currency == 'eth' &&
+            createPaymentDto.network == 'ethereum'
+        ) {
+            return await this.createEthPayment(createPaymentDto,'main');
+        } else if (
+            createPaymentDto.currency != 'eth' &&
+            createPaymentDto.network == 'ethereum'
+        ) {
+            return await this.createEthPayment(createPaymentDto,'token');
+        }
+    }
+
+    public async getBalance(address: string): Promise<string> {
+        const balance = await this.provider.getBalance(address);
+        return balance.toString();
+    }
+    public async getTokenBalance(address: string, currency: string): Promise<string> {
+        const tokenContract = new ethers.Contract(
+            ethereumTokenAddresses.get(currency),
+            this.tokenABI,
+            this.provider,
+        );
+        const balance = await tokenContract.balanceOf(address);
+        return balance.toString();
+    }
+    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
+        return this.transactionRepo.create({
+            wallet: wallet[0],
+            amount: createPaymentDto.amount,
+            currency: createPaymentDto.currency,
+            network: createPaymentDto.network,
+            wallet_balance_before: balance,
+        });
     }
 
     public async getTransactionById(id: number): Promise<Transaction> {

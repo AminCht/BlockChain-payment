@@ -5,12 +5,14 @@ import { Transaction } from '../database/entities/Transaction.entity';
 import { InfuraProvider } from "ethers";
 import { ethers } from 'ethers';
 import { DataSource, Repository } from "typeorm";
+import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
 export class CheckBallanceCommand extends CommandRunner {
 
-    public provider: InfuraProvider;
-
+    private readonly provider: InfuraProvider;
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
+    
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
@@ -22,37 +24,33 @@ export class CheckBallanceCommand extends CommandRunner {
         super();
         this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
-
-    async getCurrentBalance(address: string): Promise<string> {
-        const balancePromise = await this.provider.getBalance(address);
-        return balancePromise.toString();
-    }
-
     public async run(): Promise<void> {
         const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
-        
         for (const transaction of transactions) {
-            await this.updateTransactionStatus(transaction)
+            await this.updateTransactionStatus(transaction);
         }
     }
 
     async updateTransactionStatus(transaction: Transaction) {
         const now = new Date();
-        console.log(transaction.wallet.address);
-        const currentBalance = await this.getCurrentBalance(transaction.wallet.address);
+        let currentBalance;
+        if (transaction.wallet.type == 'main') {
+         currentBalance = await this.getCurrentBalance(transaction.wallet.address)}
+        else{
+            currentBalance = await this.getTokenBalance(
+                transaction.wallet.address,
+                transaction.currency,
+            );
+        }
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         const expectedAmount = ethers.parseEther(transaction.amount);
-        console.log(receivedAmount);
-        console.log(expectedAmount);
-        console.log(receivedAmount >= expectedAmount);
-        if (receivedAmount >= expectedAmount) {
-            await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);
-        } else if (now >= transaction.expireTime) {
-            await this.changeTransactionStatus(transaction, 'failed', currentBalance);
-        }
+        if (now >= transaction.expireTime) {
+            await this.changeTransactionStatus(transaction, 'Failed', currentBalance);
+        } else if (receivedAmount >= expectedAmount) {
+            await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);}
     }
 
-    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'failed', afterBalance: string) {
+    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'Failed', afterBalance: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         const wallet = transaction.wallet;
         wallet.lock = false;
@@ -65,7 +63,7 @@ export class CheckBallanceCommand extends CommandRunner {
             await queryRunner.manager.update(
               Wallet,
               { id: transaction.wallet.id },
-              { lock: true },
+              { lock: false },
             );
             await queryRunner.commitTransaction();
         } catch (error) {
@@ -74,5 +72,19 @@ export class CheckBallanceCommand extends CommandRunner {
         } finally {
             await queryRunner.release();
         }
+    }
+    async getCurrentBalance(address: string): Promise<string> {
+        const balancePromise = await this.provider.getBalance(address);
+        return balancePromise.toString();
+    }
+    async getTokenBalance(address: string, currency: string): Promise<string> {
+        const tokenContract = new ethers.Contract(
+            ethereumTokenAddresses.get(currency),
+            this.tokenABI,
+            this.provider,
+        );
+        const balance = await tokenContract.balanceOf(address);
+        console.log(balance.toString());
+        return balance.toString();
     }
 }

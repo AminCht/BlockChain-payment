@@ -1,7 +1,7 @@
-import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToOne,  JoinColumn, ManyToOne } from 'typeorm';
+import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
 
-export enum Status {
+ export enum Status {
     PENDING = 'Pending',
     SUCCESSFUL = 'Successful',
     FAILED = 'Failed'
@@ -14,25 +14,25 @@ export class Transaction{
     id: number;
 
     @Column({nullable: false })
-    amount: string
+    amount: string;
 
     @Column({nullable: false})
-    network: string
+    network: string;
 
     @Column({nullable:false})
-    currency: string
+    currency: string;
 
     @ManyToOne(() => Wallet, (wallet) => wallet.transactions,{cascade:true})
     wallet: Wallet
 
-    @Column({default: 'Pending'})
-    status: string
+    @Column({ type: 'enum', enum: Status, default: 'Pending' })
+    status: string;
 
     @Column({nullable: false })
-    wallet_balance_before: string
+    wallet_balance_before: string;
 
     @Column({nullable: true })
-    wallet_balance_after: string
+    wallet_balance_after: string;
 
     @CreateDateColumn()
     createdDate: Date;
