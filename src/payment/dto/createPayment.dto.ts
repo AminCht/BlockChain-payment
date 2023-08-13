@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsDecimal, IsNotEmpty, IsNumberString } from "class-validator";
 
-export class CreatePaymentDto{
+export class CreatePaymentRequestDto{
     @ApiProperty()
     @IsNotEmpty()
     network: string;
@@ -15,4 +15,15 @@ export class CreatePaymentDto{
     @IsDecimal()
     @IsNumberString()
     amount: string;
+
+}
+
+export class CreatePaymentResponseDto{
+    @ApiProperty()
+    @IsNotEmpty()
+    walletAdress: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    transactionId: number;
 }

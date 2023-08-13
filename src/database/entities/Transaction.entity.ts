@@ -1,9 +1,10 @@
 import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToOne,  JoinColumn, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
 
-enum Network {
-    ETHEREUM = 'Ethereum',
-    MAIN = 'main',
+export enum Status {
+    PENDING = 'Pending',
+    SUCCESSFUL = 'Successful',
+    FAILED = 'Failed'
 }
 
 

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/createPayment.dto';
+import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -25,7 +25,7 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(createPaymentDto: CreatePaymentDto) {
+    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
         if (
             createPaymentDto.currency == 'eth' &&
             createPaymentDto.network == 'ethereum'
@@ -53,7 +53,7 @@ export class PaymentService {
         console.log(balance);
         return balance.toString();
     }
-     createTransaction(createPaymentDto: CreatePaymentDto, balance:string,wallet:Wallet) {
+     createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
         return this.transactionRepo.create({
             wallet: wallet[0],
             amount: createPaymentDto.amount,
@@ -63,7 +63,7 @@ export class PaymentService {
         });
     }
 
-    private async createEthPayment(createPaymentDto: CreatePaymentDto, type: string) {
+    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
