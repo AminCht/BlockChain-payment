@@ -1,6 +1,5 @@
-import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { BeforeInsert, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
-
  export enum Status {
     PENDING = 'Pending',
     SUCCESSFUL = 'Successful',
