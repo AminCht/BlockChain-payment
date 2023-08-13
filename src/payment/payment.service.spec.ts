@@ -25,30 +25,46 @@ describe('PaymentService', () => {
         expect(service).toBeDefined();
     });
 
-    it('should create a eth payment and return wallet address and id', async () => {
-        const paymentDto = {
-            network: 'ethereum',
-            currency: 'eth',
-            amount: "12",
-        };
-        const payment = await service.createPayment(paymentDto);
-        expect(payment).toEqual({
-            walletAddress: payment.walletAddress,
-            transactionId: payment.transactionId,
+    describe('create transaction', ()=>{
+        it('should create a eth payment and return wallet address and id', async () => {
+            const paymentDto = {
+                network: 'ethereum',
+                currency: 'eth',
+                amount: "12",
+            };
+            const payment = await service.createPayment(paymentDto);
+            console.log(payment.walletAddress);
+            expect(payment.walletAddress).not.toBeUndefined();
+        });
+        it('should create a token payment on ethereum network and return wallet address and id', async () => {
+            const paymentDto = {
+                network: 'ethereum',
+                currency: 'USDT',
+                amount: "12",
+            };
+            const payment = await service.createPayment(paymentDto);
+            expect(payment.walletAddress).not.toBeUndefined();
         });
     });
-    it('should create a token payment on ethereum network and return wallet address and id', async () => {
-        const paymentDto = {
-            network: 'ethereum',
-            currency: 'USDT',
-            amount: "12",
-        };
-        const payment = await service.createPayment(paymentDto);
-        expect(payment).toEqual({
-            walletAddress: payment.walletAddress,
-            transactionId: payment.transactionId,
+    describe('get Transaction by id', ()=>{
+        it('should return transaction', async()=>{
+            const transactionId = 2;
+            const transaction = await service.getTransactionById(transactionId);
+            expect(transaction.amount).not.toBeUndefined();
+        });
+        it('should return error', async()=>{
+            const transactionId = 10;
+            const transaction = await service.getTransactionById(transactionId);
+            expect(transaction).toBeNull();
+        });
+        it('should return 404', async()=>{
+            const transactionId = 10;
+            try{
+                await service.getTransactionById(transactionId);
+            }catch(error){
+                expect(error.response.statusCode).toBe(404);
+            }
         });
     });
-
 });
 
