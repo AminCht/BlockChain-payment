@@ -18,9 +18,18 @@ export class TransactionService {
             if(!transaction){
                 throw new TransactionNotFoundException(transactionId);
             }
-            if(transaction.status == Status.PENDING || transaction.status == Status.SUCCESSFUL){
+            if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
                 return transaction;
             }
+            await this.sleep(4);
         }
+    }
+    async sleep(duration: number): Promise<void>{
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+              console.log('Delayed logic executed');
+              resolve();
+            }, duration*1000);
+          });
     }
 }
