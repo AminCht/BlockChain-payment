@@ -1,3 +1,3 @@
 export const ethereumTokenAddresses = new Map<string, string>();
-ethereumTokenAddresses.set('USDT', '0xdAC17F958D2ee523a2206206994597C13D831ec7',);
+ethereumTokenAddresses.set('USDT', '0xA1d7f71cbBb361A77820279958BAC38fC3667c1a',);
 
