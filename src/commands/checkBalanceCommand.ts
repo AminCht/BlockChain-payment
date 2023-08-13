@@ -49,7 +49,6 @@ export class CheckBallanceCommand extends CommandRunner {
             expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         }
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
-        console.log(expectedAmount);
         if (now >= transaction.expireTime) {
            await this.changeTransactionStatus(transaction, 'Failed', currentBalance);
         } else if (receivedAmount >= expectedAmount) {
