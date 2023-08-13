@@ -2,7 +2,7 @@ import { Command, CommandRunner } from 'nest-commander';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet, Wallet as WalletEntity } from "../database/entities/Wallet.entity";
 import { Transaction } from '../database/entities/Transaction.entity';
-import { InfuraProvider } from "ethers";
+import { Contract, InfuraProvider } from 'ethers';
 import { ethers } from 'ethers';
 import { DataSource, Repository } from "typeorm";
 import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
@@ -11,8 +11,9 @@ import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenA
 export class CheckBallanceCommand extends CommandRunner {
 
     private readonly provider: InfuraProvider;
-    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
-    
+    private tokenContract: Contract;
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
+        'function decimals() view returns (uint8)',]
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
@@ -34,18 +35,23 @@ export class CheckBallanceCommand extends CommandRunner {
     async updateTransactionStatus(transaction: Transaction) {
         const now = new Date();
         let currentBalance;
+        let expectedAmount;
         if (transaction.wallet.type == 'main') {
-         currentBalance = await this.getCurrentBalance(transaction.wallet.address)}
-        else{
+         currentBalance = await this.getBalance(transaction.wallet.address);
+         expectedAmount = ethers.parseEther(transaction.amount);
+        } else {
+            await this.createTokenContract(transaction.currency);
             currentBalance = await this.getTokenBalance(
                 transaction.wallet.address,
                 transaction.currency,
             );
+            const decimals = await this.tokenContract.decimals();
+            expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         }
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
-        const expectedAmount = ethers.parseEther(transaction.amount);
+        console.log(expectedAmount);
         if (now >= transaction.expireTime) {
-            await this.changeTransactionStatus(transaction, 'Failed', currentBalance);
+           await this.changeTransactionStatus(transaction, 'Failed', currentBalance);
         } else if (receivedAmount >= expectedAmount) {
             await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);}
     }
@@ -73,18 +79,19 @@ export class CheckBallanceCommand extends CommandRunner {
             await queryRunner.release();
         }
     }
-    async getCurrentBalance(address: string): Promise<string> {
+    async getBalance(address: string): Promise<string> {
         const balancePromise = await this.provider.getBalance(address);
         return balancePromise.toString();
     }
     async getTokenBalance(address: string, currency: string): Promise<string> {
-        const tokenContract = new ethers.Contract(
+        const balance = await this.tokenContract.balanceOf(address);
+        return balance.toString();
+    }
+    async createTokenContract(currency: string) {
+        this.tokenContract = new ethers.Contract(
             ethereumTokenAddresses.get(currency),
             this.tokenABI,
             this.provider,
         );
-        const balance = await tokenContract.balanceOf(address);
-        console.log(balance.toString());
-        return balance.toString();
     }
 }
