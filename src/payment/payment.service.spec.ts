@@ -1,46 +1,70 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
-import { getRepositoryToken, TypeOrmModule } from "@nestjs/typeorm";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { Wallet } from "../database/entities/Wallet.entity";
 import { Transaction } from "../database/entities/Transaction.entity";
-import { Repository } from "typeorm";
 import DatabaseModule from "../database/database.module";
-import * as process from "process";
-import { WalletService } from '../wallet/wallet.service';
-import { TransactionService } from '../transaction/transaction.service';
 describe('PaymentService', () => {
-  let service: PaymentService;
-  let walletRepo: Repository<Wallet>;
-  //let transactionRepo: Repository<Transaction>;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        DatabaseModule,
-        TypeOrmModule.forFeature([Wallet, Transaction]),
-      ],
-      providers: [PaymentService],
-    }).compile();
-    service = module.get<PaymentService>(PaymentService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-    //expect(walletRepo).toBeDefined();
-   // expect(transactionRepo).toBeDefined();
-  });
-  describe('Test create payment', () => {
-    it('should create a payment and return wallet address and id', async () => {
-      const paymentDto = {
-        network: 'ethereum',
-        currency: 'eth',
-        amount: "10000000000000",
-      };
-      const payment = await service.createPayment(paymentDto);
-      expect(payment.body).toEqual({
-        walletAddress: 1,
-        transactionId: 1,
-      });
+    let service: PaymentService;
+    let getWalletBalanceMock: jest.SpyInstance<Promise<string>>
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            imports: [
+                DatabaseModule,
+                TypeOrmModule.forFeature([Wallet, Transaction]),
+            ],
+            providers: [PaymentService],
+        }).compile();
+        service = module.get<PaymentService>(PaymentService);
+        jest
+        .spyOn(service, 'getBalance')
+        .mockReturnValue(Promise.resolve('1'));
     });
-  });
+
+    it('should be defined', () => {
+        expect(service).toBeDefined();
+    });
+
+    describe('create transaction', ()=>{
+        it('should create a eth payment and return wallet address and id', async () => {
+            const paymentDto = {
+                network: 'ethereum',
+                currency: 'eth',
+                amount: "12",
+            };
+            const payment = await service.createPayment(paymentDto);
+            console.log(payment.walletAddress);
+            expect(payment.walletAddress).not.toBeUndefined();
+        });
+        it('should create a token payment on ethereum network and return wallet address and id', async () => {
+            const paymentDto = {
+                network: 'ethereum',
+                currency: 'USDT',
+                amount: "12",
+            };
+            const payment = await service.createPayment(paymentDto);
+            expect(payment.walletAddress).not.toBeUndefined();
+        });
+    });
+    describe('get Transaction by id', ()=>{
+        it('should return transaction', async()=>{
+            const transactionId = 2;
+            const transaction = await service.getTransactionById(transactionId);
+            expect(transaction.amount).not.toBeUndefined();
+        });
+        it('should return error', async()=>{
+            const transactionId = 10;
+            const transaction = await service.getTransactionById(transactionId);
+            expect(transaction).toBeNull();
+        });
+        it('should return 404', async()=>{
+            const transactionId = 10;
+            try{
+                await service.getTransactionById(transactionId);
+            }catch(error){
+                expect(error.response.statusCode).toBe(404);
+            }
+        });
+    });
 });
+

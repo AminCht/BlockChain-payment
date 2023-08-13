@@ -1,82 +1,117 @@
-import {Injectable} from '@nestjs/common';
-import {CreatePaymentDto} from './dto/createPayment.dto';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Wallet} from '../database/entities/Wallet.entity';
-import {DataSource, Repository} from 'typeorm';
-import {Transaction} from '../database/entities/Transaction.entity';
-import {InfuraProvider, ethers} from "ethers";
-import { checkDatabase } from 'typeorm-extension';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Wallet } from '../database/entities/Wallet.entity';
+import { DataSource, Repository } from 'typeorm';
+import { Transaction } from '../database/entities/Transaction.entity';
+import { ethers, InfuraProvider } from 'ethers';
+import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 
 @Injectable()
 export class PaymentService {
-  constructor(
-    @InjectRepository(Wallet)
-    private walletRepo: Repository<Wallet>,
-    @InjectRepository(Transaction)
-    private transactionRepo: Repository<Transaction>,
-    private dataSource: DataSource,
-  ) {}
+    public provider: InfuraProvider;
+    tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
 
-  async createPayment(createPaymentDto: CreatePaymentDto) {
-    if (
-      createPaymentDto.currency == 'eth' &&
-      createPaymentDto.network == 'ethereum'
+    constructor(
+        @InjectRepository(Wallet)
+        private walletRepo: Repository<Wallet>,
+        @InjectRepository(Transaction)
+        private transactionRepo: Repository<Transaction>,
+        private dataSource: DataSource,
     ) {
-      const queryRunner = this.dataSource.createQueryRunner();
-      try {
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        /*const wallet = await this.walletRepo.createQueryBuilder('Wallets').
-            setLock('').where('Wallets.lock=:lock', { lock: false }).getRawOne();*/
-        const wallet = await queryRunner.query(
-          'SELECT * FROM "Wallets" WHERE "lock" = false FOR UPDATE SKIP LOCKED LIMIT 1',
+        this.provider = new InfuraProvider(
+            process.env.NETWORK,
+            process.env.API_KEY,
         );
-        if (wallet[0]) {
-          const balance = await this.getWalletBalance(wallet[0].address);
-          const balanceBigInt = balance.toString()
-          console.log('balance:'+balance);
-          const transaction = this.transactionRepo.create({
+    }
+
+    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
+        if (
+            createPaymentDto.currency == 'eth' &&
+            createPaymentDto.network == 'ethereum'
+        ) {
+            return await this.createEthPayment(createPaymentDto,'main');
+        } else if (
+            createPaymentDto.currency != 'eth' &&
+            createPaymentDto.network == 'ethereum'
+        ) {
+            return await this.createEthPayment(createPaymentDto,'token');
+        }
+    }
+
+    public async getBalance(address: string): Promise<string> {
+        const balance = await this.provider.getBalance(address);
+        return balance.toString();
+    }
+    async getTokenBalance(address: string, currency: string): Promise<string> {
+        const tokenContract = new ethers.Contract(
+            ethereumTokenAddresses.get(currency),
+            this.tokenABI,
+            this.provider,
+        );
+        const balance = await tokenContract.balanceOf(address);
+        console.log(balance);
+        return balance.toString();
+    }
+     createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
+        return this.transactionRepo.create({
             wallet: wallet[0],
             amount: createPaymentDto.amount,
             currency: createPaymentDto.currency,
             network: createPaymentDto.network,
-            wallet_balance_before: balanceBigInt,
-          });
-          //await queryRunner.manager.save(updatedWallet);
-          console.log(transaction);
-          await queryRunner.manager.save(transaction);
-          const updatedWallet = await queryRunner.manager.update(
-            Wallet,
-            { id: wallet[0].id },
-            { lock: true },
-          );
-          await queryRunner.commitTransaction();
-          return {
-            walletAddress: wallet[0].address,
-            transactionId: transaction.id,
-          };
-        }
-      } catch (error) {
-        await queryRunner.rollbackTransaction();
-        return error;
-      } finally {
-        await queryRunner.release();
-      }
-    } else {
+            wallet_balance_before: balance,
+        });
     }
-  }
-  async getWalletBalance(address: string): Promise<string> {
-    const provider = this.infuraConnect();
-    const balancePromise = await provider.getBalance(address);
-    const balanceString: string = balancePromise.toString();
-    return balanceString;
-  
-  }
 
-  infuraConnect() {
-    return new InfuraProvider(
-      'goerli',
-      '409d3a1c6c6f485cbfa0dd53901ab632',
-    );
-  }
+    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        try {
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            const wallet = await queryRunner.query(
+                'SELECT * FROM "Wallets" WHERE "lock" = false' +
+                    ' AND "wallet_network" = $1 AND "type" = $2 FOR UPDATE SKIP LOCKED LIMIT 1',
+                [createPaymentDto.network, type],
+            );
+            if (wallet.length == 1) {
+                let balance: string;
+                if(type == 'main'){
+                    balance = await this.getBalance(wallet[0].address);
+                }
+                else{
+                    balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency)
+                }
+                const transaction = this.createTransaction(createPaymentDto,balance,wallet);
+                await queryRunner.manager.save(transaction);
+                await queryRunner.manager.update(
+                    Wallet,
+                    { id: wallet[0].id },
+                    { lock: true },
+                );
+                await queryRunner.commitTransaction();
+                return {
+                    walletAddress: wallet[0].address,
+                    transactionId: transaction.id,
+                };
+            }
+            throw new NotFoundException('There is no wallet available!');
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            return error;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    public async getTransactionById(id: number): Promise<Transaction> {
+        const transaction = await this.transactionRepo.findOneById(id);
+        return transaction;
+    }
+
+    public async getWalletByAddress(address: string): Promise<Wallet> {
+        const wallet = await this.walletRepo.findOne({
+            where: { address: address },
+        });
+        return wallet;
+    }
 }

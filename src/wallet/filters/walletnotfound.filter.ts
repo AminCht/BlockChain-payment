@@ -1,9 +1,9 @@
 import { ExceptionFilter, Catch, ArgumentsHost, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
-import { TransactionNotFoundException } from '../exceptions/transactionNotFound';
+import { WalletNotFoundException } from '../exceptions/walletnotfound.exception';
 
-@Catch(TransactionNotFoundException)
-export class TransactionNotFoundExceptionFilter implements ExceptionFilter {
+@Catch(WalletNotFoundException)
+export class WalletNotFoundExceptionFilter implements ExceptionFilter {
   catch(exception: NotFoundException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
