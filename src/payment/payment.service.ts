@@ -10,15 +10,7 @@ import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses'
 @Injectable()
 export class PaymentService {
     public provider: InfuraProvider;
-    tokenABI = [
-        {
-            constant: true,
-            inputs: [{ name: '_owner', type: 'address' }],
-            name: 'balanceOf',
-            outputs: [{ name: 'balance', type: 'uint256' }],
-            type: 'function',
-        },
-    ];
+    tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
 
     constructor(
         @InjectRepository(Wallet)
@@ -52,7 +44,6 @@ export class PaymentService {
         return balance.toString();
     }
     async getTokenBalance(address: string, currency: string): Promise<string> {
-        console.log(ethereumTokenAddresses.get(currency));
         const tokenContract = new ethers.Contract(
             ethereumTokenAddresses.get(currency),
             this.tokenABI,
@@ -83,7 +74,7 @@ export class PaymentService {
                 [createPaymentDto.network, type],
             );
             if (wallet.length == 1) {
-                let balance: string
+                let balance: string;
                 if(type == 'main'){
                     balance = await this.getBalance(wallet[0].address);
                 }
