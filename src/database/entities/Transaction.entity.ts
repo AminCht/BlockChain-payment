@@ -34,18 +34,15 @@ export class Transaction{
     @Column({nullable: true })
     wallet_balance_after: string;
 
-    @CreateDateColumn()
+    @Column()
     createdDate: Date;
 
     @Column()
     expireTime: Date;
 
     @BeforeInsert()
-    setExpirationTime(){
-        this.expireTime =new Date();
-        this.expireTime.setHours(this.expireTime.getHours()+1)
+    setTimes() {
+        this.createdDate = new Date();
+        this.expireTime = new Date(this.createdDate.getTime() + 60 * 60 * 1000);
     }
-
 }
-/*
-id amount network currency status wallet_id wallet_balance_before created_date expire_time wallet_balance_after*/
