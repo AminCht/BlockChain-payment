@@ -6,6 +6,7 @@ import { Contract, InfuraProvider } from 'ethers';
 import { ethers } from 'ethers';
 import { DataSource, Repository } from "typeorm";
 import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
+import { Currency, Network } from '../payment/dto/createPayment.dto';
 
 @Command({ name: 'check-balance' })
 export class CheckBallanceCommand extends CommandRunner {
@@ -36,9 +37,9 @@ export class CheckBallanceCommand extends CommandRunner {
         const now = new Date();
         let currentBalance;
         let expectedAmount;
-        if (transaction.wallet.type == 'main') {
-         currentBalance = await this.getBalance(transaction.wallet.address);
-         expectedAmount = ethers.parseEther(transaction.amount);
+        if (transaction.network == Network.ETHEREUM && transaction.currency == Currency.ETH) {
+            currentBalance = await this.getBalance(transaction.wallet.address);
+            expectedAmount = ethers.parseEther(transaction.amount);
         } else {
             await this.createTokenContract(transaction.currency);
             currentBalance = await this.getTokenBalance(
