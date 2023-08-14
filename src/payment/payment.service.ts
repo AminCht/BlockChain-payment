@@ -101,8 +101,6 @@ export class PaymentService {
         const balance = await tokenContract.balanceOf(address);
         return balance.toString();
     }
-
-    
     private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
         return this.transactionRepo.create({
             wallet: wallet[0],

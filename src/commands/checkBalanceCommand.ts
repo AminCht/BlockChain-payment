@@ -6,7 +6,6 @@ import { Contract, InfuraProvider } from 'ethers';
 import { ethers } from 'ethers';
 import { DataSource, Repository } from "typeorm";
 import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
-import { Currency, Network } from '../payment/dto/createPayment.dto';
 
 @Command({ name: 'check-balance' })
 export class CheckBallanceCommand extends CommandRunner {
@@ -36,27 +35,32 @@ export class CheckBallanceCommand extends CommandRunner {
     async updateTransactionStatus(transaction: Transaction) {
         const now = new Date();
         let currentBalance;
-        let expectedAmount;
-        if (transaction.network == Network.ETHEREUM && transaction.currency == Currency.ETH) {
+        let decimals;
+        if (
+            transaction.currency == 'eth' &&
+            transaction.network == 'ethereum'
+        ) {
             currentBalance = await this.getBalance(transaction.wallet.address);
-            expectedAmount = ethers.parseEther(transaction.amount);
-        } else {
-            await this.createTokenContract(transaction.currency);
+        } else if (
+            transaction.currency != 'eth' &&
+            transaction.network == 'ethereum'
+        ) {
             currentBalance = await this.getTokenBalance(
                 transaction.wallet.address,
                 transaction.currency,
             );
-            const decimals = await this.tokenContract.decimals();
-            expectedAmount = ethers.parseUnits(transaction.amount, decimals);
+            decimals = await this.tokenContract.decimals();
         }
+        const expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         if (now >= transaction.expireTime) {
            await this.changeTransactionStatus(transaction, 'Failed', currentBalance);
         } else if (receivedAmount >= expectedAmount) {
             await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);}
+        else {await this.changeTransactionStatus(transaction, 'Pending', currentBalance);}
     }
 
-    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'Failed', afterBalance: string) {
+    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'Failed'|'Pending', afterBalance: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         const wallet = transaction.wallet;
         wallet.lock = false;
@@ -84,6 +88,7 @@ export class CheckBallanceCommand extends CommandRunner {
         return balancePromise.toString();
     }
     async getTokenBalance(address: string, currency: string): Promise<string> {
+        await this.createTokenContract(currency);
         const balance = await this.tokenContract.balanceOf(address);
         return balance.toString();
     }
