@@ -43,14 +43,14 @@ describe('PaymentService', () => {
                 amount: "12",
             };
             const payment = await service.createPayment(paymentDto);
-            expect(payment.walletAddress).not.toBeUndefined();
+            expect(payment.walletAddress).toBeDefined();
         });
     });
     describe('get Transaction by id', ()=>{
         it('should return transaction', async()=>{
             const transactionId = 2;
             const transaction = await service.getTransactionById(transactionId);
-            expect(transaction.amount).not.toBeUndefined();
+            expect(transaction.amount).toBeDefined();
         });
         it('should return error', async()=>{
             const transactionId = 10;
