@@ -63,7 +63,9 @@ export class CheckBallanceCommand extends CommandRunner {
     async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'Failed'|'Pending', afterBalance: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         const wallet = transaction.wallet;
-        wallet.lock = false;
+        if(status!='Pending'){
+            wallet.lock = false;
+        }
         transaction.status = status;
         transaction.wallet_balance_after = afterBalance;
         try {
