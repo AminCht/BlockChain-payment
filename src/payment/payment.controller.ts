@@ -2,7 +2,7 @@ import { Body, Controller, Post, Get, UseFilters, Param, Query } from '@nestjs/c
 import { PaymentService } from './payment.service';
 import { CreatePaymentRequestDto, CreatePaymentResponseDto, Currency, Network } from './dto/createPayment.dto';
 
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionNotFoundExceptionFilter } from '../transaction/filters/transactionNotfound.filter';
 import { GetTransactionByIdResponseDto } from './dto/getTransactionById.dto';
@@ -30,6 +30,7 @@ export class PaymentController {
   @UseFilters(TransactionNotFoundExceptionFilter)
   @ApiOperation({ summary: 'Get Transaction By id' })
   @ApiResponse({ status: 404, description: 'Transaction with given id not found' })
+  @ApiParam({ name: 'id', description: 'Id should be numeric' })
   @ApiResponse({ status: 200, description: 'Transaction found',type: GetTransactionByIdResponseDto})
   async getTransactionById(@Param('id') id:string){
     return await this.transactionService.getTransactionById(+id);
