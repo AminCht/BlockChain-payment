@@ -4,6 +4,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Wallet } from "../database/entities/Wallet.entity";
 import { Transaction } from "../database/entities/Transaction.entity";
 import DatabaseModule from "../database/database.module";
+import { Currency, Network } from './dto/createPayment.dto';
 describe('PaymentService', () => {
     let service: PaymentService;
     let getWalletBalanceMock: jest.SpyInstance<Promise<string>>
@@ -28,8 +29,8 @@ describe('PaymentService', () => {
     describe('create transaction', ()=>{
         it('should create a eth payment and return wallet address and id', async () => {
             const paymentDto = {
-                network: 'ethereum',
-                currency: 'eth',
+                network: Network.ETHEREUM,
+                currency: Currency.ETH,
                 amount: "12",
             };
             const payment = await service.createPayment(paymentDto);
@@ -38,8 +39,8 @@ describe('PaymentService', () => {
         });
         it('should create a token payment on ethereum network and return wallet address and id', async () => {
             const paymentDto = {
-                network: 'ethereum',
-                currency: 'USDT',
+                network: Network.ETHEREUM,
+                currency: Currency.USDT,
                 amount: "12",
             };
             const payment = await service.createPayment(paymentDto);

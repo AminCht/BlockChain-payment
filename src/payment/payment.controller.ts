@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Get, UseFilters, Param } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseFilters, Param, Query } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
+import { CreatePaymentRequestDto, CreatePaymentResponseDto, Currency, Network } from './dto/createPayment.dto';
 
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionNotFoundExceptionFilter } from '../transaction/filters/transactionNotfound.filter';
 import { GetTransactionByIdResponseDto } from './dto/getTransactionById.dto';
@@ -20,6 +20,8 @@ export class PaymentController {
   @ApiOperation({ summary: 'Create transaction(payment)' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.',type: CreatePaymentResponseDto})
+  @ApiQuery({ name: 'Network', enum: Network })
+  @ApiQuery({ name: 'Currency', enum: Currency })
   async createPayment(@Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
     return await this.paymentService.createPayment(createPaymentdto);
   }

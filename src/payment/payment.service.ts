@@ -24,6 +24,22 @@ export class PaymentService {
             process.env.API_KEY,
         );
     }
+
+    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
+        if (
+            createPaymentDto.currency == 'eth' &&
+            createPaymentDto.network == 'ethereum'
+        ) {
+            return await this.createEthPayment(createPaymentDto,'main');
+        } else if (
+            createPaymentDto.currency != 'eth' &&
+            createPaymentDto.network == 'ethereum'
+        ) {
+            return await this.createEthPayment(createPaymentDto,'token');
+        }
+    }
+
+
     private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
@@ -72,20 +88,6 @@ export class PaymentService {
         }
     }
 
-    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
-        if (
-            createPaymentDto.currency == 'eth' &&
-            createPaymentDto.network == 'ethereum'
-        ) {
-            return await this.createEthPayment(createPaymentDto,'main');
-        } else if (
-            createPaymentDto.currency != 'eth' &&
-            createPaymentDto.network == 'ethereum'
-        ) {
-            return await this.createEthPayment(createPaymentDto,'token');
-        }
-    }
-
     public async getBalance(address: string): Promise<string> {
         const balance = await this.provider.getBalance(address);
         return balance.toString();
@@ -99,6 +101,8 @@ export class PaymentService {
         const balance = await tokenContract.balanceOf(address);
         return balance.toString();
     }
+
+    
     private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
         return this.transactionRepo.create({
             wallet: wallet[0],
