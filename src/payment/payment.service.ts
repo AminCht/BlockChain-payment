@@ -6,6 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider } from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
+import { User } from '../database/entities/user.entity';
 
 @Injectable()
 export class PaymentService {
@@ -17,6 +18,8 @@ export class PaymentService {
         private walletRepo: Repository<Wallet>,
         @InjectRepository(Transaction)
         private transactionRepo: Repository<Transaction>,
+        @InjectRepository(User)
+        private userRepo: Repository<User>,
         private dataSource: DataSource,
     ) {
         this.provider = new InfuraProvider(
@@ -25,22 +28,27 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(createPaymentDto: CreatePaymentRequestDto) {
+    public async createPayment(req, createPaymentDto: CreatePaymentRequestDto) {
+        const user = await this.userRepo.findOne({
+            where:{
+                id:req.id
+            }
+        })
         if (
             createPaymentDto.currency == 'eth' &&
             createPaymentDto.network == 'ethereum'
         ) {
-            return await this.createEthPayment(createPaymentDto,'main');
+            return await this.createEthPayment(createPaymentDto,'main', req.user.id);
         } else if (
             createPaymentDto.currency != 'eth' &&
             createPaymentDto.network == 'ethereum'
         ) {
-            return await this.createEthPayment(createPaymentDto,'token');
+            return await this.createEthPayment(createPaymentDto,'token', user);
         }
     }
 
 
-    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string) {
+    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User) {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -58,7 +66,7 @@ export class PaymentService {
                 else{
                     balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency)
                 }
-                const transaction = this.createTransaction(createPaymentDto,balance,wallet);
+                const transaction = this.createTransaction(createPaymentDto,balance,wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -101,9 +109,10 @@ export class PaymentService {
         const balance = await tokenContract.balanceOf(address);
         return balance.toString();
     }
-    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet) {
+    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet, user: User) {
         return this.transactionRepo.create({
             wallet: wallet[0],
+            user: user,
             amount: createPaymentDto.amount,
             currency: createPaymentDto.currency,
             network: createPaymentDto.network,

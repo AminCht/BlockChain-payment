@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Status, Transaction } from '../database/entities/Transaction.entity';
 import { Repository } from 'typeorm';
@@ -8,13 +8,16 @@ import { TransactionNotFoundException } from './exceptions/transactionNotFound';
 export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
 
-    async getTransactionById(transactionId: number){
+    async getTransactionById(req, transactionId: number){
         while(true){
             const transaction = await this.transactionRepo.findOne({
                 where:{
                     id:transactionId
                 }
             });
+            if(req.id != transaction.user.id){
+                throw new ForbiddenException('This transaction does not belong to you');
+            }
             if(!transaction){
                 throw new TransactionNotFoundException(transactionId);
             }
