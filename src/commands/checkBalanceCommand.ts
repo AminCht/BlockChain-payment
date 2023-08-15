@@ -72,7 +72,13 @@ export class CheckBallanceCommand extends CommandRunner {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             await queryRunner.manager.save(transaction);
-            await queryRunner.manager.save(Wallet, wallet);
+            if(status!='Pending'){
+                await queryRunner.manager.update(
+                Wallet,
+                { id: transaction.wallet.id },
+                { lock: false },
+                );
+            }
             await queryRunner.commitTransaction();
         } catch (error) {
             await queryRunner.rollbackTransaction();
