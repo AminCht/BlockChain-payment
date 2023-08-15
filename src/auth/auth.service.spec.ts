@@ -7,7 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
 
 describe('AuthService', () => {
     let service: AuthService;
-
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [DatabaseModule, TypeOrmModule.forFeature([User]),
@@ -21,12 +20,16 @@ describe('AuthService', () => {
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
-    it('should return access token to login', () => {
-        const token = service.login({ username: 'foad', password: '1234' });
-        expect(token).not.toBeNull();
-    });
-    it('should create a user and return access token', () => {
+    describe('signup', () => {
+        it('should create a user and return access token', () => {
         const token = service.signUp({ username: 'foad', password: '1234' });
-        expect(token).not.toBeNull();
+            expect(token).not.toBeNull();
+        });
+    });
+    describe('login', () => {
+        it('should return access token to login', () => {
+            const token = service.login({ username: 'foad', password: '1234' });
+            expect(token).not.toBeNull();
+        });
     });
 });

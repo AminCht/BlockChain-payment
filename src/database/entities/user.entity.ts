@@ -25,9 +25,6 @@ export class User{
     @BeforeInsert()
     setDates(){
         this.createdAt = new Date();
-    }
-    @BeforeUpdate()
-    setDate(){
         this.updatedAt = new Date();
     }
 }
