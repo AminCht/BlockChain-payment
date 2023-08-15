@@ -23,29 +23,37 @@ export class AuthService {
             await this.userRepo.save(user);
             return this.signToken(user.id,user.username);
         } catch(error){
-            if(error.code === 'P2002'){
+            if(error.code === '23505'){
                 throw new ForbiddenException('This UserName has already taken');
+            }
+            if(error.code == "ECONNRESET" ){
+                return 'connection timeout';
+            }
+             else if(error.code == "ENOTFOUND"){
+                return 'no connection';
             }
         }
     }
 
     async login(dto: AuthDto){
+        console.log(dto)
         const hashPassword = await this.hashPassword(dto.password);
         const user = await this.userRepo.findOne({
             where:{
                 username: dto.username,
-                password: hashPassword
             }
         });
-        if(!user){
-            throw new ForbiddenException('Username or password is incorrect');
+        const isMatch = await bcrypt.compare(dto.password, user.password);
+        if(user && isMatch){
+            return this.signToken(user.id, user.username);
         }
-        return this.signToken(user.id, user.username);
+        throw new ForbiddenException('username or password is incorrect');
+        
     }
 
 
     async signToken(id: number, username: string){
-        const payload = { username:username, id:id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 20 };
+        const payload = { username:username, id:id};
         const token = await this.jwt.signAsync(payload);
         return {accesstoken: token};
     }
@@ -53,11 +61,10 @@ export class AuthService {
 
     async hashPassword(password: string){
         const hashRounds = 20
+
         const saltRounds = 10
-        for (let i = 0; i < hashRounds; i++) {
-            password = await bcrypt.hash(password, saltRounds);
-        }
-        return password;
+        
+        return await bcrypt.hash(password,saltRounds);
     }
 
 

@@ -31,7 +31,7 @@ export class PaymentService {
     public async createPayment(req, createPaymentDto: CreatePaymentRequestDto) {
         const user = await this.userRepo.findOne({
             where:{
-                id:req.id
+                id:req.user.id
             }
         })
         if (

@@ -16,7 +16,7 @@ export class User{
     @Column()
     createdAt: Date
 
-    @Column()
+    @Column({default: null})
     updatedAt: Date
 
     @OneToMany(() => Transaction, (transaction) => transaction.wallet)
