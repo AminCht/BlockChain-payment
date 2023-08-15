@@ -28,7 +28,7 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(req, createPaymentDto: CreatePaymentRequestDto) {
+    public async createPayment(req, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto> {
         const user = await this.userRepo.findOne({
             where:{
                 id:req.user.id
@@ -38,12 +38,12 @@ export class PaymentService {
             createPaymentDto.currency == 'eth' &&
             createPaymentDto.network == 'ethereum'
         ) {
-            return await this.createEthPayment(createPaymentDto,'main', req.user.id);
+            return await this.createEthPayment(createPaymentDto, 'main', user);
         } else if (
             createPaymentDto.currency != 'eth' &&
             createPaymentDto.network == 'ethereum'
         ) {
-            return await this.createEthPayment(createPaymentDto,'token', user);
+            return await this.createEthPayment(createPaymentDto, 'token', user);
         }
     }
 
