@@ -25,10 +25,10 @@ export class Transaction{
     @Column({ type: 'enum', enum: Status, default: 'Pending' })
     status: string;
 
-    @Column({nullable: false })
+    @Column({ nullable: false })
     wallet_balance_before: string;
 
-    @Column({nullable: true })
+    @Column({ nullable: true })
     wallet_balance_after: string;
 
     @Column()
@@ -38,10 +38,10 @@ export class Transaction{
     expireTime: Date;
 
     @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
-    wallet: Wallet
+    wallet: Wallet;
 
-    @ManyToOne(()=> User, (user)=> user.transactions)
-    user: User
+    @ManyToOne(() => User, (user) => user.transactions)
+    user: User;
 
     @BeforeInsert()
     setTimes() {
