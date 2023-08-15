@@ -15,10 +15,10 @@ export class AuthService {
 
     async signUp(dto: AuthDto){
         try{
-            const password = await this.hashPassword(dto.password)
+            const hashPassword = await this.hashPassword(dto.password)
             const user = this.userRepo.create({
                 username: dto.username,
-                password:password
+                password: hashPassword
             });
             await this.userRepo.save(user);
             return this.signToken(user.id,user.username);
@@ -30,8 +30,19 @@ export class AuthService {
     }
 
     async login(dto: AuthDto){
-        
+        const hashPassword = await this.hashPassword(dto.password);
+        const user = await this.userRepo.findOne({
+            where:{
+                username: dto.username,
+                password: hashPassword
+            }
+        });
+        if(!user){
+            throw new ForbiddenException('Username or password is incorrect');
+        }
+        return this.signToken(user.id, user.username);
     }
+
 
     async signToken(id: number, username: string){
         const payload = { username:username, id:id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 20 };
@@ -39,10 +50,12 @@ export class AuthService {
         return {accesstoken: token};
     }
 
+
     async hashPassword(password: string){
         const hashRounds = 20
+        const saltRounds = 10
         for (let i = 0; i < hashRounds; i++) {
-            password = await bcrypt.hash(password, 10);
+            password = await bcrypt.hash(password, saltRounds);
         }
         return password;
     }
