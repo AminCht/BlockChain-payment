@@ -26,6 +26,12 @@ export class AuthService {
             if (error.code === 'P2002') {
                 throw new ForbiddenException('This UserName has already taken');
             }
+            if(error.code == "ECONNRESET" ){
+                return 'connection timeout';
+            }
+             else if(error.code == "ENOTFOUND"){
+                return 'no connection';
+            }
         }
     }
 
@@ -40,7 +46,8 @@ export class AuthService {
         if (!user) {
             throw new ForbiddenException('Username or password is incorrect');
         }
-        return this.signToken(user.id, user.username);
+        throw new ForbiddenException('username or password is incorrect');
+        
     }
     private async signToken(id: number, username: string) {
         const payload = { username:username, id:id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 20 };
@@ -48,12 +55,12 @@ export class AuthService {
         return { access_token: token };
     }
 
-    private async hashPassword(password: string) {
-        const hashRounds = 20;
-        const saltRounds = 10;
-        for (let i = 0; i < hashRounds; i++) {
-            password = await bcrypt.hash(password, saltRounds);
-        }
-        return password;
+
+    async hashPassword(password: string){
+        const hashRounds = 20
+
+        const saltRounds = 10
+        
+        return await bcrypt.hash(password,saltRounds);
     }
 }
