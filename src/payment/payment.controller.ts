@@ -2,7 +2,7 @@ import { Body, Controller, Post, Get, UseFilters, Param, UseGuards, Req } from '
 import { PaymentService } from './payment.service';
 import { CreatePaymentRequestDto, CreatePaymentResponseDto, Currency, Network } from './dto/createPayment.dto';
 
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionNotFoundExceptionFilter } from '../transaction/filters/transactionNotfound.filter';
 import { GetTransactionByIdResponseDto } from './dto/getTransactionById.dto';
@@ -23,8 +23,11 @@ export class PaymentController {
   @ApiOperation({ summary: 'Create transaction(payment)' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.',type: CreatePaymentResponseDto})
+  @ApiResponse({ status: 403, description: 'unAuthorized' })
   @ApiQuery({ name: 'Network', enum: Network })
   @ApiQuery({ name: 'Currency', enum: Currency })
+  @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard(['jwt']))
   async createPayment(@Req() req:Request, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
     return await this.paymentService.createPayment(req, createPaymentdto);
@@ -34,8 +37,11 @@ export class PaymentController {
   @UseFilters(TransactionNotFoundExceptionFilter)
   @ApiOperation({ summary: 'Get Transaction By id' })
   @ApiResponse({ status: 404, description: 'Transaction with given id not found' })
-  @ApiParam({ name: 'id', description: 'Id should be numeric' })
   @ApiResponse({ status: 200, description: 'Transaction found',type: GetTransactionByIdResponseDto})
+  @ApiResponse({ status: 403, description: 'unAuthorized' })
+  @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'Id should be numeric' })
   @UseGuards(AuthGuard(['jwt']))
   async getTransactionById(@Req() req:Request, @Param('id') id:string){
     return await this.transactionService.getTransactionById(req, +id);
