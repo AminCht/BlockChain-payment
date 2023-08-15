@@ -28,7 +28,11 @@ export class CheckBallanceCommand extends CommandRunner {
     public async run(): Promise<void> {
         const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
         for (const transaction of transactions) {
-            await this.updateTransactionStatus(transaction);
+            try {
+                await this.updateTransactionStatus(transaction);
+            } catch (error) {
+                console.log(error);
+            }
         }
     }
 
@@ -50,7 +54,7 @@ export class CheckBallanceCommand extends CommandRunner {
                 transaction.currency,
             );
             decimals = await this.tokenContract.decimals();
-        }
+        } else { return; }
         const expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         if (now >= transaction.expireTime) {
