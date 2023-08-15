@@ -8,9 +8,7 @@ import { TransactionNotFoundException } from './exceptions/transactionNotFound';
 export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
 
-    async getTransactionById(req, transactionId: number){
-        console.log(req.user.id);
-        
+    async getTransactionById(req, transactionId: number){        
         while(true){
             const transaction = await this.transactionRepo.findOne({
                 where:{

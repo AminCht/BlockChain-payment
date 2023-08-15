@@ -38,7 +38,6 @@ export class PaymentController {
   @ApiResponse({ status: 200, description: 'Transaction found',type: GetTransactionByIdResponseDto})
   @UseGuards(AuthGuard(['jwt']))
   async getTransactionById(@Req() req:Request, @Param('id') id:string){
-    console.log(req);
     return await this.transactionService.getTransactionById(req, +id);
   }
 
