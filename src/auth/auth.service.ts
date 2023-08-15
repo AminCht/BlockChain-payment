@@ -10,20 +10,20 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
-        private jwt: JwtService
-        ){}
+        private jwt: JwtService,
+    ) {}
 
-    async signUp(dto: AuthDto){
-        try{
-            const hashPassword = await this.hashPassword(dto.password)
+    public async signUp(dto: AuthDto) {
+        try {
+            const hashPassword = await this.hashPassword(dto.password);
             const user = this.userRepo.create({
                 username: dto.username,
-                password: hashPassword
+                password: hashPassword,
             });
             await this.userRepo.save(user);
-            return this.signToken(user.id,user.username);
-        } catch(error){
-            if(error.code === '23505'){
+            return this.signToken(user.id, user.username);
+        } catch (error) {
+            if (error.code === 'P2002') {
                 throw new ForbiddenException('This UserName has already taken');
             }
             if(error.code == "ECONNRESET" ){
@@ -35,27 +35,24 @@ export class AuthService {
         }
     }
 
-    async login(dto: AuthDto){
-        console.log(dto)
+    public async login(dto: AuthDto) {
         const hashPassword = await this.hashPassword(dto.password);
         const user = await this.userRepo.findOne({
-            where:{
+            where: {
                 username: dto.username,
-            }
+                password: hashPassword,
+            },
         });
-        const isMatch = await bcrypt.compare(dto.password, user.password);
-        if(user && isMatch){
-            return this.signToken(user.id, user.username);
+        if (!user) {
+            throw new ForbiddenException('Username or password is incorrect');
         }
         throw new ForbiddenException('username or password is incorrect');
         
     }
-
-
-    async signToken(id: number, username: string){
-        const payload = { username:username, id:id};
+    private async signToken(id: number, username: string) {
+        const payload = { username:username, id:id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 20 };
         const token = await this.jwt.signAsync(payload);
-        return {accesstoken: token};
+        return { access_token: token };
     }
 
 
@@ -66,6 +63,4 @@ export class AuthService {
         
         return await bcrypt.hash(password,saltRounds);
     }
-
-
 }
