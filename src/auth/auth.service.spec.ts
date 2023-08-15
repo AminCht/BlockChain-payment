@@ -3,9 +3,7 @@ import { AuthService } from './auth.service';
 import DatabaseModule from '../database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../database/entities/user.entity';
-import {CheckBallanceCommand} from "../commands/checkBalanceCommand";
-import {JwtStrategy} from "./strategy/jwt.strategy";
-import {JwtModule} from "@nestjs/jwt";
+import { JwtModule } from '@nestjs/jwt';
 
 describe('AuthService', () => {
     let service: AuthService;

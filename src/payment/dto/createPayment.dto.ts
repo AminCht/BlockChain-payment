@@ -30,7 +30,7 @@ export class CreatePaymentRequestDto {
 export class CreatePaymentResponseDto {
     @ApiProperty()
     @IsNotEmpty()
-    walletAdress: string;
+    walletAddress: string;
 
     @ApiProperty()
     @IsNotEmpty()
