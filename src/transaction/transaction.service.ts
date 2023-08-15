@@ -15,7 +15,7 @@ export class TransactionService {
                     id:transactionId
                 }
             });
-            if(req.id != transaction.user.id){
+            if(req.user.id != transaction.user.id){
                 throw new ForbiddenException('This transaction does not belong to you');
             }
             if(!transaction){
