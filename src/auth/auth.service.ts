@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
         private jwt: JwtService,
     ) {}
 
-    public async signUp(dto: AuthDto) {
+    public async signUp(dto: AuthDto, res: Response) {
         try {
             const hashPassword = await this.hashPassword(dto.password);
             const user = this.userRepo.create({
@@ -21,9 +22,9 @@ export class AuthService {
                 password: hashPassword,
             });
             await this.userRepo.save(user);
-            return this.signToken(user.id, user.username);
+            return this.signToken(user.id, user.username, res);
         } catch (error) {
-            if (error.code === 'P2002') {
+            if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
             }
             if(error.code == "ECONNRESET" ){
@@ -35,23 +36,27 @@ export class AuthService {
         }
     }
 
-    public async login(dto: AuthDto) {
-        const hashPassword = await this.hashPassword(dto.password);
+    public async login(dto: AuthDto, res: Response) {
         const user = await this.userRepo.findOne({
             where: {
                 username: dto.username,
-                password: hashPassword,
             },
         });
-        if (!user) {
-            throw new ForbiddenException('Username or password is incorrect');
+        if (user) {
+            const isMatch = await bcrypt.compare(dto.password, user.password);
+            if(isMatch){
+                return this.signToken(user.id, user.username, res);
+            }
         }
         throw new ForbiddenException('username or password is incorrect');
         
     }
-    private async signToken(id: number, username: string) {
-        const payload = { username:username, id:id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 20 };
+    private async signToken(id: number, username: string, res: Response) {
+        console.log('user')
+        const payload = { username:username, id:id };
         const token = await this.jwt.signAsync(payload);
+        this.setCookie(res, token);
+        console.log('user');
         return { access_token: token };
     }
 
@@ -62,5 +67,11 @@ export class AuthService {
         const saltRounds = 10
         
         return await bcrypt.hash(password,saltRounds);
+    }
+
+    setCookie(res: Response, token: string){
+        res.cookie('accessToken', token, {
+            httpOnly: true,
+        });
     }
 }
