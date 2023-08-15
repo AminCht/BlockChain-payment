@@ -37,7 +37,6 @@ export class CreateWalletCommand extends CommandRunner {
                 type: type,
             });
             const savedWallet = await this.walletRepo.save(createdWallet);
-            console.log(savedWallet);
             i++;
         }
     }

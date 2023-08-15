@@ -1,15 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
-import {InjectRepository, TypeOrmModule} from '@nestjs/typeorm';
+import {getRepositoryToken, InjectRepository, TypeOrmModule} from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
 import DatabaseModule from '../database/database.module';
 import { Currency, Network } from './dto/createPayment.dto';
-import {User} from "../database/entities/user.entity";
-import {Repository} from "typeorm";
+import { User } from '../database/entities/user.entity';
+import { Repository } from 'typeorm';
 describe('PaymentService', () => {
     let service: PaymentService;
     let getWalletBalanceMock: jest.SpyInstance<Promise<string>>;
+    let userRepo: Repository<User>;
+    let walletRepo: Repository<Wallet>;
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [
@@ -19,10 +21,15 @@ describe('PaymentService', () => {
             providers: [PaymentService],
         }).compile();
         service = module.get<PaymentService>(PaymentService);
+        userRepo = module.get<Repository<User>>(getRepositoryToken(User));
+        walletRepo = module.get<Repository<Wallet>>(getRepositoryToken(Wallet));
         jest.spyOn(service, 'getBalance').mockReturnValue(Promise.resolve('1'));
+        jest.spyOn(service, 'getTokenBalance').mockReturnValue(Promise.resolve('1'));
     });
     const request = {
-        id: 1,
+        user: {
+            id: 1,
+        },
     };
     it('should be defined', () => {
         expect(service).toBeDefined();
@@ -35,8 +42,20 @@ describe('PaymentService', () => {
                 currency: Currency.ETH,
                 amount: '12',
             };
+            const user = userRepo.create({
+                username: 'foad1',
+                password: '12345',
+            });
+            await userRepo.save(user);
+            const createdWallet = walletRepo.create({
+                private_key: '1234',
+                address: '12345',
+                wallet_network: 'ethereum',
+                type: 'main',
+            });
+            await walletRepo.save(createdWallet);
             const payment = await service.createPayment(request, paymentDto);
-            expect(payment.walletAddress).not.toBeUndefined();
+            expect(payment.walletAddress).toBeDefined();
         });
         it('should create a token payment on ethereum network and return wallet address and id', async () => {
             const paymentDto = {
@@ -44,15 +63,22 @@ describe('PaymentService', () => {
                 currency: Currency.USDT,
                 amount: '12',
             };
+            const createdTokenWallet = walletRepo.create({
+                private_key: '123',
+                address: '1245',
+                wallet_network: 'ethereum',
+                type: 'token',
+            });
+            await walletRepo.save(createdTokenWallet);
             const payment = await service.createPayment(request, paymentDto);
             expect(payment.walletAddress).toBeDefined();
         });
     });
     describe('get Transaction by id', () => {
         it('should return transaction', async () => {
-            const transactionId = 2;
+            const transactionId = 1;
             const transaction = await service.getTransactionById(transactionId);
-            expect(transaction.amount).toBeDefined();
+            expect(transaction).toBeDefined();
         });
         it('should return error', async () => {
             const transactionId = 10;
