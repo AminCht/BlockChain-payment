@@ -10,55 +10,50 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
-        private jwt: JwtService
-        ){}
+        private jwt: JwtService,
+    ) {}
 
-    async signUp(dto: AuthDto){
-        try{
-            const hashPassword = await this.hashPassword(dto.password)
+    public async signUp(dto: AuthDto) {
+        try {
+            const hashPassword = await this.hashPassword(dto.password);
             const user = this.userRepo.create({
                 username: dto.username,
-                password: hashPassword
+                password: hashPassword,
             });
             await this.userRepo.save(user);
-            return this.signToken(user.id,user.username);
-        } catch(error){
-            if(error.code === 'P2002'){
+            return this.signToken(user.id, user.username);
+        } catch (error) {
+            if (error.code === 'P2002') {
                 throw new ForbiddenException('This UserName has already taken');
             }
         }
     }
 
-    async login(dto: AuthDto){
+    public async login(dto: AuthDto) {
         const hashPassword = await this.hashPassword(dto.password);
         const user = await this.userRepo.findOne({
-            where:{
+            where: {
                 username: dto.username,
-                password: hashPassword
-            }
+                password: hashPassword,
+            },
         });
-        if(!user){
+        if (!user) {
             throw new ForbiddenException('Username or password is incorrect');
         }
         return this.signToken(user.id, user.username);
     }
-
-
-    async signToken(id: number, username: string){
+    private async signToken(id: number, username: string) {
         const payload = { username:username, id:id, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 20 };
         const token = await this.jwt.signAsync(payload);
-        return {accesstoken: token};
+        return { access_token: token };
     }
 
-
-    async hashPassword(password: string){
-        const hashRounds = 20
-        const saltRounds = 10
+    private async hashPassword(password: string) {
+        const hashRounds = 20;
+        const saltRounds = 10;
         for (let i = 0; i < hashRounds; i++) {
             password = await bcrypt.hash(password, saltRounds);
         }
         return password;
     }
-
-
 }

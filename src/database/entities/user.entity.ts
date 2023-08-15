@@ -5,22 +5,22 @@ import { Transaction } from './Transaction.entity';
 export class User{
 
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
-    @Column({unique: true})
-    username: string
-
-    @Column()
-    password: string
+    @Column({ unique: true })
+    username: string;
 
     @Column()
-    createdAt: Date
+    password: string;
 
     @Column()
-    updatedAt: Date
+    createdAt: Date;
+
+    @Column()
+    updatedAt: Date;
 
     @OneToMany(() => Transaction, (transaction) => transaction.wallet)
-    transactions: Transaction[]
+    transactions: Transaction[];
 
     @BeforeInsert()
     setDates(){
@@ -30,7 +30,4 @@ export class User{
     setDate(){
         this.updatedAt = new Date();
     }
-    
-    
-    
 }
