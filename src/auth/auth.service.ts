@@ -42,10 +42,11 @@ export class AuthService {
                 username: dto.username,
             },
         });
-        console.log(user);
-        const isMatch = await bcrypt.compare(dto.password, user.password);
-        if (user && isMatch) {
-            return this.signToken(user.id, user.username, res);
+        if (user) {
+            const isMatch = await bcrypt.compare(dto.password, user.password);
+            if(isMatch){
+                return this.signToken(user.id, user.username, res);
+            }
         }
         throw new ForbiddenException('username or password is incorrect');
         
