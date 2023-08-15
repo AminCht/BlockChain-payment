@@ -1,5 +1,6 @@
 import { BeforeInsert, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
+import { User } from './user.entity';
  export enum Status {
     PENDING = 'Pending',
     SUCCESSFUL = 'Successful',
@@ -21,9 +22,6 @@ export class Transaction{
     @Column({nullable:false})
     currency: string;
 
-    @ManyToOne(() => Wallet, (wallet) => wallet.transactions,{cascade:true})
-    wallet: Wallet
-
     @Column({ type: 'enum', enum: Status, default: 'Pending' })
     status: string;
 
@@ -38,6 +36,12 @@ export class Transaction{
 
     @Column()
     expireTime: Date;
+
+    @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
+    wallet: Wallet
+
+    @ManyToOne(()=> User, (user)=> user.transactions)
+    user: User
 
     @BeforeInsert()
     setTimes() {
