@@ -9,16 +9,18 @@ export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
 
     async getTransactionById(req, transactionId: number){
+        console.log(req.user.id);
+        
         while(true){
             const transaction = await this.transactionRepo.findOne({
                 where:{
                     id:transactionId
-                }
+                },relations:["user"]
             });
-            if(req.user.id != transaction.user.id){
-                throw new ForbiddenException('This transaction does not belong to you');
-            }
             if(!transaction){
+                throw new TransactionNotFoundException(transactionId);
+            }
+            if(req.user.id != transaction.user.id){
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
