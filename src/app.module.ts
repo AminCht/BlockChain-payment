@@ -12,6 +12,6 @@ import DatabaseModule from './database/database.module';
 @Module({
     imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule],
     controllers: [AppController],
-    providers: [AppService, AccessService],
+    providers: [AppService],
 })
 export class AppModule {}
