@@ -42,18 +42,6 @@ describe('PaymentService', () => {
                 currency: Currency.ETH,
                 amount: '12',
             };
-            const user = userRepo.create({
-                username: 'foad1',
-                password: '12345',
-            });
-            await userRepo.save(user);
-            const createdWallet = walletRepo.create({
-                private_key: '1234',
-                address: '12345',
-                wallet_network: 'ethereum',
-                type: 'main',
-            });
-            await walletRepo.save(createdWallet);
             const payment = await service.createPayment(request, paymentDto);
             expect(payment.walletAddress).toBeDefined();
         });
@@ -63,13 +51,6 @@ describe('PaymentService', () => {
                 currency: Currency.USDT,
                 amount: '12',
             };
-            const createdTokenWallet = walletRepo.create({
-                private_key: '123',
-                address: '1245',
-                wallet_network: 'ethereum',
-                type: 'token',
-            });
-            await walletRepo.save(createdTokenWallet);
             const payment = await service.createPayment(request, paymentDto);
             expect(payment.walletAddress).toBeDefined();
         });

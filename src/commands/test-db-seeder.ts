@@ -5,6 +5,7 @@ import {Repository} from 'typeorm';
 import {Wallet} from "ethers";
 import {User} from "../database/entities/User.entity";
 import {Transaction} from "../database/entities/Transaction.entity";
+import * as bcrypt from "bcrypt";
 
 @Command({ name: 'test-db-seeder' })
 export class TestDbSeeder extends CommandRunner {
@@ -22,9 +23,10 @@ export class TestDbSeeder extends CommandRunner {
         passedParams: string[],
         options?: Record<string, any>,
     ): Promise<void> {
-        const wallet = await this.createWallet('main');
+        await this.createWallet('main');
         await this.createWallet('token');
         const user = await this.createUser();
+        const wallet = await this.createWallet('main');
         await this.createTransaction(wallet, user);
     }
     async createWallet(type: 'token' | 'main') {
@@ -38,9 +40,10 @@ export class TestDbSeeder extends CommandRunner {
         return await this.walletRepo.save(createdWallet);
     }
     async createUser() {
+        const hashPassword = await bcrypt.hash('12345', 10);
         const user = this.userRepo.create({
             username: 'foad12',
-            password: 'password',
+            password: hashPassword,
         });
         return await this.userRepo.save(user);
     }
@@ -53,5 +56,6 @@ export class TestDbSeeder extends CommandRunner {
             network: 'ethereum',
             wallet_balance_before: '1',
         });
+        await this.transactionRepo.save(transaction);
     }
 }

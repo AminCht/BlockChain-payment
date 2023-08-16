@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../database/entities/User.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,7 +22,7 @@ export class AuthService {
                 password: hashPassword,
             });
             await this.userRepo.save(user);
-            return {"message": "You have been reistered successfully"}
+            return { message: 'You have been registered successfully' };
         } catch (error) {
             if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
@@ -42,6 +42,9 @@ export class AuthService {
                 username: dto.username,
             },
         });
+        if(!user){
+            throw new NotFoundException();
+        }
         if (user) {
             const isMatch = await bcrypt.compare(dto.password, user.password);
             if(isMatch){
@@ -51,8 +54,8 @@ export class AuthService {
         throw new ForbiddenException('username or password is incorrect');
     }
     private async signToken(id: number, username: string) {
-        console.log('user')
-        const payload = { username:username, id:id };
+        console.log('user');
+        const payload = { username: username, id: id };
         const token = await this.jwt.signAsync(payload);
         console.log('user');
         return { access_token: token };

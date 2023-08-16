@@ -102,6 +102,7 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-    "globalSetup": "../setup.api.ts"
+    "globalSetup": "<rootDir>/setup.api.ts",
+    "detectOpenHandles": true
   }
 }

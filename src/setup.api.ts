@@ -9,6 +9,7 @@ const setup = async () => {
                 console.error(`Error executing script: ${error}`);
                 return;
             }
+            console.log('after seed');
             console.log('Script output:');
             console.log(stdout);
             if (stderr) {
