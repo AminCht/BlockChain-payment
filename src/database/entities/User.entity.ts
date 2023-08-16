@@ -34,7 +34,8 @@ export class User {
 
     @BeforeInsert()
     setDates() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
+        const date = new Date();
+        this.createdAt = date;
+        this.updatedAt = date;
     }
 }
