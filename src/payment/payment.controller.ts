@@ -29,8 +29,8 @@ export class PaymentController {
   @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
   @ApiBearerAuth()
   @UseGuards(AuthGuard(['jwt']))
-  async createPayment(@Req() req:Request, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
-    return await this.paymentService.createPayment(req, createPaymentdto);
+  async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
+    return await this.paymentService.createPayment(req.user.id, createPaymentdto);
   }
 
   @Get('Transaction/:id')

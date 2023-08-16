@@ -28,12 +28,12 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(req, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto> {
+    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto> {
         const user = await this.userRepo.findOne({
-            where:{
-                id:req.user.id
-            }
-        })
+            where: {
+                id: id,
+            },
+        });
         if (
             createPaymentDto.currency == 'eth' &&
             createPaymentDto.network == 'ethereum'
@@ -83,12 +83,10 @@ export class PaymentService {
         } catch (error) {
             if(error.code == "ECONNRESET" ){
                 return 'connection timeout';
-            }
-             else if(error.code == "ENOTFOUND"){
+            } else if (error.code == 'ENOTFOUND') {
                 return 'no connection';
-            }
-             else {
-            await queryRunner.rollbackTransaction();
+            } else {
+                await queryRunner.rollbackTransaction();
                 return error;
             }
         } finally {
