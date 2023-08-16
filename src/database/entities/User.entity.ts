@@ -7,7 +7,7 @@ import {
     ManyToMany,
 } from 'typeorm';
 import { Transaction } from './Transaction.entity';
-import { TokenEntity } from './Token.entity';
+import { Token } from './Token.entity';
 
 @Entity({ name: 'Users' })
 export class User {
@@ -29,8 +29,8 @@ export class User {
     @OneToMany(() => Transaction, (transaction) => transaction.wallet)
     transactions: Transaction[];
 
-    @ManyToMany(() => TokenEntity, (token) => token.users)
-    tokens: TokenEntity[];
+    @ManyToMany(() => Token, (token) => token.users)
+    tokens: Token[];
 
     @BeforeInsert()
     setDates() {

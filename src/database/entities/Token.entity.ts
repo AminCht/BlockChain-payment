@@ -2,7 +2,7 @@ import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typ
 import {User} from "./User.entity";
 
 @Entity('Tokens')
-export class TokenEntity {
+export class Token{
     @PrimaryGeneratedColumn()
     id: number;
 
