@@ -25,7 +25,7 @@ async function bootstrap() {
   await app.listen(process.env.PORT);
 }
 async function bootstrapCmd() {
-  await CommandFactory.run(CommandModule, ['warn', 'error', 'debug', 'log']);
+    await CommandFactory.run(CommandModule, ['warn', 'error', 'debug', 'log']);
 }
 if (process.env.MODE === 'cmd') {
   bootstrapCmd();

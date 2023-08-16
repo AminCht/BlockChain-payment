@@ -20,20 +20,18 @@ describe('AuthService', () => {
         expect(service).toBeDefined();
     });
     describe('signup', () => {
-        const mockJson = jest.fn();
-        const mockStatus = jest.fn().mockReturnValue({ json: mockJson });
-        const mockRes: Response = {
-            status: mockStatus,
-        } as unknown as Response;
-
-        it('should create a user and return access token', () => {
-        const token = service.signUp({ username: 'foad', password: '1234' },mockRes);
-            expect(token).not.toBeNull();
+        it('should create a user and return access token', async () => {
+            const message = await service.signUp({
+                username: 'foad',
+                password: '1234',
+            });
+            console.log(message);
+            expect(message).not.toBeNull();
         });
     });
     describe('login', () => {
-        it('should return access token to login', () => {
-            const token = service.login({ username: 'foad', password: '1234' },);
+        it('should return access token to login', async () => {
+            const token = await service.login({ username: 'foad', password: '1234' });
             expect(token).not.toBeNull();
         });
     });

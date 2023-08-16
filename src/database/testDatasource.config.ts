@@ -11,7 +11,7 @@ export const testDbConfig = {
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  dropSchema: true,
+  dropSchema: false,
   entities: [__dirname + '/entities/*.entity{.js,.ts}'],
 };
 
