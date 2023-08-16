@@ -25,8 +25,10 @@ describe('PaymentService', () => {
         expect(service).toBeDefined();
     });
 
-    it('transaction should Successful',async()=>{
-        jest.spyOn(checkBalance,'getBalance').mockReturnValue(Promise.resolve('10000000000000000000000000000'));
+    it('transaction should Successful', async () => {
+        jest.spyOn(checkBalance, 'getBalance').mockReturnValue(
+            Promise.resolve('10000000000000000000000000000'),
+        );
         await checkBalance.run();
         const transaction = await paymentService.getTransactionById(transactionId);
         expect(transaction.status).toBe('Successfully');

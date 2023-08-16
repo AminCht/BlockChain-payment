@@ -5,7 +5,7 @@ import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
 import DatabaseModule from '../database/database.module';
 import { Currency, Network } from './dto/createPayment.dto';
-import { User } from '../database/entities/user.entity';
+import { User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
 describe('PaymentService', () => {
     let service: PaymentService;
