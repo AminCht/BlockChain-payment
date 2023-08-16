@@ -30,13 +30,13 @@ export class CreateWalletCommand extends CommandRunner {
         let i = 0;
         while(i<walletCount){
             const wallet = Wallet.createRandom();
-            const createdWallet = await this.walletRepo.create({
+            const createdWallet = this.walletRepo.create({
                 private_key: wallet.privateKey,
                 address: wallet.address,
                 wallet_network: 'ethereum',
                 type: type,
             });
-            const savedWallet = await this.walletRepo.save(createdWallet);
+            await this.walletRepo.save(createdWallet);
             i++;
         }
     }
