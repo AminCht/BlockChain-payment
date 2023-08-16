@@ -27,12 +27,6 @@ export class AuthService {
             if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
             }
-            if(error.code == "ECONNRESET" ){
-                return 'connection timeout';
-            }
-             else if(error.code == "ENOTFOUND"){
-                return 'no connection';
-            }
         }
     }
 
@@ -54,19 +48,15 @@ export class AuthService {
         throw new ForbiddenException('username or password is incorrect');
     }
     private async signToken(id: number, username: string) {
-        console.log('user');
         const payload = { username: username, id: id };
         const token = await this.jwt.signAsync(payload);
-        console.log('user');
         return { access_token: token };
     }
 
 
     async hashPassword(password: string){
         const hashRounds = 20
-
         const saltRounds = 10
-        
         return await bcrypt.hash(password,saltRounds);
     }
 
