@@ -16,6 +16,7 @@ async function bootstrap() {
     .setDescription('The BlockChain Payment API description')
     .addCookieAuth('connect.sid')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
 

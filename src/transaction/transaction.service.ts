@@ -15,10 +15,7 @@ export class TransactionService {
                     id:transactionId
                 },relations:["user"]
             });
-            if(!transaction){
-                throw new TransactionNotFoundException(transactionId);
-            }
-            if(req.user.id != transaction.user.id){
+            if(!transaction || req.user.id != transaction.user.id){
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){

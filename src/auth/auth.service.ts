@@ -14,7 +14,7 @@ export class AuthService {
         private jwt: JwtService,
     ) {}
 
-    public async signUp(dto: AuthDto, res: Response) {
+    public async signUp(dto: AuthDto) {
         try {
             const hashPassword = await this.hashPassword(dto.password);
             const user = this.userRepo.create({
@@ -22,7 +22,7 @@ export class AuthService {
                 password: hashPassword,
             });
             await this.userRepo.save(user);
-            return this.signToken(user.id, user.username, res);
+            return {"message": "You have been reistered successfully"}
         } catch (error) {
             if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
@@ -36,7 +36,7 @@ export class AuthService {
         }
     }
 
-    public async login(dto: AuthDto, res: Response) {
+    public async login(dto: AuthDto) {
         const user = await this.userRepo.findOne({
             where: {
                 username: dto.username,
@@ -45,16 +45,15 @@ export class AuthService {
         if (user) {
             const isMatch = await bcrypt.compare(dto.password, user.password);
             if(isMatch){
-                return this.signToken(user.id, user.username, res);
+                return this.signToken(user.id, user.username);
             }
         }
         throw new ForbiddenException('username or password is incorrect');
     }
-    private async signToken(id: number, username: string, res: Response) {
+    private async signToken(id: number, username: string) {
         console.log('user')
         const payload = { username:username, id:id };
         const token = await this.jwt.signAsync(payload);
-        this.setCookie(res, token);
         console.log('user');
         return { access_token: token };
     }
@@ -68,9 +67,5 @@ export class AuthService {
         return await bcrypt.hash(password,saltRounds);
     }
 
-    setCookie(res: Response, token: string){
-        res.cookie('accessToken', token, {
-            httpOnly: true,
-        });
-    }
+    
 }
