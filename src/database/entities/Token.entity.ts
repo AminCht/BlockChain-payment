@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {User} from "./User.entity";
 
 @Entity('Tokens')
-export class Token {
+export class TokenEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -16,4 +17,7 @@ export class Token {
 
     @Column({ default: true })
     status: boolean;
+    @ManyToMany(() => User, (user) => user.tokens)
+    @JoinTable({ name: 'tokens_users' })
+    users: User[];
 }
