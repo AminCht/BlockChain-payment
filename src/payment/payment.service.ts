@@ -6,7 +6,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider } from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
-import { User } from '../database/entities/user.entity';
+import { User } from '../database/entities/User.entity';
 
 @Injectable()
 export class PaymentService {

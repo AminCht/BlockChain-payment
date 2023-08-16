@@ -6,7 +6,7 @@ import DatabaseModule from '../database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {PaymentService} from "../payment/payment.service";
 import {Transaction} from "../database/entities/Transaction.entity";
-import {User} from "../database/entities/user.entity";
+import {User} from "../database/entities/User.entity";
 
 describe('WalletService', () => {
   let service: WalletService;

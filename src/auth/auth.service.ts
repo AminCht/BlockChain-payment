@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { User } from '../database/entities/user.entity';
+import { User } from '../database/entities/User.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -49,7 +49,6 @@ export class AuthService {
             }
         }
         throw new ForbiddenException('username or password is incorrect');
-        
     }
     private async signToken(id: number, username: string, res: Response) {
         console.log('user')
