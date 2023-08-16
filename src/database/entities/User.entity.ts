@@ -1,19 +1,16 @@
 import {
     BeforeInsert,
-    BeforeUpdate,
     Entity,
     PrimaryGeneratedColumn,
     Column,
     OneToMany,
     ManyToMany,
-    JoinTable
 } from 'typeorm';
 import { Transaction } from './Transaction.entity';
-import {Token} from "./Token";
+import { TokenEntity } from './Token.entity';
 
 @Entity({ name: 'Users' })
-export class User{
-
+export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -32,9 +29,8 @@ export class User{
     @OneToMany(() => Transaction, (transaction) => transaction.wallet)
     transactions: Transaction[];
 
-    @ManyToMany(() => Token)
-    @JoinTable()
-    tokens: Token[];
+    @ManyToMany(() => TokenEntity, (token) => token.users)
+    tokens: TokenEntity[];
 
     @BeforeInsert()
     setDates() {
