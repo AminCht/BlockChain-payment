@@ -30,7 +30,7 @@ export class PaymentController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard(['jwt']))
   async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
-    return await this.paymentService.createPayment(req.user.id, createPaymentdto);
+    return await this.paymentService.createPayment(req['user'].id, createPaymentdto);
   }
 
   @Get('Transaction/:id')
@@ -44,7 +44,7 @@ export class PaymentController {
   @ApiParam({ name: 'id', description: 'Id should be numeric' })
   @UseGuards(AuthGuard(['jwt']))
   async getTransactionById(@Req() req:Request, @Param('id') id:string){
-    return await this.transactionService.getTransactionById(req, +id);
+    return await this.transactionService.getTransactionById(req['user'], +id);
   }
 
 }
