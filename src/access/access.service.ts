@@ -11,12 +11,23 @@ export class AccessService {
     ) {}
     public async getAllTokens() {
         try {
-            return await this.tokenRepo.find();}
+            const tokens = await this.tokenRepo.find({
+                where:{
+                    status: true
+                }
+            });
+            if(tokens.length == 0){
+                return {message: "Currently we don't support any tokens. try again later"}
+            }
+            return tokens;
+        }
         catch (error) {
             console.log(error);
         }
     }
-    public async getUserTokens(){}
+    public async getUserTokens(){
+        
+    }
 
     public async getAllAccesses(){}
 }
