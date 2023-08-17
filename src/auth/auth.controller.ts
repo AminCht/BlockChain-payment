@@ -23,7 +23,6 @@ export class AuthController {
     @ApiOperation({ summary: 'Login User' })
     @ApiResponse({ status: 403, description: 'unAuthorized' })
     @ApiResponse({ status: 200, description: 'user signup and get accessToken',type: AuthResponseDto})
-    @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
     @Post('login')
     async login(@Body() dto: AuthDto, @Res() res: Response): Promise<void>{
         const token = await this.authService.login(dto);

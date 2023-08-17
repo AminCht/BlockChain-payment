@@ -26,8 +26,6 @@ export class PaymentController {
   @ApiResponse({ status: 403, description: 'unAuthorized' })
   @ApiQuery({ name: 'Network', enum: Network })
   @ApiQuery({ name: 'Currency', enum: Currency })
-  @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
-  @ApiBearerAuth()
   @UseGuards(AuthGuard(['jwt']))
   async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
     return await this.paymentService.createPayment(req['user'].id, createPaymentdto);
@@ -39,8 +37,6 @@ export class PaymentController {
   @ApiResponse({ status: 404, description: 'Transaction with given id not found' })
   @ApiResponse({ status: 200, description: 'Transaction found',type: GetTransactionByIdResponseDto})
   @ApiResponse({ status: 403, description: 'unAuthorized' })
-  @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
-  @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'Id should be numeric' })
   @UseGuards(AuthGuard(['jwt']))
   async getTransactionById(@Req() req:Request, @Param('id') id:string){

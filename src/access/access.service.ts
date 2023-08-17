@@ -30,7 +30,6 @@ export class AccessService {
     }
 
     public async getAllUserAccess(userId: number): Promise <Currency[]>{
-        console.log(userId)
         const user = await this.userRepo.findOne({
             relations: ['tokens'],
             where:{
