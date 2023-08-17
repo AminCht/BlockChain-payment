@@ -14,7 +14,7 @@ export class AuthController {
     @ApiResponse({ status: 403, description: 'This UserName has already taken' })
     @ApiResponse({ status: 201, description: 'user signup and get accessToken',type: AuthResponseDto})
     @Post('signup')
-    async signUp(@Body() dto:AuthDto, @Res() res:Response){
+    async signUp(@Body() dto:AuthDto, @Res() res:Response): Promise<void>{
         const token = await this.authService.signUp(dto);
         res.status(201);
         res.send(token);
@@ -25,13 +25,13 @@ export class AuthController {
     @ApiResponse({ status: 200, description: 'user signup and get accessToken',type: AuthResponseDto})
     @ApiHeader({ name: 'authorization', description: 'Authorization header(access token)' })
     @Post('login')
-    async login(@Body() dto: AuthDto, @Res() res: Response){
+    async login(@Body() dto: AuthDto, @Res() res: Response): Promise<void>{
         const token = await this.authService.login(dto);
         this.setCookie(res, token.access_token);
         res.status(200);
         res.send(token);
     }
-    setCookie(res: Response, token: string){
+    private setCookie(res: Response, token: string){
         res.cookie('accessToken', token, {
             httpOnly: true,
         });

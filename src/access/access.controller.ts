@@ -7,13 +7,13 @@ import { Request } from 'express';
 export class AccessController {
     constructor(private accessService: AccessService) {}
     @Get('tokens')
-    @UseGuards(AuthGuard(['jwt']))
     async getAllTokens() {
         return await this.accessService.getAllTokens();
     }
 
     @Get('')
-    async getAllAccesses(){
-        return await this.accessService.getAllAccesses();
+    @UseGuards(AuthGuard(['jwt']))
+    async getAllAccesses(@Req() req: Request){
+        return await this.accessService.getAllUserAccess(req['user'].id);
     }
 }
