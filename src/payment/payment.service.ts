@@ -7,8 +7,7 @@ import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider } from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
-import { AccessService } from '../access/access.service';
-import { Currency } from '../database/entities/Currency.entity';
+
 
 @Injectable()
 export class PaymentService {
@@ -66,8 +65,7 @@ export class PaymentService {
     }
 
     private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User) {
-        const queryRunner = this.dataSource.createQueryRunner();
-        try {
+        const queryRunner = this.dataSource.createQueryRunner();try {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             const wallet = await queryRunner.query(
