@@ -9,7 +9,9 @@ import { User } from '../../database/entities/User.entity';
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(@InjectRepository(User) private userRepo: Repository<User>) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                (req) => req.cookies['accessToken'], // Extract token from cookie
+            ]),
             secretOrKey: process.env.JWT_SECRET,
         });
     }
