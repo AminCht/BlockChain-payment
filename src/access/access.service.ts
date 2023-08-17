@@ -12,7 +12,7 @@ export class AccessService {
         @InjectRepository(Currency)
         private userRepo: Repository<User>,
     ) {}
-    public async getAllTokens() {
+    public async getAllTokens(): Promise <Object> {
         try {
             const tokens = await this.tokenRepo.find({
                 where:{
@@ -28,13 +28,13 @@ export class AccessService {
             console.log(error);
         }
     }
-    public async getUserTokens(){
-        
-    }
 
-    public async getAllAccesses(){
+    public async getAllUserAccess(userId: number): Promise <User[]>{
         const user = await this.userRepo.find({
             relations: ['tokens'],
+            where:{
+                id:userId
+            }
         });
         return user;
     }
