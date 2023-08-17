@@ -55,10 +55,7 @@ export class AuthService {
 
 
     async hashPassword(password: string){
-        const hashRounds = 20
-        const saltRounds = 10
+        const saltRounds = 10;
         return await bcrypt.hash(password,saltRounds);
     }
-
-    
 }
