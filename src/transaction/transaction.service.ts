@@ -20,6 +20,7 @@ export class TransactionService {
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
+                delete transaction.user;
                 return transaction;
             }
             await this.sleep(4);
