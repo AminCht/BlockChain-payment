@@ -8,13 +8,13 @@ import { User } from '../database/entities/User.entity';
 export class AccessService {
     constructor(
         @InjectRepository(Currency)
-        private tokenRepo: Repository<Currency>,
-        @InjectRepository(Currency)
+        private currencyRepo: Repository<Currency>,
+        @InjectRepository(User)
         private userRepo: Repository<User>,
     ) {}
     public async getAllTokens(): Promise <Object> {
         try {
-            const tokens = await this.tokenRepo.find({
+            const tokens = await this.currencyRepo.find({
                 where:{
                     status: true
                 }
@@ -29,13 +29,14 @@ export class AccessService {
         }
     }
 
-    public async getAllUserAccess(userId: number): Promise <User[]>{
-        const user = await this.userRepo.find({
+    public async getAllUserAccess(userId: number): Promise <Currency[]>{
+        console.log(userId)
+        const user = await this.userRepo.findOne({
             relations: ['tokens'],
             where:{
                 id:userId
             }
         });
-        return user;
+        return user.tokens;
     }
 }
