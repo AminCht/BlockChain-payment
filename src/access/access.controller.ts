@@ -11,4 +11,9 @@ export class AccessController {
     async getAllTokens() {
         return await this.accessService.getAllTokens();
     }
+
+    @Get('')
+    async getAllAccesses(){
+        return await this.accessService.getAllAccesses();
+    }
 }
