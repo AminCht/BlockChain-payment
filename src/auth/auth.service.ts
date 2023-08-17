@@ -5,8 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Response } from 'express';
-
 @Injectable()
 export class AuthService {
     constructor(
