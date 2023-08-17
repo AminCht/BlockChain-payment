@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
@@ -23,7 +23,6 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
-        private accessService: AccessService
     ) {
         this.provider = new InfuraProvider(
             process.env.NETWORK,
@@ -40,7 +39,8 @@ export class PaymentService {
         });
         const userCanAccess = await this.checkUserCurrencies(user,createPaymentDto);
         if(!userCanAccess){
-            return await this.accessService.getAllUserAccess(user.id);
+            throw new ForbiddenException(`You dont have access to create payment with ${createPaymentDto.network} network and 
+            ${createPaymentDto.currency} currency`);
         }
         if (
             createPaymentDto.currency == 'eth' &&
@@ -57,7 +57,6 @@ export class PaymentService {
     }
 
     private async checkUserCurrencies(user: User, dto: CreatePaymentRequestDto){
-        console.log(user.tokens);
         for(const token of user.tokens){
             if(token.network == dto.network && token.symbol == dto.currency){
                 return true;
