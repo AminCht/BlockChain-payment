@@ -7,6 +7,8 @@ import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider } from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
+import { AccessService } from '../access/access.service';
+import { Currency } from '../database/entities/Currency.entity';
 
 @Injectable()
 export class PaymentService {
@@ -21,6 +23,7 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
+        private accessService: AccessService
     ) {
         this.provider = new InfuraProvider(
             process.env.NETWORK,
@@ -28,25 +31,40 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto> {
+    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto) {
         const user = await this.userRepo.findOne({
+            relations: ['tokens'],
             where: {
                 id: id,
             },
         });
+        const userCanAccess = await this.checkUserCurrencies(user,createPaymentDto);
+        if(!userCanAccess){
+            return await this.accessService.getAllUserAccess(user.id);
+        }
         if (
             createPaymentDto.currency == 'eth' &&
-            createPaymentDto.network == 'ethereum'
-        ) {
+            createPaymentDto.network == 'ethereum' && userCanAccess == true
+            ) {  
             return await this.createEthPayment(createPaymentDto, 'main', user);
+            
         } else if (
             createPaymentDto.currency != 'eth' &&
-            createPaymentDto.network == 'ethereum'
+            createPaymentDto.network == 'ethereum' && userCanAccess == true
         ) {
             return await this.createEthPayment(createPaymentDto, 'token', user);
         }
     }
 
+    private async checkUserCurrencies(user: User, dto: CreatePaymentRequestDto){
+        console.log(user.tokens);
+        for(const token of user.tokens){
+            if(token.network == dto.network && token.symbol == dto.currency){
+                return true;
+            }
+        }
+        return false;
+    }
 
     private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User) {
         const queryRunner = this.dataSource.createQueryRunner();
