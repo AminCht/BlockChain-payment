@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Token } from '../database/entities/Token.entity';
+import { Currency } from '../database/entities/Currency.entity';
 import { User } from '../database/entities/User.entity';
 
 @Injectable()
 export class AccessService {
     constructor(
-        @InjectRepository(Token)
-        private tokenRepo: Repository<Token>,
-        @InjectRepository(Token)
+        @InjectRepository(Currency)
+        private tokenRepo: Repository<Currency>,
+        @InjectRepository(Currency)
         private userRepo: Repository<User>,
     ) {}
     public async getAllTokens() {

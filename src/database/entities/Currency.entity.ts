@@ -1,23 +1,22 @@
 import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typeorm';
-import {User} from "./User.entity";
+import { User } from './User.entity';
 
-@Entity('Tokens')
-export class Token{
+@Entity('currencies')
+export class Currency {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ unique: true })
+    @Column({ nullable: false })
     network: string;
 
-    @Column({ unique: true })
-    currency: string;
-
-    @Column()
-    wallet_network: string;
+    @Column({ nullable: false })
+    name: string;
+    @Column({ nullable: false })
+    symbol: string;
 
     @Column({ default: true })
     status: boolean;
     @ManyToMany(() => User, (user) => user.tokens)
-    @JoinTable({ name: 'tokens_users' })
+    @JoinTable({ name: 'currency_user' })
     users: User[];
 }

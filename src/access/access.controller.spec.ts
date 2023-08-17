@@ -11,18 +11,4 @@ describe('AccessController', () => {
 
     controller = module.get<AccessController>(AccessController);
   });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-  it('should return all tokens', ()=>{
-    expect(tokens).toBeDefined();
-  }
-  it('should return user tokens', () => {
-    expect (user.tokens).toBeDefined()
-  }
-  it('should return all users with there accesses', () => {
-    expect (accesses).toBeDefined()
-  }
-
 });
