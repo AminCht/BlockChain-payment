@@ -46,7 +46,7 @@ export class AuthService {
         const token = await this.jwt.signAsync(payload);
         return { access_token: token };
     }
-    private async hashPassword(password: string):Promise<string>{
+    public async hashPassword(password: string):Promise<string>{
         const saltRounds = 10;
         return await bcrypt.hash(password, saltRounds);
     }
