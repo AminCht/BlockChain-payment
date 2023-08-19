@@ -25,6 +25,7 @@ export class AuthService {
             if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
             }
+            throw error;
         }
     }
 
@@ -34,10 +35,14 @@ export class AuthService {
                 username: dto.username,
             },
         });
-        if (!user) { throw new NotFoundException();}
+        if (!user) {
+            throw new NotFoundException();
+        }
         if (user) {
             const isMatch = await bcrypt.compare(dto.password, user.password);
-            if(isMatch){return await this.signToken(user.id, user.username);}
+            if(isMatch){
+                return await this.signToken(user.id, user.username);
+            }
         }
         throw new ForbiddenException('username or password is incorrect');
     }

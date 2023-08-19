@@ -31,7 +31,7 @@ export class CheckBallanceCommand extends CommandRunner {
             try {
                 await this.updateTransactionStatus(transaction);
             } catch (error) {
-                console.log(error);
+                throw error;
             }
         }
     }
