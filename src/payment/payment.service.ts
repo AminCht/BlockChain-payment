@@ -29,7 +29,7 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto) {
+    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto):Promise<CreatePaymentResponseDto> {
         const user = await this.userRepo.findOne({
             relations: ['tokens'],
             where: {
@@ -55,7 +55,7 @@ export class PaymentService {
         }
     }
 
-    private async checkUserCurrencies(user: User, dto: CreatePaymentRequestDto){
+    private async checkUserCurrencies(user: User, dto: CreatePaymentRequestDto): Promise<boolean>{
         for(const token of user.tokens){
             if(token.network == dto.network && token.symbol == dto.currency){
                 return true;
@@ -64,7 +64,7 @@ export class PaymentService {
         return false;
     }
 
-    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User) {
+    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User){
         const queryRunner = this.dataSource.createQueryRunner();try {
             await queryRunner.connect();
             await queryRunner.startTransaction();

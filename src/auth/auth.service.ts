@@ -12,7 +12,7 @@ export class AuthService {
         private jwt: JwtService,
     ) {}
 
-    public async signUp(dto: AuthDto) {
+    public async signUp(dto: AuthDto): Promise<{ message: string }> {
         try {
             const hashPassword = await this.hashPassword(dto.password);
             const user = this.userRepo.create({
@@ -28,32 +28,26 @@ export class AuthService {
         }
     }
 
-    public async login(dto: AuthDto) {
+    public async login(dto: AuthDto): Promise<{ access_token: string }> {
         const user = await this.userRepo.findOne({
             where: {
                 username: dto.username,
             },
         });
-        if(!user){
-            throw new NotFoundException();
-        }
+        if (!user) { throw new NotFoundException();}
         if (user) {
             const isMatch = await bcrypt.compare(dto.password, user.password);
-            if(isMatch){
-                return this.signToken(user.id, user.username);
-            }
+            if(isMatch){return await this.signToken(user.id, user.username);}
         }
         throw new ForbiddenException('username or password is incorrect');
     }
-    private async signToken(id: number, username: string) {
+    private async signToken(id: number, username: string): Promise<{ access_token:string }> {
         const payload = { username: username, id: id };
         const token = await this.jwt.signAsync(payload);
         return { access_token: token };
     }
-
-
-    async hashPassword(password: string){
+    private async hashPassword(password: string):Promise<string>{
         const saltRounds = 10;
-        return await bcrypt.hash(password,saltRounds);
+        return await bcrypt.hash(password, saltRounds);
     }
 }

@@ -8,7 +8,7 @@ import {Transaction} from "../database/entities/Transaction.entity";
 import * as bcrypt from "bcrypt";
 
 @Command({ name: 'test-db-seeder' })
-export class TestDbSeeder extends CommandRunner {
+export class TestSeederCommand extends CommandRunner {
     constructor(
         @InjectRepository(WalletEntity)
         private readonly walletRepo: Repository<WalletEntity>,
