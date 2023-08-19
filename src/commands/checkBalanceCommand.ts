@@ -41,17 +41,17 @@ export class CheckBallanceCommand extends CommandRunner {
         let currentBalance;
         let decimals;
         if (
-            transaction.currency == 'eth' &&
-            transaction.network == 'ethereum'
+            transaction.currency.symbol == 'eth' &&
+            transaction.currency.network == 'ethereum'
         ) {
             currentBalance = await this.getBalance(transaction.wallet.address);
         } else if (
-            transaction.currency != 'eth' &&
-            transaction.network == 'ethereum'
+            transaction.currency.symbol != 'eth' &&
+            transaction.currency.network == 'ethereum'
         ) {
             currentBalance = await this.getTokenBalance(
                 transaction.wallet.address,
-                transaction.currency,
+                transaction.currency.symbol,
             );
             decimals = await this.tokenContract.decimals();
         } else { return; }

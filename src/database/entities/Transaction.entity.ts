@@ -45,7 +45,7 @@ export class Transaction{
     user: User;
 
     @ManyToOne(() => Currency, (currency) => currency.transactions)
-    currency: Currency
+    currency: Currency;
 
     @BeforeInsert()
     setTimes() {

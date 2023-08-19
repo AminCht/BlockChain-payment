@@ -6,7 +6,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 
 @Command({ name: 'create-admin' })
-export class CreateWalletCommand extends CommandRunner {
+export class CreateAdminCommand extends CommandRunner {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,

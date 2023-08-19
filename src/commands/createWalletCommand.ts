@@ -16,19 +16,16 @@ export class CreateWalletCommand extends CommandRunner {
         passedParams: string[],
         options?: Record<string, any>,
     ): Promise<void> {
-        
         let walletCount = +passedParams[1];
-        const type = passedParams[0]
-        console.log(passedParams)
-        if(passedParams.length == 1){
-            walletCount= 1;
+        const type = passedParams[0];
+        if (passedParams.length == 1) {
+            walletCount = 1;
         }
-        await this.createWallet(type,walletCount);
-        
+        await this.createWallet(type, walletCount);
     }
-    async createWallet(type:string, walletCount:number){
+    async createWallet(type: string, walletCount: number) {
         let i = 0;
-        while(i<walletCount){
+        while (i < walletCount) {
             const wallet = Wallet.createRandom();
             const createdWallet = this.walletRepo.create({
                 private_key: wallet.privateKey,

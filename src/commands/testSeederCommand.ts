@@ -48,14 +48,13 @@ export class TestSeederCommand extends CommandRunner {
         return await this.userRepo.save(user);
     }
     async createTransaction(wallet: WalletEntity, user: User) {
-        const transaction = this.transactionRepo.create({
+        /*const transaction = this.transactionRepo.create({
             wallet: wallet,
             user: user,
             amount: '12',
             currency: 'eth',
-            network: 'ethereum',
             wallet_balance_before: '1',
         });
-        await this.transactionRepo.save(transaction);
+        await this.transactionRepo.save(transaction);*/
     }
 }
