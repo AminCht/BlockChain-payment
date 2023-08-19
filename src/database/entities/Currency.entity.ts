@@ -1,5 +1,6 @@
-import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, Unique} from 'typeorm';
+import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique} from 'typeorm';
 import { User } from './User.entity';
+import { Transaction } from './Transaction.entity';
 
 
 @Unique(['network', 'symbol'])
@@ -18,7 +19,11 @@ export class Currency {
 
     @Column({ default: true })
     status: boolean;
+    
     @ManyToMany(() => User, (user) => user.tokens)
     @JoinTable({ name: 'currency_user' })
     users: User[];
+
+    @OneToMany(() => Transaction, (transaction) => transaction.currency)
+    transactions: Transaction[]
 }

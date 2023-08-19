@@ -37,7 +37,9 @@ export class PaymentService {
         });
 
         const queryRunner = this.dataSource.createQueryRunner();
-        const query = await queryRunner.query('SELECT c.network, c.symbol FROM "Users" "u" LEFT JOIN "currency_user" "uc" ON "uc"."usersId" = "u"."id" Left JOIN "currencies" "c" ON "uc"."currenciesId" = "c"."id" WHERE "u"."id" = $1',[id]);
+        const query = await queryRunner.query('SELECT c.network, c.symbol FROM "Users" "u" LEFT JOIN "currency_user" "uc" ON "uc"."usersId" = "u"."id"' +
+         'Left JOIN "currencies" "c" ON "uc"."currenciesId" = "c"."id" WHERE "u"."id" = $1 and "c"."network"=$2 and "c"."symbol"=$3',[id,createPaymentDto.network,createPaymentDto.currency]);
+        console.log(query);
         if(query.length == 0){
             throw new ForbiddenException(`You dont have access to create payment with ${createPaymentDto.network} network and 
             ${createPaymentDto.currency} currency`);
@@ -82,10 +84,10 @@ export class PaymentService {
                     { lock: true },
                 );
                 await queryRunner.commitTransaction();
-                return {
+                /*return {
                     walletAddress: wallet[0].address,
                     transactionId: transaction.id,
-                };
+                };*/
             }
             throw new NotFoundException('There is no wallet available!');
         } catch (error) {
@@ -119,8 +121,7 @@ export class PaymentService {
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
-            amount: createPaymentDto.amount,
-            currency: createPaymentDto.currency,
+            currency:
             network: createPaymentDto.network,
             wallet_balance_before: balance,
         });
