@@ -6,6 +6,7 @@ import {Wallet} from "ethers";
 import {User} from "../database/entities/User.entity";
 import {Transaction} from "../database/entities/Transaction.entity";
 import * as bcrypt from "bcrypt";
+import {Currency} from "../database/entities/Currency.entity";
 
 @Command({ name: 'test-db-seeder' })
 export class TestSeederCommand extends CommandRunner {
@@ -16,6 +17,8 @@ export class TestSeederCommand extends CommandRunner {
         private readonly transactionRepo: Repository<Transaction>,
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
+        @InjectRepository(Currency)
+        private readonly currencyRepo: Repository<Currency>,
     ) {
         super();
     }
@@ -23,13 +26,27 @@ export class TestSeederCommand extends CommandRunner {
         passedParams: string[],
         options?: Record<string, any>,
     ): Promise<void> {
+        const currencyDto = {
+            network: 'ethereum',
+            symbol: 'eth',
+            name: 'ethereum',
+        };
+        const currencyDto1 = {
+            network: 'ethereum',
+            symbol: 'USDT',
+            name: 'ether',
+        };
         await this.createWallet('main');
         await this.createWallet('token');
         const user = await this.createUser();
-        const wallet = await this.createWallet('main');
-        await this.createTransaction(wallet, user);
+        const currency = await this.createCurrency(currencyDto);
+        user.tokens.push(currency);
+        currency.users.push(user);
+        await this.userRepo.save(user);
+        await this.createTransaction(user, currency);
+        await this.createCurrency(currencyDto1);
     }
-    async createWallet(type: 'token' | 'main') {
+    private async createWallet(type: 'token' | 'main') {
         const wallet = Wallet.createRandom();
         const createdWallet = this.walletRepo.create({
             private_key: wallet.privateKey,
@@ -39,7 +56,7 @@ export class TestSeederCommand extends CommandRunner {
         });
         return await this.walletRepo.save(createdWallet);
     }
-    async createUser() {
+    private async createUser() {
         const hashPassword = await bcrypt.hash('12345', 10);
         const user = this.userRepo.create({
             username: 'foad12',
@@ -47,14 +64,19 @@ export class TestSeederCommand extends CommandRunner {
         });
         return await this.userRepo.save(user);
     }
-    async createTransaction(wallet: WalletEntity, user: User) {
-        /*const transaction = this.transactionRepo.create({
+    private async createCurrency(dto: { network:string, symbol: string, name: string }): Promise<Currency> {
+        const currency = this.currencyRepo.create(dto);
+        return await this.currencyRepo.save(currency);
+    }
+    private async createTransaction(user: User, currency: Currency) {
+        const wallet = await this.createWallet('main');
+        const transaction = this.transactionRepo.create({
             wallet: wallet,
             user: user,
             amount: '12',
-            currency: 'eth',
+            currency: currency,
             wallet_balance_before: '1',
         });
-        await this.transactionRepo.save(transaction);*/
+        await this.transactionRepo.save(transaction);
     }
 }
