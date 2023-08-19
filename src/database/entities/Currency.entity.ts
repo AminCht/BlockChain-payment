@@ -1,6 +1,8 @@
-import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, Unique} from 'typeorm';
 import { User } from './User.entity';
 
+
+@Unique(['network', 'symbol'])
 @Entity('currencies')
 export class Currency {
     @PrimaryGeneratedColumn()
