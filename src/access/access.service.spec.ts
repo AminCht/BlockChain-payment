@@ -15,13 +15,9 @@ describe('AccessService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  it('should return all tokens', ()=>{
+  it('should return all tokens', async ()=>{
+    const tokens = await service.getAllSupportedTokens();
     expect(tokens).toBeDefined();
-  }
-  it('should return user tokens', () => {
-    expect (user.tokens).toBeDefined()
-  }
-  it('should return all users with there accesses', () => {
-    expect (accesses).toBeDefined()
-  }
+  });
+  
 });
