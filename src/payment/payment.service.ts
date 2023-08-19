@@ -2,12 +2,11 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, QueryRunner } from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider } from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
-
 
 @Injectable()
 export class PaymentService {
@@ -29,43 +28,37 @@ export class PaymentService {
         );
     }
 
-    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto):Promise<CreatePaymentResponseDto> {
+    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto):Promise<CreatePaymentResponseDto | string> {
         const user = await this.userRepo.findOne({
             relations: ['tokens'],
             where: {
                 id: id,
             },
         });
-        const userCanAccess = await this.checkUserCurrencies(user,createPaymentDto);
-        if(!userCanAccess){
+
+        const queryRunner = this.dataSource.createQueryRunner();
+        const query = await queryRunner.query('SELECT c.network, c.symbol FROM "Users" "u" LEFT JOIN "currency_user" "uc" ON "uc"."usersId" = "u"."id" Left JOIN "currencies" "c" ON "uc"."currenciesId" = "c"."id" WHERE "u"."id" = $1',[id]);
+        if(query.length == 0){
             throw new ForbiddenException(`You dont have access to create payment with ${createPaymentDto.network} network and 
             ${createPaymentDto.currency} currency`);
         }
         if (
             createPaymentDto.currency == 'eth' &&
-            createPaymentDto.network == 'ethereum' && userCanAccess == true
+            createPaymentDto.network == 'ethereum'
             ) {  
             return await this.createEthPayment(createPaymentDto, 'main', user);
             
         } else if (
             createPaymentDto.currency != 'eth' &&
-            createPaymentDto.network == 'ethereum' && userCanAccess == true
+            createPaymentDto.network == 'ethereum'
         ) {
             return await this.createEthPayment(createPaymentDto, 'token', user);
         }
     }
 
-    private async checkUserCurrencies(user: User, dto: CreatePaymentRequestDto): Promise<boolean>{
-        for(const token of user.tokens){
-            if(token.network == dto.network && token.symbol == dto.currency){
-                return true;
-            }
-        }
-        return false;
-    }
-
     private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User){
-        const queryRunner = this.dataSource.createQueryRunner();try {
+        const queryRunner = this.dataSource.createQueryRunner();
+        try {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             const wallet = await queryRunner.query(
@@ -102,7 +95,7 @@ export class PaymentService {
                 return 'no connection';
             } else {
                 await queryRunner.rollbackTransaction();
-                return error;
+                
             }
         } finally {
             await queryRunner.release();
