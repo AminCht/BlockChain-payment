@@ -19,7 +19,7 @@ export class AccessController {
 
     @ApiOperation({ summary: 'Get user Currencies(should login before)' })
     @ApiResponse({ status: 200, description: 'Get All User Currencies',type: [GetTokensResponseDto] })
-    @Get('')
+    @Get('myTokens')
     @UseGuards(AuthGuard(['jwt']))
     async getAllAccesses(@Req() req: Request){
         return await this.accessService.getAllUserAccess(req['user'].id);

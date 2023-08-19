@@ -1,18 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class GetTokensResponseDto{
+export class GetTokensResponseDto {
     @ApiProperty()
-    id: number
+    network: string;
 
     @ApiProperty()
-    network: string
+    symbol: string;
 
     @ApiProperty()
-    name: string
+    name: string;
 
     @ApiProperty()
-    symbol: string
-
-    @ApiProperty()
-    status: boolean
+    status: boolean;
 }

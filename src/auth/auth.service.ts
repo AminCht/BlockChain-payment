@@ -34,14 +34,10 @@ export class AuthService {
                 username: dto.username,
             },
         });
-        if(!user){
-            throw new NotFoundException();
-        }
+        if (!user) { throw new NotFoundException();}
         if (user) {
             const isMatch = await bcrypt.compare(dto.password, user.password);
-            if(isMatch){
-                return await this.signToken(user.id, user.username);
-            }
+            if(isMatch){return await this.signToken(user.id, user.username);}
         }
         throw new ForbiddenException('username or password is incorrect');
     }
@@ -50,10 +46,8 @@ export class AuthService {
         const token = await this.jwt.signAsync(payload);
         return { access_token: token };
     }
-
-
-    async hashPassword(password: string):Promise<string>{
+    private async hashPassword(password: string):Promise<string>{
         const saltRounds = 10;
-        return await bcrypt.hash(password,saltRounds);
+        return await bcrypt.hash(password, saltRounds);
     }
 }
