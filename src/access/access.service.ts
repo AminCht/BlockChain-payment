@@ -21,11 +21,6 @@ export class AccessService {
                     status: true
                 }
             });
-            if (tokens.length == 0) {
-                throw new NotFoundException(
-                    'Currently we dont support any tokens. try again later',
-                );
-            }
             return tokens;
         } catch (error) {
             console.log(error);
