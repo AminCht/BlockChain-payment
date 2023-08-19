@@ -9,6 +9,11 @@ import {
 import { Transaction } from './Transaction.entity';
 import { Currency } from './Currency.entity';
 
+export enum Role{
+    USER = 'User',
+    ADMIN = 'Admin'
+}
+
 @Entity({ name: 'Users' })
 export class User {
     @PrimaryGeneratedColumn()
@@ -19,6 +24,9 @@ export class User {
 
     @Column()
     password: string;
+
+    @Column({ default: Role.USER })
+    role: Role
 
     @Column()
     createdAt: Date;

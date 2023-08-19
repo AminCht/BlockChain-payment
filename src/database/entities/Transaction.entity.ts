@@ -1,6 +1,7 @@
 import { BeforeInsert, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
 import { User } from './User.entity';
+import { Currency } from './Currency.entity';
  export enum Status {
     PENDING = 'Pending',
     SUCCESSFUL = 'Successful',
@@ -16,12 +17,12 @@ export class Transaction{
     @Column({nullable: false })
     amount: string;
 
-    @Column({nullable: false})
+  /*  @Column({nullable: false})
     network: string;
 
     @Column({nullable:false})
     currency: string;
-
+*/
     @Column({ type: 'enum', enum: Status, default: 'Pending' })
     status: string;
 
@@ -42,6 +43,9 @@ export class Transaction{
 
     @ManyToOne(() => User, (user) => user.transactions)
     user: User;
+
+    @ManyToOne(() => Currency, (currency) => currency.transactions)
+    currency: Currency
 
     @BeforeInsert()
     setTimes() {
