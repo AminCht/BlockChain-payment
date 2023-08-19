@@ -14,6 +14,7 @@
     "start:stage": "dotenv -e stage.env nest start --watch",
     "start:debug": "nest start --debug --watch",
     "create-wallet": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main create-wallet",
+    "create-admin": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main create-admin",
     "create:test-wallet": "npm run build && dotenv -e test.env dotenv -v MODE=cmd node dist/main create-wallet",
     "check-balance": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main check-balance",
     "typeorm": "ts-node ./node_modules/typeorm/cli",

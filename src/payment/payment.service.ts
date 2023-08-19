@@ -118,13 +118,13 @@ export class PaymentService {
         return balance.toString();
     }
     private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet, user: User) {
-        return this.transactionRepo.create({
+        /*return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
             currency:
             network: createPaymentDto.network,
             wallet_balance_before: balance,
-        });
+        });*/
     }
 
     public async getTransactionById(id: number): Promise<Transaction> {

@@ -10,6 +10,6 @@ import {TestSeederCommand} from "./testSeederCommand";
 
 @Module({
   imports: [databaseModule, TypeOrmModule.forFeature([Wallet,Transaction,User])],
-  providers: [CreateWalletCommand,CheckBallanceCommand,TestSeederCommand],
+  providers: [CreateWalletCommand, , CheckBallanceCommand, TestSeederCommand,],
 })
 export class CommandModule {}
