@@ -138,5 +138,3 @@ export class PaymentService {
         return wallet;
     }
 }
-/*
-SELECT "User_id", "User__User_tokens"."id" , "User__User_tokens"."network" , "User__User_tokens"."name" , "User__User_tokens"."symbol", "User__User_tokens"."status" LEFT JOIN "currency_user" "User__User_tokens_User" ON "User__User_tokens_User"."usersId"="User"."id" LEFT JOIN "currencies" "User__User_tokens" ON "User__User_tokens"."id"="User__User_tokens_User"."currenciesId" WHERE ( ("User"."id" = $1) ) AND ( "User"."id" IN (58) )*/
