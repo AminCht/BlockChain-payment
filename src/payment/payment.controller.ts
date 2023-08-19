@@ -27,7 +27,7 @@ export class PaymentController {
   @ApiQuery({ name: 'Network', enum: Network })
   @ApiQuery({ name: 'Currency', enum: Currency })
   @UseGuards(AuthGuard(['jwt']))
-  async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
+  async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto | string> {
     return await this.paymentService.createPayment(req['user'].id, createPaymentdto);
   }
 
