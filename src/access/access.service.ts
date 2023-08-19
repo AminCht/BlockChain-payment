@@ -13,10 +13,13 @@ export class AccessService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
     ) {}
-    public async getAllTokens(): Promise<Currency[]> {
+    public async getAllSupportedTokens(): Promise<Currency[]> {
         try {
             const tokens = await this.currencyRepo.find({
                 select: ['network', 'symbol', 'name', 'status'],
+                where:{
+                    status: true
+                }
             });
             if (tokens.length == 0) {
                 throw new NotFoundException(
@@ -38,8 +41,8 @@ export class AccessService {
         const tokens = user.tokens.map((token) => {
             return {
                 network: token.network,
-                symbol: token.symbol,
                 name: token.name,
+                symbol: token.symbol,
                 status: token.status,
             };
         });
