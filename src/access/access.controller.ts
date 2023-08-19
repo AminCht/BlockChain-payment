@@ -14,7 +14,7 @@ export class AccessController {
     @ApiResponse({ status: 200, description: 'Get All Tokens as a List',type: [GetTokensResponseDto] })
     @Get('tokens')
     async getAllTokens() {
-        return await this.accessService.getAllTokens();
+        return await this.accessService.getAllSupportedTokens();
     }
 
     @ApiOperation({ summary: 'Get user Currencies(should login before)' })

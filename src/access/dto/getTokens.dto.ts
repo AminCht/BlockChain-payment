@@ -5,11 +5,11 @@ export class GetTokensResponseDto {
     network: string;
 
     @ApiProperty()
-    symbol: string;
-
-    @ApiProperty()
     name: string;
-
+    
+    @ApiProperty()
+    symbol: string;
+    
     @ApiProperty()
     status: boolean;
 }
