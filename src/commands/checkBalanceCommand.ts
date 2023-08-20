@@ -28,11 +28,7 @@ export class CheckBalanceCommand extends CommandRunner {
     public async run(): Promise<void> {
         const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
         for (const transaction of transactions) {
-            try {
-                await this.updateTransactionStatus(transaction);
-            } catch (error) {
-                throw error;
-            }
+            await this.updateTransactionStatus(transaction);
         }
     }
 
@@ -86,7 +82,7 @@ export class CheckBalanceCommand extends CommandRunner {
             await queryRunner.commitTransaction();
         } catch (error) {
             await queryRunner.rollbackTransaction();
-            return error;
+            throw error;
         } finally {
             await queryRunner.release();
         }
