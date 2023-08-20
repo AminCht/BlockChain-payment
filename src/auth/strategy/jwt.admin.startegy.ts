@@ -3,10 +3,10 @@ import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Repository } from 'typeorm';
-import { User } from '../../database/entities/User.entity';
+import { Role, User } from '../../database/entities/User.entity';
 
 @Injectable()
-export class JwtAdminStrategy extends PassportStrategy(Strategy) {
+export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
     constructor(@InjectRepository(User) private userRepo: Repository<User>) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
@@ -15,14 +15,14 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy) {
             secretOrKey: process.env.JWT_SECRET_ADMIN,
         });
     }
-    async validate(payload: { username: string; id: number }) {
+    async validate(payload: { role: string, username: string; id: number }) {
         const user = await this.userRepo.findOne({
             where: {
                 id: payload.id,
             },
         });
-        if (!user) {
-            throw new UnauthorizedException('invalid token');
+        if (payload.role == Role.USER) {
+            throw new UnauthorizedException('Unauthorized');
         }
         delete user.password;
         return user;

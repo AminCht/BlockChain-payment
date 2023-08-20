@@ -38,7 +38,7 @@ export class AdminController {
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
     @ApiResponse({ status: 403, description: 'Only Admins can see all users', type: GetAllUserByNotAdminResponseDto })
     @Get('AllUsers')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(JwtAdminAuthGuard)
     public async getAllUsers(@Req() req: Request): Promise <User[]>{
         return await this.adminService.getAllUsers(req['user']);
     }
