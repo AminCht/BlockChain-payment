@@ -16,3 +16,36 @@ export class AuthResponseDto{
     @ApiProperty()
     accessToken: string
 }
+export class CreateUserWithExistUsernameResponseDto{
+    @ApiProperty({default: 'This UserName has already taken'})
+    message: string
+    
+    @ApiProperty({default: 'Forbidden'})
+    error: string
+
+    @ApiProperty({default: 403})
+    statusCode: number
+}
+
+export class CreateUserResponseDto{
+    @ApiProperty({ default: 'You have been registered successfully' })
+    message: string
+}
+
+export class UnAuthorizeResponseDto{
+    @ApiProperty({default: "Credentials incorrect"})
+    message: string
+
+    @ApiProperty({default: 'Unauthorized'})
+    error: string
+    
+    @ApiProperty({default: 401})
+    statusCode: number
+
+}
+
+export class LoginUserResponseDto{
+    @ApiProperty({ default: 'You have successfully logged in' })
+    message: string
+}
+

@@ -1,4 +1,4 @@
-import {ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
+import {ForbiddenException, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../database/entities/User.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -44,7 +44,7 @@ export class AuthService {
                 return await this.signToken(user.id, user.username);
             }
         }
-        throw new ForbiddenException('username or password is incorrect');
+        throw new UnauthorizedException('Credentials incorrect');
     }
     private async signToken(id: number, username: string): Promise<{ access_token:string }> {
         const payload = { username: username, id: id };
