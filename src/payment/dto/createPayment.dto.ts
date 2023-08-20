@@ -6,7 +6,7 @@ export enum Network{
 }
 export enum Currency{
     ETH = 'eth',
-    USDT = 'usdt'
+    USDT = 'USDT',
 }
 export class CreatePaymentRequestDto {
     @ApiProperty({enum:Network})

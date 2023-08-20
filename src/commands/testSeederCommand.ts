@@ -22,10 +22,7 @@ export class TestSeederCommand extends CommandRunner {
     ) {
         super();
     }
-    async run(
-        passedParams: string[],
-        options?: Record<string, any>,
-    ): Promise<void> {
+    async run(): Promise<void> {
         await this.create();
     }
     private async create(){const currencyDto = {
@@ -41,9 +38,9 @@ export class TestSeederCommand extends CommandRunner {
         await this.createWallet('main');
         await this.createWallet('token');
         const currency = await this.createCurrency(currencyDto);
-        const user = await this.createUser(currency);
+        const currency1 = await this.createCurrency(currencyDto1);
+        const user = await this.createUser([currency,currency1]);
         await this.createTransaction(user, currency);
-        await this.createCurrency(currencyDto1);
     }
     private async createWallet(type: 'token' | 'main') {
         const wallet = Wallet.createRandom();
@@ -55,12 +52,12 @@ export class TestSeederCommand extends CommandRunner {
         });
         return await this.walletRepo.save(createdWallet);
     }
-    private async createUser(tokens: Currency) {
+    private async createUser(tokens: Currency[]) {
         const hashPassword = await bcrypt.hash('12345', 10);
         const user = this.userRepo.create({
             username: 'foad12',
             password: hashPassword,
-            tokens: [tokens],
+            tokens: tokens,
         });
         return await this.userRepo.save(user);
     }

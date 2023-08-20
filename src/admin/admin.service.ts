@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
@@ -26,7 +26,7 @@ export class AdminService {
             return {message: 'You have successfully Signed Up'}
         } catch(error){
             if (error.code === '23505') {
-                throw new BadRequestException('This UserName has already taken');
+                throw new BadRequestException('This UserName is already taken');
             }
             throw error;
         }

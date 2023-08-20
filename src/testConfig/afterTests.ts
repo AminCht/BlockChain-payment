@@ -12,7 +12,7 @@ const teardown = async () => {
         dropSchema: false,
         entities: [__dirname + '/entities/*.entity{.js,.ts}'],
     });
-   //await dataSource.initialize();
+    //await dataSource.initialize();
     //await dataSource.dropDatabase();
 };
 
