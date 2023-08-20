@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
@@ -35,7 +35,8 @@ export class AdminService {
     public async adminLogin(dto: AdminRequestDto):Promise<{ access_token: string }>{
         const admin = await this.userRepo.findOne({
             where:{
-                username: dto.username
+                username: dto.username,
+                role: Role.ADMIN
             }
         });
         if(!admin){
@@ -49,7 +50,6 @@ export class AdminService {
     }
 
     public async deleteAdmin(id: number, user:User): Promise <{message: string}>{
-        //if(user.role == Role.ADMIN){
             const admin = await this.userRepo.findOne({
                 where:{
                     id: id,
@@ -63,21 +63,16 @@ export class AdminService {
                 return {message: 'Admin deleted'};
             }
             throw new NotFoundException('Admin not found');
-        //}
-        throw new ForbiddenException('Only Admins can delete admins');
     }
 
 
     public async getAllUsers(user: User): Promise <User[]>{
-        //if(user.role == Role.ADMIN){
-            const users = this.userRepo.find({
-                where:{
-                    role: Role.USER
-                }
-            });
-            return users;
-        //}
-        throw new ForbiddenException('Only Admins can see All users');
+        const users = this.userRepo.find({
+            where:{
+                role: Role.USER
+            }
+        });
+        return users;
     }
 
     private async signTokenForAdmin(role: string, id: number, username: string): Promise<{ access_token: string }> {

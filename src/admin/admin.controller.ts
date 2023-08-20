@@ -36,7 +36,6 @@ export class AdminController {
     @ApiOperation({ summary: 'Get All users(Only Admin access to this)' })
     @ApiResponse({ status: 200, description: 'Get all users', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
-    @ApiResponse({ status: 403, description: 'Only Admins can see all users', type: GetAllUserByNotAdminResponseDto })
     @Get('AllUsers')
     @UseGuards(JwtAdminAuthGuard)
     public async getAllUsers(@Req() req: Request): Promise <User[]>{
@@ -46,7 +45,6 @@ export class AdminController {
     @ApiOperation({ summary: 'Delete Admin (Only Admin have access to this and only admins can be deleted)' })
     @ApiResponse({ status: 200, description: 'Delete Admin', type: DeleteAdminResponseDto })
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin', type: UnAuthorizeResponseDto })
-    @ApiResponse({ status: 403, description: 'Only Admins can delete admin', type: DeleteAdminByNotAdminResponseDto })
     @ApiResponse({ status: 404, description: 'Delete User', type: DeleteNotAdminResponseDto })
     @Delete(':id')
     @UseGuards(JwtAdminAuthGuard)
