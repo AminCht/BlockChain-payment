@@ -19,7 +19,8 @@ export class AdminService {
             const hashedPassword = await this.authService.hashPassword(dto.password);
             const admin = this.userRepo.create({
                 username: dto.username,
-                password: hashedPassword
+                password: hashedPassword,
+                role: Role.ADMIN
             });
             await this.userRepo.save(admin);
             return {message: 'You have successfully Signed Up'}
@@ -46,11 +47,22 @@ export class AdminService {
         }
     }
 
-    public async deleteAdmin(id: number, user:User): Promise <void>{
+    public async deleteAdmin(id: number, user:User): Promise <{message: string}>{
+        console.log(user);
         if(user.role == Role.ADMIN){
-            await this.userRepo.delete({
-                id: id
+            const admin = await this.userRepo.findOne({
+                where:{
+                    id: id,
+                    role: Role.ADMIN
+                }
             });
+            if(admin){
+                await this.userRepo.delete({
+                    id: id
+                });
+                return {message: 'Admin deleted'};
+            }
+            return {message: 'Admin not found'};
         }
         throw new ForbiddenException('Only Admins can delete admins');
     }

@@ -24,7 +24,8 @@ export class AdminController {
 
 
     @Delete(':id')
-    public async deleteAdmin( @Param('id') id: string, @Req() req: Request){
+    @UseGuards(AuthGuard(['jwt']))
+    public async deleteAdmin( @Param('id') id: string, @Req() req: Request): Promise <{ message: string }>{
         return await this.adminService.deleteAdmin(+id, req['user']);
     }
 
