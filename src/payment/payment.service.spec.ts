@@ -1,17 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
-import {getRepositoryToken, InjectRepository, TypeOrmModule} from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
 import DatabaseModule from '../database/database.module';
-import { Currency, Network } from './dto/createPayment.dto';
 import { User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
 describe('PaymentService', () => {
     let service: PaymentService;
-    let getWalletBalanceMock: jest.SpyInstance<Promise<string>>;
-    let userRepo: Repository<User>;
-    let walletRepo: Repository<Wallet>;
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [
@@ -21,8 +17,6 @@ describe('PaymentService', () => {
             providers: [PaymentService],
         }).compile();
         service = module.get<PaymentService>(PaymentService);
-        userRepo = module.get<Repository<User>>(getRepositoryToken(User));
-        walletRepo = module.get<Repository<Wallet>>(getRepositoryToken(Wallet));
         jest.spyOn(service, 'getBalance').mockReturnValue(Promise.resolve('1'));
         jest.spyOn(service, 'getTokenBalance').mockReturnValue(Promise.resolve('1'));
     });
@@ -34,8 +28,7 @@ describe('PaymentService', () => {
     describe('create transaction', () => {
         it('should create a eth payment and return wallet address and id', async () => {
             const paymentDto = {
-                network: Network.ETHEREUM,
-                currency: Currency.ETH,
+                currencyId: 1,
                 amount: '12',
             };
             const payment = await service.createPayment(1, paymentDto);
@@ -43,8 +36,7 @@ describe('PaymentService', () => {
         });
         it('should create a token payment on ethereum network and return wallet address and id', async () => {
             const paymentDto = {
-                network: Network.ETHEREUM,
-                currency: Currency.USDT,
+                currencyId: 1,
                 amount: '12',
             };
             const payment = await service.createPayment(1, paymentDto);

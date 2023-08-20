@@ -14,7 +14,11 @@ describe('AdminService', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [DatabaseModule, TypeOrmModule.forFeature([User]),
-                JwtModule.register({secret: process.env.JWT_SECRET,signOptions: { expiresIn: '20d' }})],
+                JwtModule.register({
+                    secret: process.env.JWT_SECRET,
+                    signOptions: { expiresIn: '20d' },
+                }),
+            ],
             providers: [AdminService, JwtAdminStrategy, AuthService],
         }).compile();
 
@@ -28,8 +32,8 @@ describe('AdminService', () => {
         });
         it('shouldnt create an admin with exist username', async () => {
             const adminDto = { username: 'aminadmin', password: '1234' };
-            try{
-                await service.createAdmin(adminDto)
+            try {
+                await service.createAdmin(adminDto);
                 fail('Expected an exception to be thrown');
             } catch (error) {
                 expect(error).toBeInstanceOf(BadRequestException);
@@ -55,12 +59,12 @@ describe('AdminService', () => {
         });
     });
     describe('deleteAdmin', () => {});
+    
     describe('getAllUsers',()=>{
       it('should return all users', async () => {
         const adminDto = { username: 'aminadmin', password: '1234' };
         const response = await service.adminLogin(adminDto);
         expect(response.access_token).toBeNull();
       });
-    })
-
+    });
 });

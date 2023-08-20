@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
-import { DataSource, Repository, QueryRunner } from 'typeorm';
+import { DataSource, Repository} from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider } from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
@@ -22,36 +22,27 @@ export class PaymentService {
         private userRepo: Repository<User>,
         private dataSource: DataSource,
     ) {
-        this.provider = new InfuraProvider(
-            process.env.NETWORK,
-            process.env.API_KEY,
-        );
+        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
 
-    public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto):Promise<CreatePaymentResponseDto | string> {
+    public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
         const user = await this.userRepo
             .createQueryBuilder('user')
             .leftJoinAndSelect('user.tokens', 'tokens')
             .where('user.id = :id', { id: id })
-            .andWhere('tokens.symbol = :symbol', { symbol: createPaymentDto.currency })
-            .andWhere('tokens.network = :network', { network: createPaymentDto.network })
+            .andWhere('tokens.id = :id', { id: createPaymentDto.currencyId })
             .select(['user', 'tokens'])
             .getOne();
         if (!user) {
-            throw new ForbiddenException('You dont have access to create payment with'+
-                    `${createPaymentDto.network} network and` +
-                    `${createPaymentDto.currency} currency`,
+            throw new ForbiddenException(
+                'You dont have access to create payment with ' + `${user.tokens[0].symbol}` +
+                    `on ${user.tokens[0].network} network`,
             );
         }
-        if (
-            createPaymentDto.currency == 'eth' &&
-            createPaymentDto.network == 'ethereum'
-            ) {  
+        const currency = user.tokens[0];
+        if (currency.symbol == 'eth' && currency.network == 'ethereum') {
             return await this.createEthPayment(createPaymentDto, 'main', user);
-        } else if (
-            createPaymentDto.currency != 'eth' &&
-            createPaymentDto.network == 'ethereum'
-        ) {
+        } else if (currency.symbol != 'eth' && currency.network == 'ethereum') {
             return await this.createEthPayment(createPaymentDto, 'token', user);
         }
     }
@@ -64,10 +55,10 @@ export class PaymentService {
             const wallet = await queryRunner.query(
                 'SELECT * FROM "Wallets" WHERE "lock" = false' +
                     ' AND "wallet_network" = $1 AND "type" = $2 FOR UPDATE SKIP LOCKED LIMIT 1',
-                [createPaymentDto.network, type],
+                [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                const balance = await this.getBalanceByType(type, wallet, createPaymentDto);
+                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
                 const transaction = this.createTransaction(createPaymentDto, balance, wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
@@ -83,7 +74,7 @@ export class PaymentService {
             }
             throw new NotFoundException('There is no wallet available!');
         } catch (error) {
-            if(error.code == "ECONNRESET" ){
+            if (error.code == 'ECONNRESET') {
                 console.log('connection timeout');
             } else if (error.code == 'ENOTFOUND') {
                 console.log('no connection');
@@ -109,12 +100,12 @@ export class PaymentService {
         const balance = await tokenContract.balanceOf(address);
         return balance.toString();
     }
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,createPaymentDto: CreatePaymentRequestDto) {
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string) {
         let balance: string;
         if (type == 'main') {
             balance = await this.getBalance(wallet[0].address);
         } else {
-            balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency)
+            balance = await this.getTokenBalance(wallet[0].address, currencySimbol);
         }
         return balance;
     }
