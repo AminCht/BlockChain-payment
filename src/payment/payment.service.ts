@@ -84,12 +84,12 @@ export class PaymentService {
             throw new NotFoundException('There is no wallet available!');
         } catch (error) {
             if(error.code == "ECONNRESET" ){
-                return 'connection timeout';
+                console.log('connection timeout');
             } else if (error.code == 'ENOTFOUND') {
-                return 'no connection';
+                console.log('no connection');
             } else {
                 await queryRunner.rollbackTransaction();
-                
+                throw error;
             }
         } finally {
             await queryRunner.release();
