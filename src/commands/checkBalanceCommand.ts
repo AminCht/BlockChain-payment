@@ -8,7 +8,7 @@ import { DataSource, Repository } from "typeorm";
 import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
-export class CheckBallanceCommand extends CommandRunner {
+export class CheckBalanceCommand extends CommandRunner {
 
     private readonly provider: InfuraProvider;
     private tokenContract: Contract;
@@ -76,11 +76,11 @@ export class CheckBallanceCommand extends CommandRunner {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             await queryRunner.manager.save(transaction);
-            if(status!='Pending'){
+            if (status != 'Pending') {
                 await queryRunner.manager.update(
-                Wallet,
-                { id: transaction.wallet.id },
-                { lock: false },
+                    Wallet,
+                    { id: transaction.wallet.id },
+                    { lock: false },
                 );
             }
             await queryRunner.commitTransaction();

@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { PaymentService } from '../src/payment/payment.service';
-import { CheckBallanceCommand } from '../src/commands/checkBalanceCommand';
+import { CheckBalanceCommand } from '../src/commands/checkBalanceCommand';
 import { Transaction } from '../src/database/entities/Transaction.entity';
 import DatabaseModule from '../src/database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,7 +14,7 @@ import { CreateWalletCommand } from '../src/commands/createWalletCommand';
 describe('AppController (e2e)', () => {
   let app: INestApplication;
   let paymentService: PaymentService;
-  let checkBalance: CheckBallanceCommand;
+  let checkBalance: CheckBalanceCommand;
   let createWallet: CreateWalletCommand;
   let transactionRepo: Repository<Transaction>;
   let transactionId: number;
@@ -22,12 +22,12 @@ describe('AppController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule,DatabaseModule,
         TypeOrmModule.forFeature([Wallet, Transaction]),],
-        providers:[PaymentService,CheckBallanceCommand,CreateWalletCommand]
+        providers:[PaymentService,CheckBalanceCommand,CreateWalletCommand]
     }).compile();
 
     app = moduleFixture.createNestApplication();
     paymentService = moduleFixture.get<PaymentService>(PaymentService);
-    checkBalance = moduleFixture.get<CheckBallanceCommand>(CheckBallanceCommand);
+    checkBalance = moduleFixture.get<CheckBalanceCommand>(CheckBalanceCommand);
     createWallet = moduleFixture.get<CreateWalletCommand>(CreateWalletCommand);
     await app.init();
   });

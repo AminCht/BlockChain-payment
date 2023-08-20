@@ -10,7 +10,7 @@ export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
 
     public async getTransactionById(user: User, transactionId: number): Promise<Transaction> {
-        while(true){
+        while (true) {
             const transaction = await this.transactionRepo.findOne({
                 where: {
                     id: transactionId,
