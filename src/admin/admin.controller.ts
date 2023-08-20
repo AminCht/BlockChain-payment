@@ -16,7 +16,7 @@ export class AdminController {
     @ApiResponse({ status: 400, description: 'This UserName has already taken', type: CreateExistUsernameResponseDto })
     @ApiResponse({ status: 201, description: 'Create Admin and get message', type: CreateAdminResponseDto })
     @Post('create')
-    public async createAdmin(@Body() createAdmindto: AdminRequestDto) {
+    public async createAdmin(@Body() createAdmindto: AdminRequestDto): Promise< { message: string }> {
         return await this.adminService.createAdmin(createAdmindto);
     }
 
@@ -40,7 +40,7 @@ export class AdminController {
     public async getAllUsers(@Req() req: Request): Promise <User[]>{
         return await this.adminService.getAllUsers(req['user']);
     }
-    
+
     @ApiOperation({ summary: 'Delete Admin (Only Admin have access to this and only admins can be deleted)' })
     @ApiResponse({ status: 200, description: 'Delete Admin', type: DeleteAdminResponseDto })
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin', type: UnAuthorizeResponseDto })
