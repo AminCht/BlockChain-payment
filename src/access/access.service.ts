@@ -15,7 +15,7 @@ export class AccessService {
     ) {}
     public async getAllSupportedTokens(): Promise<Currency[]> {
         const tokens = await this.currencyRepo.find({
-            select: ['network', 'symbol', 'name', 'status'],
+            select: ['id', 'network', 'symbol', 'name', 'status'],
             where: {status: true}
         });
         return tokens;
@@ -28,6 +28,7 @@ export class AccessService {
         });
         const tokens = user.tokens.map((token) => {
             return {
+                id:token.id,
                 network: token.network,
                 name: token.name,
                 symbol: token.symbol,
