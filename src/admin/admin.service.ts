@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../database/entities/User.entity';
+import { Role, User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AdminRequestDto } from './dto/createAdmin.dto';
@@ -14,7 +14,7 @@ export class AdminService {
         private authService: AuthService
     ){}
     
-    async createAdmin(dto: AdminRequestDto): Promise< { message: string }>{
+    public async createAdmin(dto: AdminRequestDto): Promise< { message: string }>{
         try{
             const hashedPassword = await this.authService.hashPassword(dto.password);
             const admin = this.userRepo.create({
@@ -31,7 +31,7 @@ export class AdminService {
         }
     }
 
-    async adminLogin(dto: AdminRequestDto):Promise<{ access_token: string }>{
+    public async adminLogin(dto: AdminRequestDto):Promise<{ access_token: string }>{
         const admin = await this.userRepo.findOne({
             where:{
                 username: dto.username
@@ -44,6 +44,16 @@ export class AdminService {
         if(isMatch){
             return await this.signTokenForAdmin(admin.role, admin.id, admin.username)
         }
+    }
+
+
+
+    public async getAllUsers(user: User): Promise <User[]>{
+        if(user.role == Role.ADMIN){
+            const users = this.userRepo.find();
+            return users;
+        }
+        throw new ForbiddenException('Only Admins can see All users');
     }
 
     private async signTokenForAdmin(role: string, id: number, username: string): Promise<{ access_token:string }> {

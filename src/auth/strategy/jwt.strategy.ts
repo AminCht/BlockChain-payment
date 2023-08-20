@@ -12,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (req) => req.cookies['accessToken'], // Extract token from cookie
             ]),
-            secretOrKey: process.env.JWT_SECRET,
+ //           secretOrKey: process.env.JWT_SECRET,
         });
     }
     async validate(payload: { username: string; id: number }) {
