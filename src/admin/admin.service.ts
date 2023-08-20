@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { CreateAdminRequestDto } from './dto/createAdmin.dto';
+import { AdminRequestDto } from './dto/createAdmin.dto';
 import { AuthService } from '../auth/auth.service';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AdminService {
     constructor(
@@ -14,7 +14,7 @@ export class AdminService {
         private authService: AuthService
     ){}
     
-    async createAdmin(dto: CreateAdminRequestDto){
+    async createAdmin(dto: AdminRequestDto): Promise< { message: string }>{
         try{
             const hashedPassword = await this.authService.hashPassword(dto.password);
             const admin = this.userRepo.create({
@@ -22,6 +22,7 @@ export class AdminService {
                 password: hashedPassword
             });
             await this.userRepo.save(admin);
+            return {message: 'You habe successfully Signed Up'}
         } catch(error){
             if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
@@ -30,4 +31,24 @@ export class AdminService {
         }
     }
 
+    async adminLogin(dto: AdminRequestDto):Promise<{ access_token: string }>{
+        const admin = await this.userRepo.findOne({
+            where:{
+                username: dto.username
+            }
+        });
+        if(!admin){
+            throw new ForbiddenException('Credentials incorrect');
+        }
+        const isMatch = await bcrypt.compare(dto.password, admin.password);
+        if(isMatch){
+            return await this.signTokenForAdmin(admin.role, admin.id, admin.username)
+        }
+    }
+
+    private async signTokenForAdmin(role: string, id: number, username: string): Promise<{ access_token:string }> {
+        const payload = {role: role, id: id, username: username};
+        const token = await this.jwt.signAsync(payload);
+        return { access_token: token };
+    }
 }
