@@ -26,11 +26,13 @@ export class TestSeederCommand extends CommandRunner {
         passedParams: string[],
         options?: Record<string, any>,
     ): Promise<void> {
-        const currencyDto = {
-            network: 'ethereum',
-            symbol: 'eth',
-            name: 'ethereum',
-        };
+        await this.create();
+    }
+    private async create(){const currencyDto = {
+        network: 'ethereum',
+        symbol: 'eth',
+        name: 'ethereum',
+    };
         const currencyDto1 = {
             network: 'ethereum',
             symbol: 'USDT',
@@ -38,11 +40,8 @@ export class TestSeederCommand extends CommandRunner {
         };
         await this.createWallet('main');
         await this.createWallet('token');
-        const user = await this.createUser();
         const currency = await this.createCurrency(currencyDto);
-        user.tokens.push(currency);
-        currency.users.push(user);
-        await this.userRepo.save(user);
+        const user = await this.createUser(currency);
         await this.createTransaction(user, currency);
         await this.createCurrency(currencyDto1);
     }
@@ -56,11 +55,12 @@ export class TestSeederCommand extends CommandRunner {
         });
         return await this.walletRepo.save(createdWallet);
     }
-    private async createUser() {
+    private async createUser(tokens: Currency) {
         const hashPassword = await bcrypt.hash('12345', 10);
         const user = this.userRepo.create({
             username: 'foad12',
             password: hashPassword,
+            tokens: [tokens],
         });
         return await this.userRepo.save(user);
     }

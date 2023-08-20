@@ -6,7 +6,7 @@ import { AccessService } from './access.service';
 import { User } from '../database/entities/User.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Currency,User])],
+    imports: [TypeOrmModule.forFeature([Currency, User])],
     controllers: [AccessController],
     providers: [AccessService],
 })

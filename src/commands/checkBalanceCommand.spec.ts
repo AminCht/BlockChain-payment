@@ -27,8 +27,11 @@ describe('checkBalanceCommand', () => {
         expect(checkBalance).toBeDefined();
     });
 
-    it('transaction should be Successful', async () => {
+    it('transaction wallet balance should be updated', async () => {
         jest.spyOn(checkBalance, 'getBalance').mockReturnValue(
+            Promise.resolve('10'),
+        );
+        jest.spyOn(checkBalance, 'getTokenBalance').mockReturnValue(
             Promise.resolve('10'),
         );
         await checkBalance.run();
