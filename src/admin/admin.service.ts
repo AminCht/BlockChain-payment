@@ -22,7 +22,7 @@ export class AdminService {
                 password: hashedPassword
             });
             await this.userRepo.save(admin);
-            return {message: 'You habe successfully Signed Up'}
+            return {message: 'You have successfully Signed Up'}
         } catch(error){
             if (error.code === '23505') {
                 throw new ForbiddenException('This UserName has already taken');
@@ -46,6 +46,14 @@ export class AdminService {
         }
     }
 
+    public async deleteAdmin(id: number, user:User): Promise <void>{
+        if(user.role == Role.ADMIN){
+            await this.userRepo.delete({
+                id: id
+            });
+        }
+        throw new ForbiddenException('Only Admins can delete admins');
+    }
 
 
     public async getAllUsers(user: User): Promise <User[]>{
@@ -56,7 +64,7 @@ export class AdminService {
         throw new ForbiddenException('Only Admins can see All users');
     }
 
-    private async signTokenForAdmin(role: string, id: number, username: string): Promise<{ access_token:string }> {
+    private async signTokenForAdmin(role: string, id: number, username: string): Promise<{ access_token: string }> {
         const payload = {role: role, id: id, username: username};
         const token = await this.jwt.signAsync(payload);
         return { access_token: token };
