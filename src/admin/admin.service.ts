@@ -49,8 +49,7 @@ export class AdminService {
     }
 
     public async deleteAdmin(id: number, user:User): Promise <{message: string}>{
-        console.log(user);
-        if(user.role == Role.ADMIN){
+        //if(user.role == Role.ADMIN){
             const admin = await this.userRepo.findOne({
                 where:{
                     id: id,
@@ -64,20 +63,20 @@ export class AdminService {
                 return {message: 'Admin deleted'};
             }
             throw new NotFoundException('Admin not found');
-        }
+        //}
         throw new ForbiddenException('Only Admins can delete admins');
     }
 
 
     public async getAllUsers(user: User): Promise <User[]>{
-        if(user.role == Role.ADMIN){
+        //if(user.role == Role.ADMIN){
             const users = this.userRepo.find({
                 where:{
                     role: Role.USER
                 }
             });
             return users;
-        }
+        //}
         throw new ForbiddenException('Only Admins can see All users');
     }
 
