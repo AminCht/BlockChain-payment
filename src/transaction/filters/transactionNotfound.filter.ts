@@ -11,8 +11,8 @@ export class TransactionNotFoundExceptionFilter implements ExceptionFilter {
     const message = exception.message;
 
     response.status(status).json({
+      message: message,
       statusCode: status,
-      error: message,
     });
   }
 }

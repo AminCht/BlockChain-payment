@@ -36,3 +36,19 @@ export class CreatePaymentResponseDto {
     @IsNotEmpty()
     transactionId: number;
 }
+export class UnAuthorizeResponseDto{
+    @ApiProperty({default: "Transaction with id 'x' not found"})
+    message: string
+
+    @ApiProperty({default: 404})
+    statusCode: number
+}
+
+export class BadRequestResponseDto{
+    @ApiProperty()
+    message: Array<string>
+    @ApiProperty({default: 'Bad Request'})
+    error: string
+    @ApiProperty({default: 400})
+    statusCode: number
+}

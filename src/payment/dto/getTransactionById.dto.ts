@@ -39,3 +39,10 @@ export class GetTransactionByIdResponseDto{
     @IsNotEmpty()
     expireTime: Date;
 }
+export class TransactionNotFoundResponseDto{
+    @ApiProperty({default: "Transaction with id 'x' not found"})
+    message: string
+
+    @ApiProperty({default: 404})
+    statusCode: number
+}
