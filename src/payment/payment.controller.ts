@@ -40,7 +40,7 @@ export class PaymentController {
   @ApiParam({ name: 'id', description: 'Id should be numeric' })
   @UseGuards(AuthGuard(['jwt']))
   async getTransactionById(@Req() req:Request, @Param('id') id:string){
-    return await this.transactionService.getTransactionById(req['user'], +id);
+    return await this.transactionService.getTransactionById(req['user'], Number(id));
   }
 
 }

@@ -1,8 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminRequestDto, GetAllUsersResponseDto, CreateAdminResponseDto, LogingAdminResponseDto, UnAuthorizeResponseDto
-    , DeleteAdminResponseDto, DeleteNotAdminResponseDto, DeleteAdminByNotAdminResponseDto, GetAllUserByNotAdminResponseDto, CreateExistUsernameResponseDto, LogingWrongInfoAdminResponseDto } from './dto/createAdmin.dto';
-import { AuthGuard } from '@nestjs/passport';
+    , DeleteAdminResponseDto, DeleteNotAdminResponseDto,CreateExistUsernameResponseDto, LogingWrongInfoAdminResponseDto } from './dto/createAdmin.dto';
 import { Response } from 'express';
 import { User } from '../database/entities/User.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -48,8 +47,8 @@ export class AdminController {
     @ApiResponse({ status: 404, description: 'Delete User', type: DeleteNotAdminResponseDto })
     @Delete(':id')
     @UseGuards(JwtAdminAuthGuard)
-    public async deleteAdmin( @Param('id') id: string, @Req() req: Request): Promise <{ message: string }>{
-        return await this.adminService.deleteAdmin(+id, req['user']);
+    public async deleteAdmin( @Param('id') id: string): Promise <{ message: string }>{
+        return await this.adminService.deleteAdmin(Number(id));
     }
 
     private setCookie(res: Response, token: string){

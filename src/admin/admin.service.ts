@@ -49,20 +49,20 @@ export class AdminService {
         throw new ForbiddenException('Credentials incorrect');
     }
 
-    public async deleteAdmin(id: number, user:User): Promise <{message: string}>{
-            const admin = await this.userRepo.findOne({
-                where:{
-                    id: id,
-                    role: Role.ADMIN
-                }
+    public async deleteAdmin(id: number): Promise<{ message: string }> {
+        const admin = await this.userRepo.findOne({
+            where: {
+                id: id,
+                role: Role.ADMIN,
+            },
+        });
+        if (admin) {
+            await this.userRepo.delete({
+                id: id,
             });
-            if(admin){
-                await this.userRepo.delete({
-                    id: id
-                });
-                return {message: 'Admin deleted'};
-            }
-            throw new NotFoundException('Admin not found');
+            return { message: 'Admin deleted' };
+        }
+        throw new NotFoundException('Admin not found');
     }
 
 
