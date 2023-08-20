@@ -7,10 +7,11 @@ import { TransactionModule } from './transaction/transaction.module';
 import { AuthModule } from './auth/auth.module';
 import { AccessService } from './access/access.service';
 import { AccessModule } from './access/access.module';
+import { AdminModule } from './admin/admin.module';
 import DatabaseModule from './database/database.module';
 
 @Module({
-    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule],
+    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule, AdminModule],
     controllers: [AppController],
     providers: [AppService],
 })
