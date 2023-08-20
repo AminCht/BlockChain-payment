@@ -6,6 +6,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { User } from '../database/entities/User.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAdminStrategy } from '../auth/strategy/jwt.admin.startegy';
+import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -36,7 +38,7 @@ export class AdminController {
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
     @ApiResponse({ status: 403, description: 'Only Admins can see all users', type: GetAllUserByNotAdminResponseDto })
     @Get('AllUsers')
-    @UseGuards(AuthGuard(['jwt']))
+    @UseGuards(AuthGuard('jwt'))
     public async getAllUsers(@Req() req: Request): Promise <User[]>{
         return await this.adminService.getAllUsers(req['user']);
     }
@@ -47,7 +49,7 @@ export class AdminController {
     @ApiResponse({ status: 403, description: 'Only Admins can delete admin', type: DeleteAdminByNotAdminResponseDto })
     @ApiResponse({ status: 404, description: 'Delete User', type: DeleteNotAdminResponseDto })
     @Delete(':id')
-    @UseGuards(AuthGuard(['jwt']))
+    @UseGuards(JwtAdminAuthGuard)
     public async deleteAdmin( @Param('id') id: string, @Req() req: Request): Promise <{ message: string }>{
         return await this.adminService.deleteAdmin(+id, req['user']);
     }
