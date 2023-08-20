@@ -1,30 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import {IsDecimal, IsIn, IsNotEmpty, IsNumberString} from "class-validator";
-import { ethereumTokenAddresses } from '../tokenAddresses/EthereumTokenAddresses';
-export enum Network{
-    ETHEREUM = 'ethereum'
-}
-export enum Currency{
-    ETH = 'eth',
-    USDT = 'USDT',
-}
-export class CreatePaymentRequestDto {
-    @ApiProperty({enum:Network})
-    @IsNotEmpty()
-    @IsIn(['ethereum'])
-    network: Network;
+import { IsDecimal, IsNotEmpty, IsNumberString } from 'class-validator';
 
-    @ApiProperty({enum:Currency})
+export class CreatePaymentRequestDto {
+    @ApiProperty()
     @IsNotEmpty()
-    @IsIn(Array.from(ethereumTokenAddresses.keys()))
-    currency: Currency;
+    currencyId: number;
 
     @ApiProperty()
     @IsNotEmpty()
     @IsDecimal()
     @IsNumberString()
     amount: string;
-
 }
 
 export class CreatePaymentResponseDto {

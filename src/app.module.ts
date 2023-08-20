@@ -8,10 +8,11 @@ import { AuthModule } from './auth/auth.module';
 import { AccessService } from './access/access.service';
 import { AccessModule } from './access/access.module';
 import { AdminModule } from './admin/admin.module';
+import { CurrencyModule } from './currency/currency.module';
 import DatabaseModule from './database/database.module';
 
 @Module({
-    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule, AdminModule],
+    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule, AdminModule, CurrencyModule],
     controllers: [AppController],
     providers: [AppService],
 })

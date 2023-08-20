@@ -27,7 +27,7 @@ export class AccessService {
         });
         const tokens = user.tokens.map((token) => {
             return {
-                id:token.id,
+                id: token.id,
                 network: token.network,
                 name: token.name,
                 symbol: token.symbol,
