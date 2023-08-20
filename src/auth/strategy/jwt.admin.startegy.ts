@@ -21,9 +21,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
                 id: payload.id,
             },
         });
-        if (payload.role == Role.USER) {
-            throw new UnauthorizedException('Unauthorized');
-        }
+
         delete user.password;
         return user;
     }
