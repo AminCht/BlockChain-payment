@@ -14,16 +14,11 @@ export class AccessService {
         private userRepo: Repository<User>,
     ) {}
     public async getAllSupportedTokens(): Promise<Currency[]> {
-        try {
-            const tokens = await this.currencyRepo.find({
-                select: ['network', 'symbol', 'name', 'status'],
-                where: {status: true}
-            });
-            return tokens;
-        } catch (error) {
-            console.log(error);
-            return error;
-        }
+        const tokens = await this.currencyRepo.find({
+            select: ['network', 'symbol', 'name', 'status'],
+            where: {status: true}
+        });
+        return tokens;
     }
 
     public async getAllUserAccess(userId: number): Promise<GetTokensResponseDto[]> {
