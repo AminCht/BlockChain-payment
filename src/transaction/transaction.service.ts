@@ -11,12 +11,12 @@ export class TransactionService {
 
     public async getTransactionById(user: User, transactionId: number): Promise<Transaction> {
         while (true) {
-            const transaction = await this.transactionRepo.findOne({
-                where: {
-                    id: transactionId,
-                }, relations: ['user'],
-            });
-            if(!transaction || user.id != transaction.user.id){
+            const transaction = await this.transactionRepo
+            .createQueryBuilder('transaction')
+            .where('transaction.userId=:userId',{userId: user.id}).andWhere('transaction.id=:id', {id: transactionId})
+            .select(['transaction'])
+            .getOne();
+            if(!transaction){
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
