@@ -6,11 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../database/entities/User.entity';
 import { JwtStrategy } from '../auth/strategy/jwt.strategy';
 import { AuthService } from '../auth/auth.service';
+import { JwtAdminStrategy } from '../auth/strategy/jwt.admin.startegy';
 
 @Module({
-  imports:[JwtModule.register({secret: process.env.JWT_SECRET, signOptions: { expiresIn: '20d' }}),
+  imports:[JwtModule.register({secret: process.env.JWT_SECRET_ADMIN, signOptions: { expiresIn: '20d' }}),
   TypeOrmModule.forFeature([User])],
   controllers: [AdminController],
-  providers: [AdminService, JwtStrategy, AuthService]
+  providers: [AdminService, JwtStrategy,JwtAdminStrategy, AuthService]
 })
 export class AdminModule {}
