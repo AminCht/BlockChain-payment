@@ -23,7 +23,7 @@ export class CreateAdminCommand extends CommandRunner {
             const user = this.userRepo.create({
                 username: passedParams[0],
                 password: hashedPassword,
-                role: Role.ADMIN
+                role: Role.ADMIN,
             });
             await this.userRepo.save(user);
         } catch(error){

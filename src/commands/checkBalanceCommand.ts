@@ -26,7 +26,7 @@ export class CheckBalanceCommand extends CommandRunner {
         this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
     public async run(): Promise<void> {
-        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
+        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet","currency"] });
         for (const transaction of transactions) {
             await this.updateTransactionStatus(transaction);
         }

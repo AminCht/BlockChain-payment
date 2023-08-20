@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
@@ -26,7 +26,7 @@ export class AdminService {
             return {message: 'You have successfully Signed Up'}
         } catch(error){
             if (error.code === '23505') {
-                throw new BadRequestException('This UserName has already taken');
+                throw new BadRequestException('This UserName is already taken');
             }
             throw error;
         }
@@ -49,20 +49,20 @@ export class AdminService {
         throw new ForbiddenException('Credentials incorrect');
     }
 
-    public async deleteAdmin(id: number, user:User): Promise <{message: string}>{
-            const admin = await this.userRepo.findOne({
-                where:{
-                    id: id,
-                    role: Role.ADMIN
-                }
+    public async deleteAdmin(id: number): Promise<{ message: string }> {
+        const admin = await this.userRepo.findOne({
+            where: {
+                id: id,
+                role: Role.ADMIN,
+            },
+        });
+        if (admin) {
+            await this.userRepo.delete({
+                id: id,
             });
-            if(admin){
-                await this.userRepo.delete({
-                    id: id
-                });
-                return {message: 'Admin deleted'};
-            }
-            throw new NotFoundException('Admin not found');
+            return { message: 'Admin deleted' };
+        }
+        throw new NotFoundException('Admin not found');
     }
 
 
