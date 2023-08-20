@@ -30,6 +30,17 @@ export class AdminController {
         res.send({message: 'You have successfully logged in'});
     }
 
+    
+    @ApiOperation({ summary: 'Get All users(Only Admin access to this)' })
+    @ApiResponse({ status: 200, description: 'Get all users', type: [GetAllUsersResponseDto]})
+    @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
+    @ApiResponse({ status: 403, description: 'Only Admins can see all users', type: GetAllUserByNotAdminResponseDto })
+    @Get('AllUsers')
+    @UseGuards(AuthGuard(['jwt']))
+    public async getAllUsers(@Req() req: Request): Promise <User[]>{
+        return await this.adminService.getAllUsers(req['user']);
+    }
+    
     @ApiOperation({ summary: 'Delete Admin (Only Admin have access to this and only admins can be deleted)' })
     @ApiResponse({ status: 200, description: 'Delete Admin', type: DeleteAdminResponseDto })
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin', type: UnAuthorizeResponseDto })
@@ -39,16 +50,6 @@ export class AdminController {
     @UseGuards(AuthGuard(['jwt']))
     public async deleteAdmin( @Param('id') id: string, @Req() req: Request): Promise <{ message: string }>{
         return await this.adminService.deleteAdmin(+id, req['user']);
-    }
-
-    @ApiOperation({ summary: 'Get All users(Only Admin access to this)' })
-    @ApiResponse({ status: 200, description: 'Get all users', type: [GetAllUsersResponseDto]})
-    @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
-    @ApiResponse({ status: 403, description: 'Only Admins can see all users', type: GetAllUserByNotAdminResponseDto })
-    @Get('AllUsers')
-    @UseGuards(AuthGuard(['jwt']))
-    public async getAllUsers(@Req() req: Request): Promise <User[]>{
-        return await this.adminService.getAllUsers(req['user']);
     }
 
     private setCookie(res: Response, token: string){

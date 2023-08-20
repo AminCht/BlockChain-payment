@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetTokensResponseDto } from './dto/getTokens.dto';
 
-@ApiTags('access')
+@ApiTags('Access')
 @Controller('access')
 export class AccessController {
     constructor(private accessService: AccessService) {}
