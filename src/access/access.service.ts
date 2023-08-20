@@ -21,8 +21,7 @@ export class AccessService {
             });
             return tokens;
         } catch (error) {
-            console.log(error);
-            return error;
+            throw error
         }
     }
 
