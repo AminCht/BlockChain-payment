@@ -47,7 +47,8 @@ export class PaymentService {
         }
     }
 
-    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: 'main'|'token', user: User){
+    private async createEthPayment(
+        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User,): Promise<CreatePaymentResponseDto> {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -100,7 +101,7 @@ export class PaymentService {
         const balance = await tokenContract.balanceOf(address);
         return balance.toString();
     }
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string) {
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string):Promise<string> {
         let balance: string;
         if (type == 'main') {
             balance = await this.getBalance(wallet[0].address);
