@@ -29,27 +29,25 @@ export class PaymentService {
     }
 
     public async createPayment(id:number, createPaymentDto: CreatePaymentRequestDto):Promise<CreatePaymentResponseDto | string> {
-        const user = await this.userRepo.findOne({
-            relations: ['tokens'],
-            where: {
-                id: id,
-            },
-        });
-
-        const queryRunner = this.dataSource.createQueryRunner();
-        const query = await queryRunner.query('SELECT c.network, c.symbol FROM "Users" "u" LEFT JOIN "currency_user" "uc" ON "uc"."usersId" = "u"."id"' +
-         'Left JOIN "currencies" "c" ON "uc"."currenciesId" = "c"."id" WHERE "u"."id" = $1 and "c"."network"=$2 and "c"."symbol"=$3',[id,createPaymentDto.network,createPaymentDto.currency]);
-        console.log(query);
-        if(query.length == 0){
-            throw new ForbiddenException(`You dont have access to create payment with ${createPaymentDto.network} network and 
-            ${createPaymentDto.currency} currency`);
+        const user = await this.userRepo
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.tokens', 'tokens')
+            .where('user.id = :id', { id: id })
+            .andWhere('tokens.symbol = :symbol', { symbol: createPaymentDto.currency })
+            .andWhere('tokens.network = :network', { network: createPaymentDto.network })
+            .select(['user', 'tokens'])
+            .getOne();
+        if (!user) {
+            throw new ForbiddenException('You dont have access to create payment with'+
+                    `${createPaymentDto.network} network and` +
+                    `${createPaymentDto.currency} currency`,
+            );
         }
         if (
             createPaymentDto.currency == 'eth' &&
             createPaymentDto.network == 'ethereum'
             ) {  
             return await this.createEthPayment(createPaymentDto, 'main', user);
-            
         } else if (
             createPaymentDto.currency != 'eth' &&
             createPaymentDto.network == 'ethereum'
@@ -58,7 +56,7 @@ export class PaymentService {
         }
     }
 
-    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: string, user: User){
+    private async createEthPayment(createPaymentDto: CreatePaymentRequestDto, type: 'main'|'token', user: User){
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -69,14 +67,8 @@ export class PaymentService {
                 [createPaymentDto.network, type],
             );
             if (wallet.length == 1) {
-                let balance: string;
-                if (type == 'main') {
-                    balance = await this.getBalance(wallet[0].address);
-                }
-                else{
-                    balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency)
-                }
-                const transaction = this.createTransaction(createPaymentDto,balance,wallet,user);
+                const balance = await this.getBalanceByType(type, wallet, createPaymentDto);
+                const transaction = this.createTransaction(createPaymentDto, balance, wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -84,10 +76,10 @@ export class PaymentService {
                     { lock: true },
                 );
                 await queryRunner.commitTransaction();
-                /*return {
+                return {
                     walletAddress: wallet[0].address,
                     transactionId: transaction.id,
-                };*/
+                };
             }
             throw new NotFoundException('There is no wallet available!');
         } catch (error) {
@@ -117,14 +109,23 @@ export class PaymentService {
         const balance = await tokenContract.balanceOf(address);
         return balance.toString();
     }
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,createPaymentDto: CreatePaymentRequestDto) {
+        let balance: string;
+        if (type == 'main') {
+            balance = await this.getBalance(wallet[0].address);
+        } else {
+            balance = await this.getTokenBalance(wallet[0].address, createPaymentDto.currency)
+        }
+        return balance;
+    }
     private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet, user: User) {
-        /*return this.transactionRepo.create({
+        return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
-            currency:
-            network: createPaymentDto.network,
+            amount: createPaymentDto.amount,
+            currency: user.tokens[0],
             wallet_balance_before: balance,
-        });*/
+        });
     }
 
     public async getTransactionById(id: number): Promise<Transaction> {

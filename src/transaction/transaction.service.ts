@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Status, Transaction } from '../database/entities/Transaction.entity';
 import { Repository } from 'typeorm';
@@ -9,12 +9,12 @@ import { User } from '../database/entities/User.entity';
 export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
 
-    async getTransactionById(user: User, transactionId: number){        
-        while(true){
+    public async getTransactionById(user: User, transactionId: number): Promise<Transaction> {
+        while (true) {
             const transaction = await this.transactionRepo.findOne({
-                where:{
-                    id:transactionId
-                },relations:["user"]
+                where: {
+                    id: transactionId,
+                }, relations: ['user'],
             });
             if(!transaction || user.id != transaction.user.id){
                 throw new TransactionNotFoundException(transactionId);
@@ -26,12 +26,12 @@ export class TransactionService {
             await this.sleep(4);
         }
     }
-    async sleep(duration: number): Promise<void>{
+    private async sleep(duration: number): Promise<void> {
         return new Promise<void>((resolve) => {
             setTimeout(() => {
               console.log('Delayed logic executed');
               resolve();
             }, duration*1000);
-          });
+        });
     }
 }

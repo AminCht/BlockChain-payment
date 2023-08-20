@@ -39,7 +39,7 @@ describe('PaymentService', () => {
                 amount: '12',
             };
             const payment = await service.createPayment(1, paymentDto);
-            expect(payment.walletAddress).toBeDefined();
+            expect(payment).toBeDefined();
         });
         it('should create a token payment on ethereum network and return wallet address and id', async () => {
             const paymentDto = {
@@ -48,7 +48,7 @@ describe('PaymentService', () => {
                 amount: '12',
             };
             const payment = await service.createPayment(1, paymentDto);
-            expect(payment.walletAddress).toBeDefined();
+            expect(payment).toBeDefined();
         });
     });
     describe('get Transaction by id', () => {

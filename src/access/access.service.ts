@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Currency } from '../database/entities/Currency.entity';
 import { User } from '../database/entities/User.entity';
-import {GetTokensResponseDto} from "./dto/getTokens.dto";
+import { GetTokensResponseDto } from './dto/getTokens.dto';
 
 @Injectable()
 export class AccessService {
@@ -17,9 +17,7 @@ export class AccessService {
         try {
             const tokens = await this.currencyRepo.find({
                 select: ['network', 'symbol', 'name', 'status'],
-                where:{
-                    status: true
-                }
+                where: {status: true}
             });
             return tokens;
         } catch (error) {
