@@ -45,6 +45,10 @@ export class CurrencyService {
         }
     }
     public async DeleteCurrency(id: number) {
-        return await this.currencyRepo.delete({ id: id });
+        const deleteResult = await this.currencyRepo.delete({ id: id });
+        if(deleteResult.affected == 0){
+            throw new NotFoundException(`Currency with id ${id} not found`);
+        }
+        return {message: `Currency with id ${id} Deleted`}
     }
 }
