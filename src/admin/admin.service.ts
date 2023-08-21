@@ -66,7 +66,7 @@ export class AdminService {
     }
 
 
-    public async getAllUsers(user: User): Promise <User[]>{
+    public async getAllUsers(): Promise <User[]>{
         const users = this.userRepo.find({
             where:{
                 role: Role.USER
