@@ -24,10 +24,10 @@ export class CreateExistUsernameResponseDto{
     @ApiProperty({ default: 'This UserName has already taken' })
     message: string
 
-    @ApiProperty({default: 'Conflict'})
+    @ApiProperty({default: 'Bad Request'})
     error: string
 
-    @ApiProperty({default: 409})
+    @ApiProperty({default: 400})
     statusCode: number
 }
 

@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import {Repository, UpdateResult} from 'typeorm';
 import { Currency } from '../database/entities/Currency.entity';
-import { CreateCurrencyDto, UpdateCurrencyDto} from './dto/Currency.dto';
+import { CreateCurrencyDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
 
 @Injectable()
 export class CurrencyService {
@@ -11,15 +11,27 @@ export class CurrencyService {
         return await this.currencyRepo.find();
     }
     public async getCurrencyById(id: number): Promise<Currency> {
-        return await this.currencyRepo.findOne({
+        const currency = await this.currencyRepo.findOne({
             where: { id: id },
         });
+        if(currency){
+            return currency;
+        }
+        throw new NotFoundException(`Currency with id ${id} not found`);
     }
-    public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<Currency> {
+    public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<GetCurrenciesResponseDto> {
         try {
             const createdCurrency = this.currencyRepo.create(createCurrnecyDto);
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
-            return savedCurrency;
+            const responseDto: GetCurrenciesResponseDto = {
+                id: savedCurrency.id,
+                network: savedCurrency.network,
+                name: savedCurrency.name,
+                symbol: savedCurrency.symbol,
+                status: savedCurrency.status,
+              };
+            return responseDto;
+
         } catch (error) {
             if(error.code == '23505'){
                 throw new ConflictException('This network and symbol has already exist');

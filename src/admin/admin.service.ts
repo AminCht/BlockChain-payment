@@ -26,7 +26,7 @@ export class AdminService {
             return {message: 'You have successfully Signed Up'}
         } catch(error){
             if (error.code === '23505') {
-                throw new ConflictException('This UserName is already taken');
+                throw new BadRequestException('This UserName is already taken');
             }
             throw error;
         }
@@ -67,14 +67,21 @@ export class AdminService {
 
 
     public async getAllUsers(): Promise <User[]>{
+        return await this.getUsers(Role.USER);
+    }
+
+    public async getAllAdmins(): Promise <User[]>{
+        return await this.getUsers(Role.ADMIN);
+    }
+
+    public async getUsers(role : Role){
         const users = this.userRepo.find({
             where:{
-                role: Role.USER
+                role: role
             }
         });
         return users;
     }
-
     private async signTokenForAdmin(role: string, id: number, username: string): Promise<{ access_token: string }> {
         const payload = {role: role, id: id, username: username};
         const token = await this.jwt.signAsync(payload);
