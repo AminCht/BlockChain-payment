@@ -2,7 +2,9 @@ import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nes
 import { CurrencyService } from './currency.service';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
 import { CreateCurrencyDto, UpdateCurrencyDto } from './dto/Currency.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Currency')
 @Controller('currency')
 export class CurrencyController {
 

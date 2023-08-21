@@ -5,7 +5,6 @@ import { AdminRequestDto, GetAllUsersResponseDto, CreateAdminResponseDto, Loging
 import { Response } from 'express';
 import { User } from '../database/entities/User.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAdminStrategy } from '../auth/strategy/jwt.admin.startegy';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
 
 @ApiTags('Admin')
@@ -39,6 +38,16 @@ export class AdminController {
     @UseGuards(JwtAdminAuthGuard)
     public async getAllUsers(): Promise <User[]>{
         return await this.adminService.getAllUsers();
+    }
+
+
+    @ApiOperation({ summary: 'Get All Admins(Only Admin access to this)' })
+    @ApiResponse({ status: 200, description: 'Get all Admins', type: [GetAllUsersResponseDto]})
+    @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
+    @Get('alladmins')
+    @UseGuards(JwtAdminAuthGuard)
+    public async getAllAdmins(){
+        return await this.adminService.getAllAdmins();
     }
 
     @ApiOperation({ summary: 'Delete Admin (Only Admin have access to this and only admins can be deleted)' })

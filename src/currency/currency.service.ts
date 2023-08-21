@@ -11,9 +11,13 @@ export class CurrencyService {
         return await this.currencyRepo.find();
     }
     public async getCurrencyById(id: number): Promise<Currency> {
-        return await this.currencyRepo.findOne({
+        const currency = await this.currencyRepo.findOne({
             where: { id: id },
         });
+        if(currency){
+            return currency;
+        }
+        throw new NotFoundException(`Currency with id ${id} not found`);
     }
     public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<Currency> {
         try {

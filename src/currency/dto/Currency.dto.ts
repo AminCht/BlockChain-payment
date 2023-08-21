@@ -34,3 +34,20 @@ export class UpdateCurrencyDto {
     @IsOptional()
     status?: boolean;
 }
+
+export class GetAllCurrenciesResponseDto{
+    @ApiProperty()
+    @IsNotEmpty()
+    network: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    name: string;
+    @ApiProperty()
+    @IsNotEmpty()
+    symbol: string;
+
+    @ApiProperty()
+    @IsOptional()
+    status: boolean;
+}
