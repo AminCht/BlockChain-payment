@@ -11,7 +11,7 @@ export class AuthController {
 
 
     @ApiOperation({ summary: 'User Registeration' })
-    @ApiResponse({ status: 403, description: 'This UserName has already taken', type: CreateUserWithExistUsernameResponseDto })
+    @ApiResponse({ status: 400, description: 'This UserName has already taken', type: CreateUserWithExistUsernameResponseDto })
     @ApiResponse({ status: 201, description: 'user signup and get accessToken', type: CreateUserResponseDto })
     @Post('signup')
     async signUp(@Body() dto:AuthDto, @Res() res:Response): Promise<void>{
