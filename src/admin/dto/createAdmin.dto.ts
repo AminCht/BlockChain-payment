@@ -24,10 +24,10 @@ export class CreateExistUsernameResponseDto{
     @ApiProperty({ default: 'This UserName has already taken' })
     message: string
 
-    @ApiProperty({default: 'Bad Request'})
+    @ApiProperty({default: 'Conflict'})
     error: string
 
-    @ApiProperty({default: 400})
+    @ApiProperty({default: 409})
     statusCode: number
 }
 
@@ -40,10 +40,10 @@ export class LogingWrongInfoAdminResponseDto{
     @ApiProperty({ default:'Credentials incorrect' })
     message: string
 
-    @ApiProperty({default: 'Forbidden'})
+    @ApiProperty({default: 'Unauthorized'})
     error: string
 
-    @ApiProperty({default: 403})
+    @ApiProperty({default: 401})
     statusCode: number
 }
 
@@ -67,10 +67,10 @@ export class DeleteAdminByNotAdminResponseDto{
     @ApiProperty({ default: 'Only Admins can delete admins' })
     message: string
 
-    @ApiProperty({default: 'Forbidden'})
+    @ApiProperty({default: 'Unauthorized'})
     error: string
 
-    @ApiProperty({default: 403})
+    @ApiProperty({default: 401})
     statusCode: number
 }
 
@@ -98,10 +98,10 @@ export class GetAllUserByNotAdminResponseDto{
     @ApiProperty({default: 'Only Admins can see All users'})
     message: string
     
-    @ApiProperty({default: 'Forbidden'})
+    @ApiProperty({default: 'Unauthorized'})
     error: string
 
-    @ApiProperty({default: 403})
+    @ApiProperty({default: 401})
     statusCode: number
 }
 
