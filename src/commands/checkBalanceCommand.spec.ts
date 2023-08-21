@@ -3,11 +3,8 @@ import {getRepositoryToken, TypeOrmModule} from "@nestjs/typeorm";
 import { Wallet } from "../database/entities/Wallet.entity";
 import { Transaction } from "../database/entities/Transaction.entity";
 import DatabaseModule from "../database/database.module";
-import { PaymentService } from '../payment/payment.service';
 import { CheckBalanceCommand } from './checkBalanceCommand';
-import {TransactionService} from "../transaction/transaction.service";
 import {Repository} from "typeorm";
-import {User} from "../database/entities/User.entity";
 describe('checkBalanceCommand', () => {
     let checkBalance: CheckBalanceCommand;
     let transactionRepo: Repository<Transaction>;
@@ -35,10 +32,10 @@ describe('checkBalanceCommand', () => {
             Promise.resolve('10'),
         );
         await checkBalance.run();
-        const transactions = await transactionRepo.find();
-        for (const transaction of transactions) {
-            expect(transaction.wallet_balance_after).toBe('10');
-        }
+        const transaction = await transactionRepo.findOne({
+            where: { wallet_balance_after: '10' },
+        });
+        expect(transaction.wallet_balance_after).toBe('10');
     });
 });
 

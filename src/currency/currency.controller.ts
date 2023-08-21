@@ -52,5 +52,4 @@ export class CurrencyController {
     async deleteCurrency(@Param('id') id: string){
         return await this.currencyService.DeleteCurrency(Number(id));
     }
-
 }
