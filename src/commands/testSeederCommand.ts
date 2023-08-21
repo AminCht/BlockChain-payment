@@ -25,7 +25,8 @@ export class TestSeederCommand extends CommandRunner {
     async run(): Promise<void> {
         await this.create();
     }
-    private async create(){const currencyDto = {
+    private async create(){
+        const currencyDto = {
         network: 'ethereum',
         symbol: 'eth',
         name: 'ethereum',
