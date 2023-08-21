@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { CreatePaymentRequestDto, CreatePaymentResponseDto } from './dto/createPayment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
@@ -77,8 +77,10 @@ export class PaymentService {
         } catch (error) {
             if (error.code == 'ECONNRESET') {
                 console.log('connection timeout');
+                throw new InternalServerErrorException();
             } else if (error.code == 'ENOTFOUND') {
                 console.log('no connection');
+                throw new InternalServerErrorException();
             } else {
                 await queryRunner.rollbackTransaction();
                 throw error;
