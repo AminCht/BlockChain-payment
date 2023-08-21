@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {IsNotEmpty, IsOptional} from 'class-validator';
 
-export class CurrencyDto {
+export class CreateCurrencyDto {
 
     @ApiProperty()
     @IsNotEmpty()

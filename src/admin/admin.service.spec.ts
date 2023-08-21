@@ -6,7 +6,7 @@ import { User } from '../database/entities/User.entity';
 import {JwtAdminStrategy} from "../auth/strategy/jwt.admin.startegy";
 import {JwtModule} from "@nestjs/jwt";
 import {AuthService} from "../auth/auth.service";
-import {BadRequestException, ForbiddenException} from "@nestjs/common";
+import {BadRequestException, ForbiddenException, NotFoundException} from "@nestjs/common";
 
 describe('AdminService', () => {
     let service: AdminService;
@@ -58,13 +58,27 @@ describe('AdminService', () => {
             }
         });
     });
-    describe('deleteAdmin', () => {});
+    describe('deleteAdmin', () => {
+        it('should delete an admin', async()=>{
+            const response = await service.deleteAdmin(1);
+            expect(response.message).toBe('Admin deleted');
+        });
+        it('given id is not belong to an admin and should return not fond expetion', async()=>{
+            try{
+                await service.deleteAdmin(10);
+                fail('Expected an exception to be thrown');
+            }
+            catch(error){
+                expect(error).toBeInstanceOf(NotFoundException);
+                expect(error.status).toBe(404);
+            }
+        });
+    });
     
     describe('getAllUsers',()=>{
       it('should return all users', async () => {
-        const adminDto = { username: 'aminadmin', password: '1234' };
-        const response = await service.adminLogin(adminDto);
-        expect(response.access_token).toBeNull();
+        const response = await service.getAllUsers();
+        expect(response).not.toBeNull();
       });
     });
 });

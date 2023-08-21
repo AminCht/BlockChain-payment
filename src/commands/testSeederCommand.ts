@@ -3,7 +3,7 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Wallet as WalletEntity} from '../database/entities/Wallet.entity';
 import {Repository} from 'typeorm';
 import {Wallet} from "ethers";
-import {User} from "../database/entities/User.entity";
+import {Role, User} from "../database/entities/User.entity";
 import {Transaction} from "../database/entities/Transaction.entity";
 import * as bcrypt from "bcrypt";
 import {Currency} from "../database/entities/Currency.entity";
@@ -41,6 +41,7 @@ export class TestSeederCommand extends CommandRunner {
         const currency1 = await this.createCurrency(currencyDto1);
         const user = await this.createUser([currency,currency1]);
         await this.createTransaction(user, currency);
+        await this.createAdmin();
     }
     private async createWallet(type: 'token' | 'main') {
         const wallet = Wallet.createRandom();
@@ -75,5 +76,13 @@ export class TestSeederCommand extends CommandRunner {
             wallet_balance_before: '1',
         });
         await this.transactionRepo.save(transaction);
+    }
+    private async createAdmin(){
+        const admin = await this.userRepo.create({
+            username: 'admin',
+            password: '1234',
+            role: Role.ADMIN
+        });
+        await this.userRepo.save(admin);
     }
 }

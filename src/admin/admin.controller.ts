@@ -37,8 +37,8 @@ export class AdminController {
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
     @Get('AllUsers')
     @UseGuards(JwtAdminAuthGuard)
-    public async getAllUsers(@Req() req: Request): Promise <User[]>{
-        return await this.adminService.getAllUsers(req['user']);
+    public async getAllUsers(): Promise <User[]>{
+        return await this.adminService.getAllUsers();
     }
 
     @ApiOperation({ summary: 'Delete Admin (Only Admin have access to this and only admins can be deleted)' })

@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {Repository, UpdateResult} from 'typeorm';
 import { Currency } from '../database/entities/Currency.entity';
-import { CurrencyDto, UpdateCurrencyDto} from './dto/Currency.dto';
+import { CreateCurrencyDto, UpdateCurrencyDto} from './dto/Currency.dto';
 
 @Injectable()
 export class CurrencyService {
@@ -15,27 +15,40 @@ export class CurrencyService {
             where: { id: id },
         });
     }
-    public async addCurrency(createCurrnecyDto: CurrencyDto): Promise<Currency> {
+    public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<Currency> {
         try {
             const createdCurrency = this.currencyRepo.create(createCurrnecyDto);
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
             return savedCurrency;
         } catch (error) {
-            console.log(error);
+            if(error.code == '23505'){
+                throw new ConflictException('This network and symbol has already exist');
+            }
+            throw error;
         }
     }
-    public async UpdateCurrency(id: number, updateCurrencyDto: UpdateCurrencyDto):Promise<UpdateResult> {
+    public async UpdateCurrency(id: number, updateCurrencyDto: UpdateCurrencyDto):Promise<UpdateCurrencyDto> {
         try {
-            const updatedCurrency = await this.currencyRepo.update(
+            const update = await this.currencyRepo.update(
                 { id: id },
                 { ...updateCurrencyDto },
             );
-            return updatedCurrency;
+            if(update.affected == 1){
+                return updateCurrencyDto;
+            }
+            throw new NotFoundException(`Currency with id ${id} not found`);
         } catch (error) {
-            console.log(error);
+            if(error.code == '23505'){
+                throw new ConflictException('This network and symbol has already exist');
+            }
+            throw error;
         }
     }
     public async DeleteCurrency(id: number) {
-        return await this.currencyRepo.delete({ id: id });
+        const deleteResult = await this.currencyRepo.delete({ id: id });
+        if(deleteResult.affected == 0){
+            throw new NotFoundException(`Currency with id ${id} not found`);
+        }
+        return {message: `Currency with id ${id} Deleted`}
     }
 }

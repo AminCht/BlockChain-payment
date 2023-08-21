@@ -111,5 +111,4 @@ export class UnAuthorizeResponseDto{
 
     @ApiProperty({default: 401})
     statusCode: number
-
 }
