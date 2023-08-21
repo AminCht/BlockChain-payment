@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
@@ -26,7 +26,7 @@ export class AdminService {
             return {message: 'You have successfully Signed Up'}
         } catch(error){
             if (error.code === '23505') {
-                throw new BadRequestException('This UserName is already taken');
+                throw new ConflictException('This UserName is already taken');
             }
             throw error;
         }
@@ -40,13 +40,13 @@ export class AdminService {
             }
         });
         if(!admin){
-            throw new ForbiddenException('Credentials incorrect');
+            throw new UnauthorizedException('Credentials incorrect');
         }
         const isMatch = await bcrypt.compare(dto.password, admin.password);
         if(isMatch){
             return await this.signTokenForAdmin(admin.role, admin.id, admin.username)
         }
-        throw new ForbiddenException('Credentials incorrect');
+        throw new UnauthorizedException('Credentials incorrect');
     }
 
     public async deleteAdmin(id: number): Promise<{ message: string }> {
