@@ -17,11 +17,8 @@ export class CreateAdminCommand extends CommandRunner {
         passedParams: string[],
         options?: Record<string, any>,
     ): Promise<void> {
-        const user = this.userRepo.create({
-            username: passedParams[0],
-            password: passedParams[1],
-        });
-        await this.adminService.createAdmin(user);
+        const adminDto = {username: passedParams[0], password: passedParams[1]}
+        await this.adminService.createAdmin(adminDto);
 
     }
     
