@@ -6,16 +6,19 @@ import * as process from 'process';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as cookieParser from 'cookie-parser';
 config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.use(cookieParser());
   const config = new DocumentBuilder()
     .setTitle('BlockChain Payment')
     .setDescription('The BlockChain Payment API description')
-    .addCookieAuth('connect.sid')
+    .addCookieAuth('accessToken')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
 
@@ -24,7 +27,7 @@ async function bootstrap() {
   await app.listen(process.env.PORT);
 }
 async function bootstrapCmd() {
-  await CommandFactory.run(CommandModule, ['warn', 'error', 'debug', 'log']);
+    await CommandFactory.run(CommandModule, ['warn', 'error', 'debug', 'log']);
 }
 if (process.env.MODE === 'cmd') {
   bootstrapCmd();
