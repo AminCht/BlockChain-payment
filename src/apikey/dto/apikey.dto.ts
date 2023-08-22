@@ -1,5 +1,28 @@
+import { ApiProperty } from '@nestjs/swagger';
+import {IsNotEmpty, IsOptional} from 'class-validator';
 
+export class ApiKeyRequestDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    apiList: number[];
 
-export class ApiKeyRequestDto{
-    
+    @ApiProperty()
+    @IsOptional()
+    expireDate?: Date;
+}
+export class ApiKeyUpdateDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    id: number;
+    @ApiProperty()
+    @IsOptional()
+    apiList?: number[];
+
+    @ApiProperty()
+    @IsOptional()
+    expireDate?: Date;
+
+    @ApiProperty()
+    @IsOptional()
+    status?: boolean;
 }

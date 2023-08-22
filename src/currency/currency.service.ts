@@ -14,7 +14,7 @@ export class CurrencyService {
         const currency = await this.currencyRepo.findOne({
             where: { id: id },
         });
-        if(currency){
+        if (currency) {
             return currency;
         }
         throw new NotFoundException(`Currency with id ${id} not found`);
