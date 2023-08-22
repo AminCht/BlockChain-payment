@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ApiKey } from '../database/entities/apikey.entity';
 import { ApiKeyRequestDto, ApiKeyUpdateDto } from './dto/apikey.dto';
 import { User } from '../database/entities/User.entity';
+import * as crypto from 'crypto';
 @Injectable()
 export class ApikeyService {
     constructor(@InjectRepository(ApiKey) private apiKeyRepo: Repository<ApiKey>) {}
@@ -14,6 +15,7 @@ export class ApikeyService {
             user: user,
             accesses: endPoints,
             expireTime: apiKeyRequestDto.expireDate,
+            key: this.generateRandomHashedString(),
         });
         const savedApiKey = this.apiKeyRepo.save(createdApiKey);
         return savedApiKey;
@@ -46,6 +48,11 @@ export class ApikeyService {
             }),
         );
         return await Promise.all(endPointAccessPromises);
+    }
+    generateRandomHashedString(): string {
+        const randomBytes = crypto.randomBytes(25);
+        const hash = crypto.createHash('sha256').update(randomBytes).digest('hex');
+        return hash;
     }
 
 }
