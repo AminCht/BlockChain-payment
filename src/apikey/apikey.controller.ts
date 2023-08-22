@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { ApiKeyAuthGuard } from './guard/apikey.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { EitherGuard } from './guard/either.guard';
 
 @ApiTags('ApiKey')
 @Controller('apikey')
@@ -11,7 +12,8 @@ export class ApikeyController {
 
 
     @Get()
-    @UseGuards(AuthGuard('ApiKey-Strategy'))
+    @UseGuards(EitherGuard)
     async createApiKey(){
+        console.log('sucess');
     }
 }

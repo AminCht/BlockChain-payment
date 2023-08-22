@@ -10,7 +10,7 @@ import  Strategy  from 'passport-headerapikey';
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy') {
     constructor(@InjectRepository(ApiKey) private apikeyRepo: Repository<ApiKey>) {
-        super({ header: 'X-API-KEY', prefix: 'Api-Key ', passReqToCallback: true },
+        super({ header: 'Authorization', prefix: 'Api-Key ', passReqToCallback: true },
         true,
         async (apiKey ,done, request) => {
             return this.validate(request,apiKey, done);
@@ -29,7 +29,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         if(!key){
             return done(null, false)
         }
-        return done(key, true);       
+        return done(null, true);       
         
     }
 }
