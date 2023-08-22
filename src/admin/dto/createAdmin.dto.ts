@@ -3,8 +3,7 @@ import { IsNotEmpty } from "class-validator";
 import { Role } from "../../database/entities/User.entity";
 
 
-export class AdminRequestDto{
-
+export class AdminRequestDto{ 
     @ApiProperty()
     @IsNotEmpty()
     username: string

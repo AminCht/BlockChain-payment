@@ -11,7 +11,7 @@ export class EndPointAccess{
     id: number
 
     @Column()
-    name: Acess
+    name: string // its for test
 
     @ManyToMany(() => ApiKey, (apikey) => apikey.accesses)
     apikies: ApiKey[];
