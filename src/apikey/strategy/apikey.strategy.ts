@@ -29,7 +29,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         if(!key){
             return done(null, false)
         }
-        return done(null, true);       
+        return done(null, key);       
         
     }
 }
