@@ -41,7 +41,7 @@ export class ApikeyService {
             throw new InternalServerErrorException();
         }
     }
-    public async getEndPoints(ids: number[]): Promise<ApiKey[]> {
+    private async getEndPoints(ids: number[]): Promise<ApiKey[]> {
         const endPointAccessPromises = ids.map(apiId =>
             this.apiKeyRepo.findOne({
                 where: { id: apiId },
@@ -49,7 +49,7 @@ export class ApikeyService {
         );
         return await Promise.all(endPointAccessPromises);
     }
-    generateRandomHashedString(): string {
+    private generateRandomHashedString(): string {
         const randomBytes = crypto.randomBytes(25);
         const hash = crypto.createHash('sha256').update(randomBytes).digest('hex');
         return hash;

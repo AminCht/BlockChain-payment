@@ -15,4 +15,20 @@ describe('ApikeyService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+  describe('getApiKeys',()=>{
+    it('should return all currencies',async()=>{
+    })
+  });
+  describe('createApiKey',()=>{
+    it('create an api key',async()=>{
+      const response = await service.createApiKey();
+      expect(response).not.toBeNull();
+    })
+  });
+  describe('updateApiKey',()=>{
+    it('update an api key',async()=>{
+      const response = await service.updateApiKey();
+      expect(response).not.toBeNull();
+    })
+  });
 });
