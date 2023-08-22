@@ -52,7 +52,11 @@
     "mysql": "^2.18.1",
     "nest-commander": "^3.11.0",
     "nestjs-seeder": "^0.3.2",
+    "passport-custom": "^1.1.1",
+    "passport-headerapikey": "^1.2.2",
+    "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
     "pg": "^8.11.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
@@ -103,5 +107,6 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "globalSetup": "<rootDir>/testConfig/beforTests.ts",
-    "globalTeardown": "<rootDir>/testConfig/afterTests.ts"}
+    "globalTeardown": "<rootDir>/testConfig/afterTests.ts"
+  }
 }
