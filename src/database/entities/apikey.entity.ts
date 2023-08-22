@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./User.entity";
+import { EndPointAccess } from "./endpoint_acess.entity";
 
 
 @Entity({name: 'ApiKeys'})
@@ -25,6 +26,10 @@ export class ApiKey{
     @ManyToOne(() => User, (user) => user.apikies)
     user: User;
 
+    @ManyToMany(() => EndPointAccess, (endpoint) => endpoint.apikies)
+    @JoinTable({name: 'apikey_endpoint'})
+    accesses: EndPointAccess[]
+    
     @BeforeInsert()
     setTimes() {
         this.createdAt = new Date();
