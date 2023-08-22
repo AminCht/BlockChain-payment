@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {  User } from '../database/entities/User.entity';
 import { AdminService } from '../admin/admin.service';
+import { AdminRequestDto } from '../admin/dto/createAdmin.dto';
 
 @Command({ name: 'create-admin' })
 export class CreateAdminCommand extends CommandRunner {
@@ -17,9 +18,10 @@ export class CreateAdminCommand extends CommandRunner {
         passedParams: string[],
         options?: Record<string, any>,
     ): Promise<void> {
-        const adminDto = {username: passedParams[0], password: passedParams[1]}
-        await this.adminService.createAdmin(adminDto);
-
+        const admin = new AdminRequestDto();
+        admin.username = passedParams[0];
+        admin.password = passedParams[1];
+        await this.adminService.createAdmin(admin);
     }
     
 }
