@@ -1,9 +1,11 @@
-import { BeforeInsert, CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, OneToOne,  JoinColumn, ManyToOne } from 'typeorm';
+import { BeforeInsert, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Wallet } from './Wallet.entity';
-
-enum Network {
-    ETHEREUM = 'Ethereum',
-    MAIN = 'main',
+import { User } from './User.entity';
+import { Currency } from './Currency.entity';
+ export enum Status {
+    PENDING = 'Pending',
+    SUCCESSFUL = 'Successful',
+    FAILED = 'Failed'
 }
 
 
@@ -13,38 +15,35 @@ export class Transaction{
     id: number;
 
     @Column({nullable: false })
-    amount: string
+    amount: string;
 
-    @Column({nullable: false})
-    network: string
+    @Column({ type: 'enum', enum: Status, default: 'Pending' })
+    status: string;
 
-    @Column({nullable:false})
-    currency: string
+    @Column({ nullable: false })
+    wallet_balance_before: string;
 
-    @ManyToOne(() => Wallet, (wallet) => wallet.transactions,{cascade:true})
-    wallet: Wallet
+    @Column({ nullable: true })
+    wallet_balance_after: string;
 
-    @Column({default: 'Pending'})
-    status: string
-
-    @Column({nullable: false })
-    wallet_balance_before: string
-
-    @Column({nullable: true })
-    wallet_balance_after: string
-
-    @CreateDateColumn()
+    @Column()
     createdDate: Date;
 
     @Column()
     expireTime: Date;
 
-    @BeforeInsert()
-    setExpirationTime(){
-        this.expireTime =new Date();
-        this.expireTime.setHours(this.expireTime.getHours()+1)
-    }
+    @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
+    wallet: Wallet;
 
+    @ManyToOne(() => User, (user) => user.transactions)
+    user: User;
+
+    @ManyToOne(() => Currency, (currency) => currency.transactions)
+    currency: Currency;
+
+    @BeforeInsert()
+    setTimes() {
+        this.createdDate = new Date();
+        this.expireTime = new Date(this.createdDate.getTime() + 60 * 60 * 1000);
+    }
 }
-/*
-id amount network currency status wallet_id wallet_balance_before created_date expire_time wallet_balance_after*/

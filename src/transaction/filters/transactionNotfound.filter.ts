@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { TransactionNotFoundException } from '../exceptions/transactionNotFound';
 
 @Catch(TransactionNotFoundException)
-export class UserNotFoundExceptionFilter implements ExceptionFilter {
+export class TransactionNotFoundExceptionFilter implements ExceptionFilter {
   catch(exception: NotFoundException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -11,8 +11,8 @@ export class UserNotFoundExceptionFilter implements ExceptionFilter {
     const message = exception.message;
 
     response.status(status).json({
+      message: message,
       statusCode: status,
-      error: message,
     });
   }
 }

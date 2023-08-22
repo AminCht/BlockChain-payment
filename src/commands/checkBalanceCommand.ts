@@ -2,15 +2,18 @@ import { Command, CommandRunner } from 'nest-commander';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet, Wallet as WalletEntity } from "../database/entities/Wallet.entity";
 import { Transaction } from '../database/entities/Transaction.entity';
-import { InfuraProvider } from "ethers";
+import { Contract, InfuraProvider } from 'ethers';
 import { ethers } from 'ethers';
 import { DataSource, Repository } from "typeorm";
+import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
-export class CheckBallanceCommand extends CommandRunner {
+export class CheckBalanceCommand extends CommandRunner {
 
-    public provider: InfuraProvider;
-
+    private readonly provider: InfuraProvider;
+    private tokenContract: Contract;
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
+        'function decimals() view returns (uint8)',]
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
@@ -22,57 +25,82 @@ export class CheckBallanceCommand extends CommandRunner {
         super();
         this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
-
-    async getCurrentBalance(address: string): Promise<string> {
-        const balancePromise = await this.provider.getBalance(address);
-        return balancePromise.toString();
-    }
-
     public async run(): Promise<void> {
-        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
-        
+        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet","currency"] });
         for (const transaction of transactions) {
-            await this.updateTransactionStatus(transaction)
+            await this.updateTransactionStatus(transaction);
         }
     }
 
     async updateTransactionStatus(transaction: Transaction) {
         const now = new Date();
-        console.log(transaction.wallet.address);
-        const currentBalance = await this.getCurrentBalance(transaction.wallet.address);
+        let currentBalance;
+        let decimals;
+        if (
+            transaction.currency.symbol == 'eth' &&
+            transaction.currency.network == 'ethereum'
+        ) {
+            currentBalance = await this.getBalance(transaction.wallet.address);
+        } else if (
+            transaction.currency.symbol != 'eth' &&
+            transaction.currency.network == 'ethereum'
+        ) {
+            currentBalance = await this.getTokenBalance(
+                transaction.wallet.address,
+                transaction.currency.symbol,
+            );
+            decimals = await this.tokenContract.decimals();
+        } else { return; }
+        const expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
-        const expectedAmount = ethers.parseEther(transaction.amount);
-        console.log(receivedAmount);
-        console.log(expectedAmount);
-        console.log(receivedAmount >= expectedAmount);
-        if (receivedAmount >= expectedAmount) {
-            await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);
-        } else if (now >= transaction.expireTime) {
-            await this.changeTransactionStatus(transaction, 'failed', currentBalance);
-        }
+        if (now >= transaction.expireTime) {
+           await this.changeTransactionStatus(transaction, 'Failed', currentBalance);
+        } else if (receivedAmount >= expectedAmount) {
+            await this.changeTransactionStatus(transaction, 'Successfully', currentBalance);}
+        else {await this.changeTransactionStatus(transaction, 'Pending', currentBalance);}
     }
 
-    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'failed', afterBalance: string) {
+    async changeTransactionStatus(transaction: Transaction, status: 'Successfully'|'Failed'|'Pending', afterBalance: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         const wallet = transaction.wallet;
-        wallet.lock = false;
+        if(status!='Pending'){
+            wallet.lock = false;
+        }
         transaction.status = status;
         transaction.wallet_balance_after = afterBalance;
         try {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             await queryRunner.manager.save(transaction);
-            await queryRunner.manager.update(
-              Wallet,
-              { id: transaction.wallet.id },
-              { lock: true },
-            );
+            if (status != 'Pending') {
+                await queryRunner.manager.update(
+                    Wallet,
+                    { id: transaction.wallet.id },
+                    { lock: false },
+                );
+            }
             await queryRunner.commitTransaction();
         } catch (error) {
             await queryRunner.rollbackTransaction();
-            return error;
+            throw error;
         } finally {
             await queryRunner.release();
         }
+    }
+    async getBalance(address: string): Promise<string> {
+        const balancePromise = await this.provider.getBalance(address);
+        return balancePromise.toString();
+    }
+    async getTokenBalance(address: string, currency: string): Promise<string> {
+        await this.createTokenContract(currency);
+        const balance = await this.tokenContract.balanceOf(address);
+        return balance.toString();
+    }
+    async createTokenContract(currency: string) {
+        this.tokenContract = new ethers.Contract(
+            ethereumTokenAddresses.get(currency),
+            this.tokenABI,
+            this.provider,
+        );
     }
 }
