@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Transaction } from './Transaction.entity';
 import { Currency } from './Currency.entity';
+import { ApiKey } from './apikey.entity';
 
 export enum Role{
     USER = 'User',
@@ -36,6 +37,9 @@ export class User {
 
     @OneToMany(() => Transaction, (transaction) => transaction.wallet)
     transactions: Transaction[];
+
+    @OneToMany(() => ApiKey, (apikey) => apikey.user)
+    apikies: ApiKey[];
 
     @ManyToMany(() => Currency, (token) => token.users)
     tokens: Currency[];

@@ -9,10 +9,11 @@ import { AccessService } from './access/access.service';
 import { AccessModule } from './access/access.module';
 import { AdminModule } from './admin/admin.module';
 import { CurrencyModule } from './currency/currency.module';
+import { ApikeyModule } from './apikey/apikey.module';
 import DatabaseModule from './database/database.module';
 
 @Module({
-    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule, AdminModule, CurrencyModule],
+    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, AccessModule, AdminModule, CurrencyModule, ApikeyModule],
     controllers: [AppController],
     providers: [AppService],
 })

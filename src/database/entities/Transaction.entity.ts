@@ -17,12 +17,6 @@ export class Transaction{
     @Column({nullable: false })
     amount: string;
 
-  /*  @Column({nullable: false})
-    network: string;
-
-    @Column({nullable:false})
-    currency: string;
-*/
     @Column({ type: 'enum', enum: Status, default: 'Pending' })
     status: string;
 
