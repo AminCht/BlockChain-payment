@@ -49,6 +49,7 @@
     "dotenv-cli": "^7.2.1",
     "env-cmd": "^10.1.0",
     "ethers": "^6.7.0",
+    "fs-extra": "^11.1.1",
     "mysql": "^2.18.1",
     "nest-commander": "^3.11.0",
     "nestjs-seeder": "^0.3.2",

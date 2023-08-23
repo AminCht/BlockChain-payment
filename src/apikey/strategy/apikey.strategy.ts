@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { ApiKey } from '../../database/entities/apikey.entity';
 import { Request } from 'express';
 import  Strategy  from 'passport-headerapikey';
+import * as fs from 'fs-extra';
 
 
 @Injectable()
@@ -17,13 +18,11 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         });
     }
     async validate(request, apikey: string, done) {
-        console.log(apikey);
-        const parts = request.originalUrl.split('/')
-        const access = parts[parts.length - 1];
-        console.log(access)
+        const accessName = await this.getJson(request);
+        console.log(accessName);
         const key = await this.apikeyRepo.createQueryBuilder('apikey')
         .leftJoinAndSelect('apikey.accesses', 'accesses')
-        .where('apikey.key = :key', { key: apikey }).andWhere('accesses.name= :name', {name: access})
+        .where('apikey.key = :key', { key: apikey }).andWhere('accesses.name= :name', {name: accessName})
         .leftJoinAndSelect('apikey.user', 'user')
         .getOne();   
         if(!key){
@@ -32,4 +31,19 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         return done(null, key);       
         
     }
+    async getJson(request){
+        const jsonData = await fs.readJson('src/apikey/access.json');
+        let url = request.originalUrl;
+        if(url[url.length-1] != '/'){
+            url = url + '/';
+        }
+        for (const item of jsonData) {
+            for(const pattern of item.patterns){
+                if(pattern.urlPattern==url && pattern.method == request.method){
+                      return item.accessName;                  
+                }
+            }
+        }
+    }
+
 }
