@@ -23,7 +23,6 @@ export class ApikeyService {
 
     public async updateApiKey(user: User, apiKeyUpdateDto: ApiKeyUpdateDto){
         const endPoints = await this.getEndPoints(apiKeyUpdateDto.apiList);
-        try {
             const updatedApiKey = await this.apiKeyRepo.update(
                 {
                     expireTime: apiKeyUpdateDto.expireDate,
@@ -35,12 +34,10 @@ export class ApikeyService {
             if (updatedApiKey.affected == 1) {
                 return apiKeyUpdateDto;
             }
-            throw new NotFoundException(`api-key with id ${apiKeyUpdateDto.id} not found`);}
-        catch (error){
-            console.log('update faild');
-            throw new InternalServerErrorException();
-        }
+            throw new NotFoundException(`api-key with id ${apiKeyUpdateDto.id} not found`);
+
     }
+    //todo optimize it to be done with one query and use end point repo
     private async getEndPoints(ids: number[]): Promise<ApiKey[]> {
         const endPointAccessPromises = ids.map(apiId =>
             this.apiKeyRepo.findOne({
