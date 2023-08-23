@@ -49,7 +49,7 @@ export class CurrencyController {
     @ApiResponse({ status: 404, description: 'Currency not found and return a message', type: CurrencyNotFoundResponseDto})
     @Delete(':id')
     @UseGuards(JwtAdminAuthGuard)
-    async deleteCurrency(@Param('id') id: string){
-        return await this.currencyService.DeleteCurrency(Number(id));
+    async deleteCurrency(@Param('id') id: number) {
+        return await this.currencyService.DeleteCurrency(id);
     }
 }

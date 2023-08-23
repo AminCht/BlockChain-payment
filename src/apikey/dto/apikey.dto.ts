@@ -11,12 +11,10 @@ export class ApiKeyRequestDto {
     expireDate?: Date;
 }
 export class ApiKeyUpdateDto {
-    @ApiProperty()
-    @IsNotEmpty()
-    id: number;
+
     @ApiProperty()
     @IsOptional()
-    apiList?: number[];
+    endPointList?: number[];
 
     @ApiProperty()
     @IsOptional()

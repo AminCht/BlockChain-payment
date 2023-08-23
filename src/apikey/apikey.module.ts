@@ -8,9 +8,10 @@ import { ApiKeyAuthGuard } from './guard/apikey.guard';
 import { JwtStrategy } from '../auth/strategy/jwt.strategy';
 import { User } from '../database/entities/User.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import {EndPointAccess} from "../database/entities/endpoint_acess.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ApiKey, User])],
+  imports: [TypeOrmModule.forFeature([ApiKey, User,EndPointAccess])],
   controllers: [ApikeyController],
   providers: [ApikeyService, ApiKeyAuthGuard, ApiKeyStrategy, String, JwtStrategy, JwtAuthGuard]
 })
