@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -37,11 +37,23 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         if(url[url.length-1] != '/'){
             url = url + '/';
         }
+        console.log(url);
+        
         for (const item of jsonData) {
-            for(const pattern of item.patterns){
+            console.log(item);
+            for(const pattern of item.patterns){         
                 if(pattern.urlPattern==url && pattern.method == request.method){
-                      return item.accessName;                  
+                    console.log('gooz');
+                    return item.accessName;                  
                 }
+                const patternRegex = pattern.urlPattern.replace(
+                    /\{id\}/g,
+                    '\\d+' // Regular expression to match any numeric value
+                  );
+                  const regexPattern = new RegExp(`^${patternRegex}$`);
+                  if (regexPattern.test(url)) {
+                    return item.accessName;
+                  }
             }
         }
     }

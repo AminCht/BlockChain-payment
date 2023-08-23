@@ -16,6 +16,15 @@
         }
     ],
     "accessName": "getApiKey"
+},
+{
+    "patterns": [
+        {
+            "urlPattern": "/payment/transaction/{id}/",
+            "method": "GET"
+        }
+    ],
+    "accessName": "getApiKey"
 }
 
 ]
