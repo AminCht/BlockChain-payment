@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Req, UseGuards } from '@nestjs/common';
+import {Body, Controller, Get, Param, Post, Put, Req, UseGuards} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { ApiKeyAuthGuard } from './guard/apikey.guard';
@@ -14,14 +14,15 @@ export class ApikeyController {
 
 
     @Post()
-    async createApiKey(@Req() req: Request, dto: ApiKeyRequestDto){
-        return await this.apikeyService.createApiKey(req['user'].user, dto);
+    async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto){
+        console.log(req['user']);
+        return await this.apikeyService.createApiKey(req['user'], dto);
     }
 
     @Put(':id')
     @UseGuards(EitherGuard)
-    async updateApiKey(@Req() req: Request, dto: ApiKeyUpdateDto){
-        return await this.apikeyService.updateApiKey(req['user'].user, dto);
+    async updateApiKey(@Req() req: Request, @Body() dto: ApiKeyUpdateDto,@Param('id') id: number){
+        return await this.apikeyService.updateApiKey(req['user'].id, dto, id);
     }
 
     @Get()

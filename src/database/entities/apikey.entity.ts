@@ -31,12 +31,15 @@ export class ApiKey{
     accesses: EndPointAccess[];
 
     @BeforeInsert()
-    setTimes() {
+    private setTimes() {
         this.createdAt = new Date();
         this.updatedAt = new Date();
+        const expireTime = new Date();
+        expireTime.setDate(this.createdAt.getDate() + 20);
+        this.expireTime = expireTime;
     }
     @BeforeUpdate()
-    setUpdateTime() {
+   private setUpdateTime() {
         this.updatedAt = new Date();
     }
 }
