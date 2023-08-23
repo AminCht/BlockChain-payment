@@ -11,7 +11,7 @@ export class EitherGuard implements CanActivate {
    canActivate(context: ExecutionContext){
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
-    const authorizationHeader = (request.headers.authorization);
+    const authorizationHeader = request.headers.authorization;
     if (authorizationHeader && authorizationHeader.startsWith('Api-Key ')) {
         return this.guardB.canActivate(context);
     }
