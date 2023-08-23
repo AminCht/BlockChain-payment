@@ -17,6 +17,7 @@
     "create-admin": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main create-admin",
     "create:test-wallet": "npm run build && dotenv -e test.env dotenv -v MODE=cmd node dist/main create-wallet",
     "check-balance": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main check-balance",
+    "add-access": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main add-access",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "createmigration:dev": "dotenv -e development.env -- npm run typeorm -- -d ./src/database/developmentDatasource.config.ts migration:generate ./src/database/dev_migrations/dev_migrations",
     "migrate:dev": "npm run build && dotenv -e development.env -- npm run typeorm migration:run -- -d ./src/database/developmentDatasource.config.ts",

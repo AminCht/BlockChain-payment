@@ -19,7 +19,6 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
     }
     async validate(request, apikey: string, done) {
         const accessName = await this.getJson(request);
-        console.log(accessName);
         const key = await this.apikeyRepo.createQueryBuilder('apikey')
         .leftJoinAndSelect('apikey.accesses', 'accesses')
         .where('apikey.key = :key', { key: apikey }).andWhere('accesses.name= :name', {name: accessName})
@@ -34,21 +33,19 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
     async getJson(request){
         const jsonData = await fs.readJson('src/apikey/access.json');
         let url = request.originalUrl;
+        
         if(url[url.length-1] != '/'){
             url = url + '/';
         }
-        console.log(url);
-        
+
         for (const item of jsonData) {
-            console.log(item);
             for(const pattern of item.patterns){         
                 if(pattern.urlPattern==url && pattern.method == request.method){
-                    console.log('gooz');
                     return item.accessName;                  
                 }
                 const patternRegex = pattern.urlPattern.replace(
                     /\{id\}/g,
-                    '\\d+' // Regular expression to match any numeric value
+                    '\\d+'
                   );
                   const regexPattern = new RegExp(`^${patternRegex}$`);
                   if (regexPattern.test(url)) {
