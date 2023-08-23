@@ -13,8 +13,7 @@ export class ApikeyController {
     constructor( private apikeyService: ApikeyService){}
 
 
-    @Get()
-    @UseGuards(EitherGuard)
+    @Post()
     async createApiKey(@Req() req: Request, dto: ApiKeyRequestDto){
         return await this.apikeyService.createApiKey(req['user'].user, dto);
     }
@@ -23,5 +22,11 @@ export class ApikeyController {
     @UseGuards(EitherGuard)
     async updateApiKey(@Req() req: Request, dto: ApiKeyUpdateDto){
         return await this.apikeyService.updateApiKey(req['user'].user, dto);
+    }
+
+    @Get()
+    @UseGuards(ApiKeyAuthGuard)
+    getAccess(@Req() req: Request){
+        return req['user'].accesses;
     }
 }
