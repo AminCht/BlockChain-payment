@@ -12,7 +12,7 @@ export class ApikeyService {
         @InjectRepository(EndPointAccess) private endPointsRepo: Repository<EndPointAccess>,
     ) {}
     public async getApiKeys() {}
-    public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto) {
+    public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto): Promise<ApiKey> {
         const endPoints = await this.getEndPoints(apiKeyRequestDto.apiList);
         const createdApiKey = this.apiKeyRepo.create({
             user: user,
@@ -20,7 +20,6 @@ export class ApikeyService {
             expireTime: apiKeyRequestDto.expireDate,
             key: this.generateRandomHashedString(),
         });
-        console.log('user' + user);
         const savedApiKey = this.apiKeyRepo.save(createdApiKey);
         return savedApiKey;
     }
