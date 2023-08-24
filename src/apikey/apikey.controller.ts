@@ -14,8 +14,8 @@ export class ApikeyController {
 
 
     @Post()
-    async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto){
-        console.log(req['user']);
+    @UseGuards(EitherGuard)
+    async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto) {
         return await this.apikeyService.createApiKey(req['user'], dto);
     }
 
