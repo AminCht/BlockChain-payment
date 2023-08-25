@@ -20,21 +20,21 @@ export class ApikeyService {
             expireTime: apiKeyRequestDto.expireDate,
             key: this.generateRandomHashedString(),
         });
+        delete createdApiKey.user;
         const savedApiKey = this.apiKeyRepo.save(createdApiKey);
         return savedApiKey;
     }
 
     public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number) {
         const endPoints = await this.getEndPoints(apiKeyUpdateDto.endPointList);
-        console.log(endPoints);
         const updatedApiKey = await this.apiKeyRepo.update(
-            { user: { id: userId }, id: id },
+            { id: id },
             { accesses: endPoints, expireTime: apiKeyUpdateDto.expireDate },
         );
         if (updatedApiKey.affected == 1) {
             return apiKeyUpdateDto;
         }
-        throw new NotFoundException(`api-key with id ${id} not found`);
+        throw new NotFoundException(`api-key with id ${id} not found`);      
     }
     //todo optimize it to be done with one query and use end point repo
     private async getEndPoints(ids: number[]): Promise<EndPointAccess[]> {

@@ -16,8 +16,8 @@ export class ApikeyController {
     @ApiOperation({summary: 'Create ApiKey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 201, description: 'create an apikey and return it', type: ApiKeyResponseDto})
+    @UseGuards(AuthGuard(['jwt']))
     async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto){
-        console.log(req['user']);
         return await this.apikeyService.createApiKey(req['user'], dto);
     }
 
@@ -25,12 +25,12 @@ export class ApikeyController {
     @ApiOperation({summary: 'Update an ApiKey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: ApiKeyResponseDto})
-    @UseGuards(EitherGuard)
+    @UseGuards(ApiKeyAuthGuard)
     async updateApiKey(@Req() req: Request, @Body() dto: ApiKeyUpdateDto,@Param('id') id: number){
         return await this.apikeyService.updateApiKey(req['user'].id, dto, id);
     }
 
-    @Get()
+    @Get('access')
     @ApiOperation({summary: 'Get access of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
