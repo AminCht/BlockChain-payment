@@ -1,17 +1,16 @@
 import {Body, Controller, Get, Param, Post, Put, Req, UseGuards} from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { ApiKeyAuthGuard } from './guard/apikey.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { EitherGuard } from './guard/either.guard';
 import { Request } from 'express';
-import { ApiKeyRequestDto, ApiKeyUpdateDto } from './dto/apikey.dto';
+import { ApiKeyRequestDto, ApiKeyResponseDto, ApiKeyUpdateDto, GetAccessResponseDto, UnAuthorizedResponseDto } from './dto/apikey.dto';
 
 @ApiTags('ApiKey')
 @Controller('apikey')
 export class ApikeyController {
     constructor( private apikeyService: ApikeyService){}
-
 
     @Post()
     @UseGuards(EitherGuard)
@@ -20,12 +19,18 @@ export class ApikeyController {
     }
 
     @Put(':id')
-    @UseGuards(EitherGuard)
+    @ApiOperation({summary: 'Update an ApiKey'})
+    @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
+    @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: ApiKeyResponseDto})
+    @UseGuards(ApiKeyAuthGuard)
     async updateApiKey(@Req() req: Request, @Body() dto: ApiKeyUpdateDto,@Param('id') id: number){
         return await this.apikeyService.updateApiKey(req['user'].id, dto, id);
     }
 
-    @Get()
+    @Get('access')
+    @ApiOperation({summary: 'Get access of apikey'})
+    @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
+    @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
     @UseGuards(ApiKeyAuthGuard)
     getAccess(@Req() req: Request){
         return req['user'].accesses;

@@ -41,7 +41,7 @@ export class ApikeyService {
         if (updatedApiKey.affected == 1) {
             return apiKeyUpdateDto;
         }
-        throw new NotFoundException(`api-key with id ${id} not found`);
+        throw new NotFoundException(`api-key with id ${id} not found`);      
     }
     //todo optimize it to be done with one query and use end point repo
     private async getEndPoints(ids: number[]): Promise<EndPointAccess[]> {

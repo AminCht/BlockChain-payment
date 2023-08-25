@@ -26,7 +26,7 @@ export class PaymentController {
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.',type: CreatePaymentResponseDto})
   @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
   @ApiQuery({ name: 'currencyId'})
-  @UseGuards(AuthGuard(['jwt']))
+  @UseGuards(EitherGuard)
   async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto | string> {
     return await this.paymentService.createPayment(req['user'].id, createPaymentdto);
   }
