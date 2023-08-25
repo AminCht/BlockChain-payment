@@ -37,7 +37,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         if(url[url.length-1] != '/'){
             url = url + '/';
         }
-
+        
         for (const item of jsonData) {
             for(const pattern of item.patterns){         
                 if(pattern.urlPattern==url && pattern.method == request.method){

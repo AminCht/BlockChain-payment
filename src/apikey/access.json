@@ -11,7 +11,7 @@
 {
     "patterns": [
         {
-            "urlPattern": "/apikey/",
+            "urlPattern": "/apikey/access/",
             "method": "GET"
         }
     ],
@@ -25,6 +25,15 @@
         }
     ],
     "accessName": "getTransaction"
+},
+{
+    "patterns": [
+        {
+            "urlPattern": "/apikey/{id}/",
+            "method": "PUT"
+        }
+    ],
+    "accessName": "updateApiKey"
 }
 
 ]
