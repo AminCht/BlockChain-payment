@@ -26,11 +26,10 @@ export class ApikeyService {
 
     public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number) {
         let endPoints;
-        const updateFields = {};
         if (apiKeyUpdateDto.endPointList) {
-            updateFields.accesses = await this.getEndPoints(apiKeyUpdateDto.endPointList);
+            endPoints = await this.getEndPoints(apiKeyUpdateDto.endPointList);
         }
-        const updatedApiKey = await this.apiKeyRepo.(
+        const updatedApiKey = await this.apiKeyRepo.update(
             { user: { id: userId }, id: id },
             {
                 accesses: endPoints,
