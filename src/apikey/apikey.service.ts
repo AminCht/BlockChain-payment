@@ -12,24 +12,31 @@ export class ApikeyService {
         @InjectRepository(EndPointAccess) private endPointsRepo: Repository<EndPointAccess>,
     ) {}
     public async getApiKeys() {}
-    public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto): Promise<ApiKey> {
-        const endPoints = await this.getEndPoints(apiKeyRequestDto.apiList);
+    public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto) {
+        const endPoints = await this.getEndPoints(apiKeyRequestDto.endPointList);
         const createdApiKey = this.apiKeyRepo.create({
             user: user,
             accesses: endPoints,
             expireTime: apiKeyRequestDto.expireDate,
             key: this.generateRandomHashedString(),
         });
-        delete createdApiKey.user;
         const savedApiKey = this.apiKeyRepo.save(createdApiKey);
         return savedApiKey;
     }
 
     public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number) {
-        const endPoints = await this.getEndPoints(apiKeyUpdateDto.endPointList);
-        const updatedApiKey = await this.apiKeyRepo.update(
-            { id: id },
-            { accesses: endPoints, expireTime: apiKeyUpdateDto.expireDate },
+        let endPoints;
+        const updateFields = {};
+        if (apiKeyUpdateDto.endPointList) {
+            updateFields.accesses = await this.getEndPoints(apiKeyUpdateDto.endPointList);
+        }
+        const updatedApiKey = await this.apiKeyRepo.(
+            { user: { id: userId }, id: id },
+            {
+                accesses: endPoints,
+                expireTime: apiKeyUpdateDto.expireDate,
+                status: apiKeyUpdateDto.status,
+            },
         );
         if (updatedApiKey.affected == 1) {
             return apiKeyUpdateDto;

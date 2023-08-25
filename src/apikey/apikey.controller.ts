@@ -13,11 +13,8 @@ export class ApikeyController {
     constructor( private apikeyService: ApikeyService){}
 
     @Post()
-    @ApiOperation({summary: 'Create ApiKey'})
-    @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
-    @ApiResponse({ status: 201, description: 'create an apikey and return it', type: ApiKeyResponseDto})
-    @UseGuards(AuthGuard(['jwt']))
-    async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto){
+    @UseGuards(EitherGuard)
+    async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto) {
         return await this.apikeyService.createApiKey(req['user'], dto);
     }
 

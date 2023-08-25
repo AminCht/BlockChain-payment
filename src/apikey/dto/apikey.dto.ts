@@ -4,7 +4,7 @@ import {IsNotEmpty, IsOptional} from 'class-validator';
 export class ApiKeyRequestDto {
     @ApiProperty()
     @IsNotEmpty()
-    apiList: number[];
+    endPointList: number[];
 
     @ApiProperty()
     @IsOptional()
