@@ -32,9 +32,10 @@ export class ApiKey{
 
     @BeforeInsert()
     private setTimes() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-        const expireTime = new Date();
+        const date = new Date();
+        this.createdAt = date;
+        this.updatedAt = date;
+        const expireTime = date;
         expireTime.setDate(this.createdAt.getDate() + 20);
         this.expireTime = expireTime;
     }
