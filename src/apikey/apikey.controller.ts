@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Post, Put, Req, UseGuards} from '@nestjs/common';
+import {Body, Controller, Get, Param, Patch, Post, Put, Req, UseGuards} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { ApiKeyAuthGuard } from './guard/apikey.guard';
@@ -21,21 +21,29 @@ export class ApikeyController {
         return await this.apikeyService.createApiKey(req['user'], dto);
     }
 
-    @Put(':id')
+    @Patch(':id')
     @ApiOperation({summary: 'Update an ApiKey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: ApiKeyResponseDto})
-    @UseGuards(ApiKeyAuthGuard)
+    @UseGuards(EitherGuard)
     async updateApiKey(@Req() req: Request, @Body() dto: ApiKeyUpdateDto,@Param('id') id: number){
         return await this.apikeyService.updateApiKey(req['user'].id, dto, id);
     }
 
-    @Get('access')
+    @Get()
     @ApiOperation({summary: 'Get access of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
-    @UseGuards(ApiKeyAuthGuard)
-    getAccess(@Req() req: Request){
-        return req['user'].accesses;
+    @UseGuards(EitherGuard)
+    async getApiKeys(@Req() req: Request) {
+        return await this.apikeyService.getApiKeys(req['user'].id);
+    }
+    @Get(':id')
+    @ApiOperation({summary: 'Get access of apikey'})
+    @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
+    @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
+    @UseGuards(EitherGuard)
+    async getApiKeysById(@Req() req: Request, @Param('id') id: number) {
+        return await this.apikeyService.getApiKeysById(req['user'].id, id);
     }
 }

@@ -1,17 +1,32 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ApiKey } from '../database/entities/apikey.entity';
-import { ApiKeyRequestDto, ApiKeyUpdateDto } from './dto/apikey.dto';
-import { User } from '../database/entities/User.entity';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {ApiKey} from '../database/entities/apikey.entity';
+import {ApiKeyRequestDto, ApiKeyUpdateDto} from './dto/apikey.dto';
+import {User} from '../database/entities/User.entity';
 import * as crypto from 'crypto';
-import { EndPointAccess } from '../database/entities/endpoint_acess.entity';
+import {EndPointAccess} from '../database/entities/endpoint_acess.entity';
+
 @Injectable()
 export class ApikeyService {
     constructor(@InjectRepository(ApiKey) private apiKeyRepo: Repository<ApiKey>,
         @InjectRepository(EndPointAccess) private endPointsRepo: Repository<EndPointAccess>,
     ) {}
-    public async getApiKeys() {}
+    public async getApiKeys(userId: number): Promise<ApiKey[]> {
+        const apiKeys = await this.apiKeyRepo.find({ where: { user: { id: userId } } });
+        return apiKeys;
+    }
+    public async getApiKeysById(userId: number, apiKeyId: number): Promise<ApiKey> {
+        const apiKey = await this.apiKeyRepo.findOne({ where: { user: { id: userId }, id: apiKeyId } });
+        return apiKey;
+    }
+    public async deleteApiKey(userId: number, apiKeyId: number) {
+        const deletedApiKey = await this.apiKeyRepo.delete({ user: { id: userId }, id: apiKeyId  });
+        if (deletedApiKey.affected == 0) {
+            throw new NotFoundException(`apiKey with id ${apiKeyId} not found`);
+        }
+        return { message: `apiKey with id ${apiKeyId} deleted` };
+    }
     public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto): Promise<ApiKey> {
         const endPoints = await this.getEndPoints(apiKeyRequestDto.endPointList);
         const createdApiKey = this.apiKeyRepo.create({
@@ -25,48 +40,28 @@ export class ApikeyService {
         return savedApiKey;
     }
 
-    public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number) {
-        const apikey = await this.apiKeyRepo.findOne({
-            where:{
-                id: id
+    public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number): Promise<ApiKey> {
+        let endPoints;
+        const apikey = await this.apiKeyRepo.findOneById(id);
+        if (apikey) {
+            if (apiKeyUpdateDto.endPointList) {
+                endPoints = await this.getEndPoints(apiKeyUpdateDto.endPointList);
             }
-        });
-        if(apikey){
-            if(apiKeyUpdateDto.endPointList){
-                const endPoints = await this.getEndPoints(apiKeyUpdateDto.endPointList);
-                const updatedApiKey = this.apiKeyRepo.create({
-                    id: apikey.id,
-                    accesses: endPoints,
-                    ...apiKeyUpdateDto,
-                });
-                await this.apiKeyRepo.save(updatedApiKey);
-                return this.getApiKeyFromDb(id);
-            }
-            const updatedApiKey = this.apiKeyRepo.create({
+            const updatedApiKey = this.apiKeyRepo.save({
                 id: apikey.id,
-                ...apiKeyUpdateDto,
+                accesses: endPoints,
+                status: apiKeyUpdateDto.status,
+                expireTime: apiKeyUpdateDto.expireDate,
             });
-            await this.apiKeyRepo.save(updatedApiKey);
-            return this.getApiKeyFromDb(id);  
-        }         
-        throw new NotFoundException(`api-key with id ${id} not found`);        
+            return updatedApiKey;
+        }
     }
-    private async getApiKeyFromDb(id: number){
-        const updatedApiKeyinDB = await this.apiKeyRepo.findOne({
-            where:{
-                id: id
-            }, relations:['accesses']
-        });
-        return updatedApiKeyinDB;
-    }
-    //todo optimize it to be done with one query and use end point repo
     private async getEndPoints(ids: number[]): Promise<EndPointAccess[]> {
-        const endPointAccessPromises = ids.map(endPointId =>
-            this.endPointsRepo.findOne({
-                where: { id: endPointId },
-            }),
-        );
-        return await Promise.all(endPointAccessPromises);
+        const endPoints = await this.endPointsRepo.findByIds(ids);
+        if (endPoints.length != ids.length) {
+            throw new NotFoundException("all or some of the endpoints could not be found");
+        }
+        return endPoints;
     }
     private generateRandomHashedString(): string {
         const randomBytes = crypto.randomBytes(25);

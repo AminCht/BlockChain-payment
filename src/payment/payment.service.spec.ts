@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
 import DatabaseModule from '../database/database.module';
 import { User } from '../database/entities/User.entity';
-import { Repository } from 'typeorm';
 describe('PaymentService', () => {
     let service: PaymentService;
     beforeEach(async () => {
