@@ -61,12 +61,8 @@ export class ApikeyService {
     }
     //todo optimize it to be done with one query and use end point repo
     private async getEndPoints(ids: number[]): Promise<EndPointAccess[]> {
-        const endPointAccessPromises = ids.map(endPointId =>
-            this.endPointsRepo.findOne({
-                where: { id: endPointId },
-            }),
-        );
-        return await Promise.all(endPointAccessPromises);
+        const endPoints = await this.endPointsRepo.findByIds(ids);
+        return endPoints;
     }
     private generateRandomHashedString(): string {
         const randomBytes = crypto.randomBytes(25);
