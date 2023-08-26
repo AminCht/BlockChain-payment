@@ -12,20 +12,20 @@ export class ApikeyService {
     constructor(@InjectRepository(ApiKey) private apiKeyRepo: Repository<ApiKey>,
         @InjectRepository(EndPointAccess) private endPointsRepo: Repository<EndPointAccess>,
     ) {}
-    public async getApiKeys(userId: number) {
+    public async getApiKeys(userId: number): Promise<ApiKey[]> {
         const apiKeys = await this.apiKeyRepo.find({ where: { user: { id: userId } } });
         return apiKeys;
     }
-    public async getApiKeysById(userId: number, apiKeyId: number) {
-        const apiKeys = await this.apiKeyRepo.find({ where: { user: { id: userId }, id: apiKeyId } });
-        return apiKeys;
+    public async getApiKeysById(userId: number, apiKeyId: number): Promise<ApiKey> {
+        const apiKey = await this.apiKeyRepo.findOne({ where: { user: { id: userId }, id: apiKeyId } });
+        return apiKey;
     }
     public async deleteApiKey(userId: number, apiKeyId: number) {
         const deletedApiKey = await this.apiKeyRepo.delete({ user: { id: userId }, id: apiKeyId  });
         if (deletedApiKey.affected == 0) {
             throw new NotFoundException(`apiKey with id ${apiKeyId} not found`);
         }
-        return { message: `apiKey with id ${apiKeyId} Deleted` };
+        return { message: `apiKey with id ${apiKeyId} deleted` };
     }
     public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto): Promise<ApiKey> {
         const endPoints = await this.getEndPoints(apiKeyRequestDto.endPointList);
@@ -40,7 +40,7 @@ export class ApikeyService {
         return savedApiKey;
     }
 
-    public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number) {
+    public async updateApiKey(userId: number, apiKeyUpdateDto: ApiKeyUpdateDto, id: number): Promise<ApiKey> {
         let endPoints;
         const apikey = await this.apiKeyRepo.findOneById(id);
         if (apikey) {
