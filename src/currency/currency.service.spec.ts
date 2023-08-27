@@ -29,8 +29,7 @@ describe('CurrencyService', () => {
       expect(response).not.toBeNull();
     });
   });
-
-  describe('add currency',async()=>{
+  describe('add currency',()=>{
     it('should add a currency',async()=>{
       const currencyDto = {network: 'ethereum', name: 'bitcoin', symbol: 'btc'}
       const response = await service.addCurrency(currencyDto);

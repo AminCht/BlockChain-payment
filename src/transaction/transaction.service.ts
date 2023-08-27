@@ -8,8 +8,6 @@ import { User } from '../database/entities/User.entity';
 @Injectable()
 export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
-
-
     public async getTransactionById(user: User, transactionId: number): Promise<Transaction> {
         while (true) {
             const transaction = await this.transactionRepo

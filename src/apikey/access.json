@@ -1,0 +1,39 @@
+[
+{
+    "patterns": [
+        {
+            "urlPattern": "/payment/",
+            "method": "POST"
+        }
+    ],
+    "accessName": "createPayment"
+},
+{
+    "patterns": [
+        {
+            "urlPattern": "/apikey/access/",
+            "method": "GET"
+        }
+    ],
+    "accessName": "getApiKey"
+},
+{
+    "patterns": [
+        {
+            "urlPattern": "/payment/transaction/{id}/",
+            "method": "GET"
+        }
+    ],
+    "accessName": "getTransaction"
+},
+{
+    "patterns": [
+        {
+            "urlPattern": "/apikey/{id}/",
+            "method": "PUT"
+        }
+    ],
+    "accessName": "updateApiKey"
+}
+
+]

@@ -35,7 +35,7 @@ export class PaymentService {
             .getOne();
         if (!user) {
             throw new ForbiddenException(
-                'You dont have access to create payment with ' + `${user.tokens[0].symbol}` +
+                'You dont have token to create payment with ' + `${user.tokens[0].symbol}` +
                     `on ${user.tokens[0].network} network`,
             );
         }

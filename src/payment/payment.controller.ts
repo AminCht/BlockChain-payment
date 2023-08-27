@@ -7,6 +7,7 @@ import { TransactionNotFoundExceptionFilter } from '../transaction/filters/trans
 import { GetTransactionByIdResponseDto, TransactionNotFoundResponseDto } from './dto/getTransactionById.dto';
 import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import { EitherGuard } from '../apikey/guard/either.guard';
 
 @ApiBearerAuth()
 @ApiTags('Payment')
@@ -17,15 +18,13 @@ export class PaymentController {
     private transactionService: TransactionService
     )
      {}
-
-
   @Post()
   @ApiOperation({ summary: 'Create transaction(payment)' })
   @ApiResponse({ status: 400, description: 'Bad Request', type: BadRequestResponseDto })
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.',type: CreatePaymentResponseDto})
   @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
   @ApiQuery({ name: 'currencyId'})
-  @UseGuards(AuthGuard(['jwt']))
+  @UseGuards(EitherGuard)
   async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto | string> {
     return await this.paymentService.createPayment(req['user'].id, createPaymentdto);
   }
@@ -37,7 +36,7 @@ export class PaymentController {
   @ApiResponse({ status: 200, description: 'Transaction found',type: GetTransactionByIdResponseDto})
   @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
   @ApiParam({ name: 'id', description: 'Id should be numeric' })
-  @UseGuards(AuthGuard(['jwt']))
+  @UseGuards(EitherGuard)
   async getTransactionById(@Req() req:Request, @Param('id') id:string){
     return await this.transactionService.getTransactionById(req['user'], Number(id));
   }

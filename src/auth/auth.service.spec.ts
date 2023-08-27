@@ -20,7 +20,7 @@ describe('AuthService', () => {
         expect(service).toBeDefined();
     });
     describe('signup', () => {
-        it('should create a user and return access token', async () => {
+        it('should create a user and return token token', async () => {
             const message = await service.signUp({
                 username: 'foad',
                 password: '1234',
@@ -30,7 +30,7 @@ describe('AuthService', () => {
         });
     });
     describe('login', () => {
-        it('should return access token to login', async () => {
+        it('should return token token to login', async () => {
             const token = await service.login({ username: 'foad', password: '1234' });
             expect(token).not.toBeNull();
         });
