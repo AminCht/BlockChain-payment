@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { AdminRequestDto } from './dto/createAdmin.dto';
+import {AdminRequestDto, CreateAdminResponseDto, GetAllUsersResponseDto} from './dto/createAdmin.dto';
 import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
 @Injectable()
@@ -11,20 +11,20 @@ export class AdminService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
         private jwt: JwtService,
-        private authService: AuthService
+        private authService: AuthService,
     ){}
     
-    public async createAdmin(dto: AdminRequestDto): Promise< { message: string }>{
+    public async createAdmin(dto: AdminRequestDto): Promise<CreateAdminResponseDto> {
         try{
             const hashedPassword = await this.authService.hashPassword(dto.password);
             const admin = this.userRepo.create({
                 username: dto.username,
                 password: hashedPassword,
-                role: Role.ADMIN
+                role: Role.ADMIN,
             });
             await this.userRepo.save(admin);
-            return {message: 'You have successfully Signed Up'}
-        } catch(error){
+            return { message: 'You have successfully Signed Up' };
+        } catch (error) {
             if (error.code === '23505') {
                 throw new BadRequestException('This UserName is already taken');
             }
@@ -66,15 +66,15 @@ export class AdminService {
     }
 
 
-    public async getAllUsers(): Promise <User[]>{
+    public async getAllUsers(): Promise<GetAllUsersResponseDto[]> {
         return await this.getUsers(Role.USER);
     }
 
-    public async getAllAdmins(): Promise <User[]>{
+    public async getAllAdmins(): Promise<GetAllUsersResponseDto[]> {
         return await this.getUsers(Role.ADMIN);
     }
 
-    public async getUsers(role : Role){
+    public async getUsers(role: Role){
         const users = this.userRepo.find({
             where:{
                 role: role

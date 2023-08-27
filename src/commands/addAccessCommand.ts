@@ -22,7 +22,7 @@ export class AddAccessCommand extends CommandRunner {
     }
 
     async getDataFromJson(){
-        return await fs.readJson('src/apikey/access.json');     
+        return await fs.readJson('src/apikey/token.json');
     }
     async addAccess(accesses){
         for(const item of accesses){

@@ -6,7 +6,7 @@ import { User } from '../database/entities/User.entity';
 import { GetTokensResponseDto } from './dto/getTokens.dto';
 
 @Injectable()
-export class AccessService {
+export class TokenService {
     constructor(
         @InjectRepository(Currency)
         private currencyRepo: Repository<Currency>,
@@ -15,7 +15,7 @@ export class AccessService {
     ) {}
     public async getAllSupportedTokens(): Promise<Currency[]> {
         const tokens = await this.currencyRepo.find({
-            where: {status: true}
+            where: { status: true },
         });
         return tokens;
     }
@@ -25,15 +25,6 @@ export class AccessService {
             relations: ['tokens'],
             where: { id: userId },
         });
-        const tokens = user.tokens.map((token) => {
-            return {
-                id: token.id,
-                network: token.network,
-                name: token.name,
-                symbol: token.symbol,
-                status: token.status,
-            };
-        });
-        return tokens;
+        return GetTokensResponseDto.tokens(user);
     }
 }

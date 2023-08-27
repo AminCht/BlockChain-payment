@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiKey } from '../../database/entities/apikey.entity';
-import { Request } from 'express';
 import  Strategy  from 'passport-headerapikey';
 import * as fs from 'fs-extra';
 
@@ -14,7 +13,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         super({ header: 'Authorization', prefix: 'Api-Key ', passReqToCallback: true },
         true,
         async (apiKey ,done, request) => {
-            return this.validate(request,apiKey, done);
+            return await this.validate(request,apiKey, done);
         });
     }
     async validate(request, apikey: string, done) {
@@ -31,7 +30,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         
     }
     async getJson(request){
-        const jsonData = await fs.readJson('src/apikey/access.json');
+        const jsonData = await fs.readJsonSync('src/apikey/token.json');
         let url = request.originalUrl;
         
         if(url[url.length-1] != '/'){

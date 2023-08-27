@@ -25,13 +25,13 @@ export class ApikeyController {
     @ApiOperation({summary: 'Update an ApiKey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: ApiKeyResponseDto})
-    @UseGuards(EitherGuard)
+    @UseGuards(AuthGuard(['jwt']))
     async updateApiKey(@Req() req: Request, @Body() dto: ApiKeyUpdateDto,@Param('id') id: number){
         return await this.apikeyService.updateApiKey(req['user'].id, dto, id);
     }
 
     @Get()
-    @ApiOperation({summary: 'Get access of apikey'})
+    @ApiOperation({summary: 'Get token of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
     @UseGuards(AuthGuard(['jwt']))
@@ -39,17 +39,17 @@ export class ApikeyController {
         return await this.apikeyService.getApiKeys(req['user'].id);
     }
     @Get(':id')
-    @ApiOperation({summary: 'Get access of apikey'})
+    @ApiOperation({summary: 'Get token of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
     @UseGuards(AuthGuard(['jwt']))
     async getApiKeysById(@Req() req: Request, @Param('id') id: number) {
         return await this.apikeyService.getApiKeysById(req['user'].id, id);
     }
-    @UseGuards(ApiKeyAuthGuard)
-    @ApiOperation({summary: 'Get access of apikey'})
+    @ApiOperation({summary: 'Get token of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
+    @UseGuards(ApiKeyAuthGuard)
     getAccess(@Req() req: Request){
         return req['user'].accesses;
     }

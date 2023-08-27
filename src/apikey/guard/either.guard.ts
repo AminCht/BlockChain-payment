@@ -6,16 +6,16 @@ import { Observable } from "rxjs";
 
 @Injectable()
 export class EitherGuard implements CanActivate {
-  constructor(private readonly guardA: JwtAuthGuard, private readonly guardB: ApiKeyAuthGuard) {}
+  constructor(private readonly jwtAuthGuard: JwtAuthGuard, private readonly apiKeyAuthGuard: ApiKeyAuthGuard) {}
 
    canActivate(context: ExecutionContext){
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
     const authorizationHeader = request.headers.authorization;
     if (authorizationHeader && authorizationHeader.startsWith('Api-Key ')) {
-        return this.guardB.canActivate(context);
+        return this.apiKeyAuthGuard.canActivate(context);
     }
-    return this.guardA.canActivate(context);
+    return this.jwtAuthGuard.canActivate(context);
   
     }
 }

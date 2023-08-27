@@ -8,13 +8,13 @@ import { ApiKeyAuthGuard } from './guard/apikey.guard';
 import { ApiKeyStrategy } from './strategy/apikey.strategy';
 import { JwtStrategy } from '../auth/strategy/jwt.strategy';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { Repository } from 'typeorm';
-import { Transaction } from '../database/entities/Transaction.entity';
+import { DataSource, Repository } from 'typeorm';
 
 describe('ApikeyService', () => {
     let service: ApikeyService;
     let userRepository: Repository<User>;
     let user;
+    let dataSource: DataSource;
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [TypeOrmModule.forFeature([ApiKey, User, EndPointAccess])],
@@ -55,13 +55,18 @@ describe('ApikeyService', () => {
                 status: false,
             };
             const response = await service.updateApiKey(user, dto, 1);
-            expect(response).not.toBeNull();
+            expect(response.accesses.length == 2);
         });
     });
     describe('deleteApiKey', () => {
         it('update an api key', async () => {
-            const response = await service.deleteApiKey(user, 2);
-            expect(response).not.toBeNull();
+            await service.deleteApiKey(user, 2);
+            const queryRunner = dataSource.createQueryRunner();
+            const result = await queryRunner.query(
+                'SELECT * FROM api_keys WHERE user_id = $1 AND id = $2',
+                [user.id, 2],
+            );
+            expect(result).toBeNull();
         });
     });
     describe('getApiKeyById', () => {
