@@ -1,11 +1,12 @@
-import { Body, Controller, Post, Get, UseFilters, Param, Query } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseFilters, Param, UseGuards, Req } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentRequestDto, CreatePaymentResponseDto, Currency, Network } from './dto/createPayment.dto';
-
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BadRequestResponseDto, CreatePaymentRequestDto, CreatePaymentResponseDto, UnAuthorizeResponseDto } from './dto/createPayment.dto';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TransactionService } from '../transaction/transaction.service';
 import { TransactionNotFoundExceptionFilter } from '../transaction/filters/transactionNotfound.filter';
-import { GetTransactionByIdResponseDto } from './dto/getTransactionById.dto';
+import { GetTransactionByIdResponseDto, TransactionNotFoundResponseDto } from './dto/getTransactionById.dto';
+import { Request } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiBearerAuth()
 @ApiTags('Payment')
@@ -16,24 +17,29 @@ export class PaymentController {
     private transactionService: TransactionService
     )
      {}
+
+
   @Post()
   @ApiOperation({ summary: 'Create transaction(payment)' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 400, description: 'Bad Request', type: BadRequestResponseDto })
   @ApiResponse({ status: 201, description: 'The transaction has been successfully created.',type: CreatePaymentResponseDto})
-  @ApiQuery({ name: 'Network', enum: Network })
-  @ApiQuery({ name: 'Currency', enum: Currency })
-  async createPayment(@Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto> {
-    return await this.paymentService.createPayment(createPaymentdto);
+  @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
+  @ApiQuery({ name: 'currencyId'})
+  @UseGuards(AuthGuard(['jwt']))
+  async createPayment(@Req() req, @Body() createPaymentdto: CreatePaymentRequestDto): Promise <CreatePaymentResponseDto | string> {
+    return await this.paymentService.createPayment(req['user'].id, createPaymentdto);
   }
 
   @Get('Transaction/:id')
   @UseFilters(TransactionNotFoundExceptionFilter)
   @ApiOperation({ summary: 'Get Transaction By id' })
-  @ApiResponse({ status: 404, description: 'Transaction with given id not found' })
-  @ApiParam({ name: 'id', description: 'Id should be numeric' })
+  @ApiResponse({ status: 404, description: 'Transaction with given id not found', type: TransactionNotFoundResponseDto})
   @ApiResponse({ status: 200, description: 'Transaction found',type: GetTransactionByIdResponseDto})
-  async getTransactionById(@Param('id') id:string){
-    return await this.transactionService.getTransactionById(+id);
+  @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
+  @ApiParam({ name: 'id', description: 'Id should be numeric' })
+  @UseGuards(AuthGuard(['jwt']))
+  async getTransactionById(@Req() req:Request, @Param('id') id:string){
+    return await this.transactionService.getTransactionById(req['user'], Number(id));
   }
 
 }

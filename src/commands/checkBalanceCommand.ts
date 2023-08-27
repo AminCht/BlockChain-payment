@@ -8,7 +8,7 @@ import { DataSource, Repository } from "typeorm";
 import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
-export class CheckBallanceCommand extends CommandRunner {
+export class CheckBalanceCommand extends CommandRunner {
 
     private readonly provider: InfuraProvider;
     private tokenContract: Contract;
@@ -26,7 +26,7 @@ export class CheckBallanceCommand extends CommandRunner {
         this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
     }
     public async run(): Promise<void> {
-        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet"] });
+        const transactions = await this.transactionRepo.find({ where: { status: "Pending"},relations:["wallet","currency"] });
         for (const transaction of transactions) {
             await this.updateTransactionStatus(transaction);
         }
@@ -37,20 +37,21 @@ export class CheckBallanceCommand extends CommandRunner {
         let currentBalance;
         let decimals;
         if (
-            transaction.currency == 'eth' &&
-            transaction.network == 'ethereum'
+
+            transaction.currency.symbol == 'eth' &&
+            transaction.currency.network == 'ethereum'
         ) {
             currentBalance = await this.getBalance(transaction.wallet.address);
         } else if (
-            transaction.currency != 'eth' &&
-            transaction.network == 'ethereum'
+            transaction.currency.symbol != 'eth' &&
+            transaction.currency.network == 'ethereum'
         ) {
             currentBalance = await this.getTokenBalance(
                 transaction.wallet.address,
-                transaction.currency,
+                transaction.currency.symbol,
             );
             decimals = await this.tokenContract.decimals();
-        }
+        } else { return; }
         const expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         if (now >= transaction.expireTime) {
@@ -72,11 +73,17 @@ export class CheckBallanceCommand extends CommandRunner {
             await queryRunner.connect();
             await queryRunner.startTransaction();
             await queryRunner.manager.save(transaction);
-            await queryRunner.manager.save(Wallet, wallet);
+            if (status != 'Pending') {
+                await queryRunner.manager.update(
+                    Wallet,
+                    { id: transaction.wallet.id },
+                    { lock: false },
+                );
+            }
             await queryRunner.commitTransaction();
         } catch (error) {
             await queryRunner.rollbackTransaction();
-            return error;
+            throw error;
         } finally {
             await queryRunner.release();
         }
