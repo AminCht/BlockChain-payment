@@ -34,7 +34,7 @@ export class ApikeyController {
     @ApiOperation({summary: 'Get access of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
-    @UseGuards(ApiKeyAuthGuard)
+    @UseGuards(AuthGuard(['jwt']))
     getAccess(@Req() req: Request){
         return req['user'].accesses;
     }
