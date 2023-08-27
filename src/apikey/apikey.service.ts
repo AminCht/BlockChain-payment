@@ -13,11 +13,17 @@ export class ApikeyService {
         @InjectRepository(EndPointAccess) private endPointsRepo: Repository<EndPointAccess>,
     ) {}
     public async getApiKeys(userId: number): Promise<ApiKey[]> {
-        const apiKeys = await this.apiKeyRepo.find({ where: { user: { id: userId } } });
+        const apiKeys = await this.apiKeyRepo.find({
+            where: { user: { id: userId } },
+            relations: ['accesses'],
+        });
         return apiKeys;
     }
     public async getApiKeysById(userId: number, apiKeyId: number): Promise<ApiKey> {
-        const apiKey = await this.apiKeyRepo.findOne({ where: { user: { id: userId }, id: apiKeyId } });
+        const apiKey = await this.apiKeyRepo.findOne({
+            where: { user: { id: userId }, id: apiKeyId },
+            relations: ['accesses'],
+        });
         return apiKey;
     }
     public async deleteApiKey(userId: number, apiKeyId: number) {

@@ -15,7 +15,8 @@ export class AdminController {
     @ApiOperation({ summary: 'Create Admin' })
     @ApiResponse({ status: 400, description: 'This UserName has already taken', type: CreateExistUsernameResponseDto })
     @ApiResponse({ status: 201, description: 'Create Admin and get message', type: CreateAdminResponseDto })
-    @Post('create')
+    @Post()
+    @UseGuards(JwtAdminAuthGuard)
     public async createAdmin(@Body() createAdmindto: AdminRequestDto): Promise< { message: string }> {
         return await this.adminService.createAdmin(createAdmindto);
     }
@@ -31,26 +32,26 @@ export class AdminController {
     }
 
     
-    @ApiOperation({ summary: 'Get All users(Only Admin access to this)' })
+    @ApiOperation({ summary: 'Get All users(Only Admin token to this)' })
     @ApiResponse({ status: 200, description: 'Get all users', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
-    @Get('AllUsers')
+    @Get('users')
     @UseGuards(JwtAdminAuthGuard)
-    public async getAllUsers(): Promise <User[]>{
+    public async getAllUsers(): Promise <GetAllUsersResponseDto[]>{
         return await this.adminService.getAllUsers();
     }
 
 
-    @ApiOperation({ summary: 'Get All Admins(Only Admin access to this)' })
+    @ApiOperation({ summary: 'Get All Admins(Only Admin token to this)' })
     @ApiResponse({ status: 200, description: 'Get all Admins', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
-    @Get('alladmins')
+    @Get('admins')
     @UseGuards(JwtAdminAuthGuard)
-    public async getAllAdmins(){
+    public async getAllAdmins(): Promise<GetAllUsersResponseDto[]> {
         return await this.adminService.getAllAdmins();
     }
 
-    @ApiOperation({ summary: 'Delete Admin (Only Admin have access to this and only admins can be deleted)' })
+    @ApiOperation({ summary: 'Delete Admin (Only Admin have token to this and only admins can be deleted)' })
     @ApiResponse({ status: 200, description: 'Delete Admin', type: DeleteAdminResponseDto })
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin', type: UnAuthorizeResponseDto })
     @ApiResponse({ status: 404, description: 'Delete User', type: DeleteNotAdminResponseDto })
