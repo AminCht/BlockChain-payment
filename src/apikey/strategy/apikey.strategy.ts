@@ -37,9 +37,11 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
 
         for (const item of this.jsonData) {
             for(const pattern of item.patterns){
-                if(pattern.urlPattern==partialReq.url && pattern.method == partialReq.method){
-                    return item.accessName;}
+                const regexPattern = new RegExp(pattern.urlPattern);
+                 if (regexPattern.test(partialReq.url)) {
+                     return item.accessName;
+                }
             }
-            }
+        }
     }
 }
