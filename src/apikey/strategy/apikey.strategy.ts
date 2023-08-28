@@ -13,13 +13,14 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         super({ header: 'Authorization', prefix: 'Api-Key ', passReqToCallback: true },
             true,
             async (apiKey ,done, request) => {
-                return await this.validate(request,apiKey, done);
+                return await this.validate({ url:request.originalUrl, method: request.method}, apiKey, done);
             });
     }
     private jsonData = fs.readJsonSync('src/apikey/access.json');
-    async validate(request, apikey: string, done) {
-        const accessName = await this.getJson(request);
-        const key = await this.apikeyRepo.createQueryBuilder('apikey')
+    async validate(partialReq: { url: string; method: string }, apikey: string, done) {
+        const accessName = await this.checkUrl(partialReq);
+        const key = await this.apikeyRepo
+            .createQueryBuilder('apikey')
             .leftJoinAndSelect('apikey.accesses', 'accesses')
             .where('apikey.key = :key', { key: apikey }).andWhere('accesses.name= :name', {name: accessName})
             .leftJoinAndSelect('apikey.user', 'user')
@@ -29,18 +30,16 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         }
         return done(null, key);
     }
-    async getJson(request){
-        let url = request.originalUrl;
-        if (url[url.length - 1] != '/') {
-            url = url + '/';
+    async checkUrl(partialReq: { url: string; method: string }){
+        if (partialReq.url[partialReq.url.length - 1] != '/') {
+            partialReq.url = partialReq.url + '/';
         }
 
         for (const item of this.jsonData) {
             for(const pattern of item.patterns){
-                if(pattern.urlPattern==url && pattern.method == request.method){
+                if(pattern.urlPattern==partialReq.url && pattern.method == partialReq.method){
                     return item.accessName;}
             }
-        }
+            }
     }
-
 }

@@ -11,7 +11,7 @@
 {
     "patterns": [
         {
-            "urlPattern": "/apikey/access/",
+            "urlPattern": "^\\/apikey\\/access\\/$",
             "method": "GET"
         }
     ],
@@ -20,7 +20,7 @@
 {
     "patterns": [
         {
-            "urlPattern": "/payment/transaction/{id}/",
+            "urlPattern": "^\\/payment\\/transaction\\/([^\\/]+)\\/$",
             "method": "GET"
         }
     ],
@@ -29,7 +29,7 @@
 {
     "patterns": [
         {
-            "urlPattern": "/apikey/{id}/",
+            "urlPattern": "^\\/apikey\\/([^\\/]+)\\/$",
             "method": "PUT"
         }
     ],
