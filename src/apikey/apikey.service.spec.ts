@@ -61,11 +61,7 @@ describe('ApikeyService', () => {
     describe('deleteApiKey', () => {
         it('update an api key', async () => {
             await service.deleteApiKey(user, 2);
-            const queryRunner = dataSource.createQueryRunner();
-            const result = await queryRunner.query(
-                'SELECT * FROM api_keys WHERE user_id = $1 AND id = $2',
-                [user.id, 2],
-            );
+            const result = await service.getApiKeysById(user, 2);
             expect(result).toBeNull();
         });
     });

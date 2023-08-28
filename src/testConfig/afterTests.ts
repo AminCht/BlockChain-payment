@@ -12,8 +12,8 @@ const teardown = async () => {
         dropSchema: false,
         entities: [__dirname + '/entities/*.entity{.js,.ts}'],
     });
-   //await dataSource.initialize();
-   //await dataSource.dropDatabase();
+   await dataSource.initialize();
+   await dataSource.dropDatabase();
 };
 
 module.exports = teardown;

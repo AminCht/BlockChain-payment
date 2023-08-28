@@ -17,7 +17,6 @@ export class AddAccessCommand extends CommandRunner {
         options?: Record<string, any>,
     ): Promise<void> {
         const accesses = await this.getDataFromJson();
-        console.log(typeof(accesses));
         await this.addAccess(accesses);
     }
 

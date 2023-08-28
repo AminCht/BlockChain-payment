@@ -11,45 +11,34 @@ import * as fs from 'fs-extra';
 export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy') {
     constructor(@InjectRepository(ApiKey) private apikeyRepo: Repository<ApiKey>) {
         super({ header: 'Authorization', prefix: 'Api-Key ', passReqToCallback: true },
-        true,
-        async (apiKey ,done, request) => {
-            return await this.validate(request,apiKey, done);
-        });
+            true,
+            async (apiKey ,done, request) => {
+                return await this.validate(request,apiKey, done);
+            });
     }
+    private jsonData = fs.readJsonSync('src/apikey/access.json');
     async validate(request, apikey: string, done) {
         const accessName = await this.getJson(request);
         const key = await this.apikeyRepo.createQueryBuilder('apikey')
-        .leftJoinAndSelect('apikey.accesses', 'accesses')
-        .where('apikey.key = :key', { key: apikey }).andWhere('accesses.name= :name', {name: accessName})
-        .leftJoinAndSelect('apikey.user', 'user')
-        .getOne();   
+            .leftJoinAndSelect('apikey.accesses', 'accesses')
+            .where('apikey.key = :key', { key: apikey }).andWhere('accesses.name= :name', {name: accessName})
+            .leftJoinAndSelect('apikey.user', 'user')
+            .getOne();
         if(!key){
-            return done(null, false)
+            return done(null, false);
         }
-        return done(null, key);       
-        
+        return done(null, key);
     }
     async getJson(request){
-        const jsonData = await fs.readJsonSync('src/apikey/token.json');
         let url = request.originalUrl;
-        
-        if(url[url.length-1] != '/'){
+        if (url[url.length - 1] != '/') {
             url = url + '/';
         }
-        
-        for (const item of jsonData) {
-            for(const pattern of item.patterns){         
+
+        for (const item of this.jsonData) {
+            for(const pattern of item.patterns){
                 if(pattern.urlPattern==url && pattern.method == request.method){
-                    return item.accessName;                  
-                }
-                const patternRegex = pattern.urlPattern.replace(
-                    /\{id\}/g,
-                    '\\d+'
-                  );
-                  const regexPattern = new RegExp(`^${patternRegex}$`);
-                  if (regexPattern.test(url)) {
-                    return item.accessName;
-                  }
+                    return item.accessName;}
             }
         }
     }

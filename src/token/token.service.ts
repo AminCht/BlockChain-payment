@@ -25,6 +25,6 @@ export class TokenService {
             relations: ['tokens'],
             where: { id: userId },
         });
-        return GetTokensResponseDto.tokens(user);
+        return GetTokensResponseDto.tokens(user.tokens);
     }
 }

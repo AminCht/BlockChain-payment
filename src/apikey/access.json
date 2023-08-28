@@ -2,7 +2,7 @@
 {
     "patterns": [
         {
-            "urlPattern": "/payment/",
+            "urlPattern": "^\\/payment\\/$",
             "method": "POST"
         }
     ],

@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
-import {User} from "../../database/entities/User.entity";
+import {Currency} from "../../database/entities/Currency.entity";
 
 export class GetTokensResponseDto {
-    static tokens(user: User) {
-        const tokens = user.tokens.map((token) => {
+    static tokens(userTokens: Currency[]) {
+        const mapTokens = userTokens.map((token) => {
             return {
                 id: token.id,
                 network: token.network,
@@ -12,7 +12,7 @@ export class GetTokensResponseDto {
                 status: token.status,
             };
         });
-        return tokens;
+        return mapTokens;
     }
     @ApiProperty()
     network: string;
