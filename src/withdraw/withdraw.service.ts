@@ -40,6 +40,14 @@ export class WithdrawService {
         throw new BadRequestException('Your requested amount is less than your payments');
 
     }
+
+    async cancelWithDraw(id: number){
+        return await this.withdrawRepo.update(id,{
+            status: withdrawStatus.CANCEL
+        });
+    }
+
+
     async getUserWithdraw(userId: number){
         const withDraw = await this.withdrawRepo.findOne({
             where:{

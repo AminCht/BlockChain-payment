@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { WithdrawService } from './withdraw.service';
 import { CreateWithdrawDto } from './dto/withdraw.dto';
@@ -18,5 +18,11 @@ export class WithdrawController {
     @Post()
     async createWithdraw(@Body() dto: CreateWithdrawDto, @Req() req: Request){
         return await this.withdrawService.createWithdraw(dto, req['user']);
+    }
+
+    @UseGuards(AuthGuard(['jwt']))
+    @Patch(':id')
+    async cancelWithdraw(@Param('id') withdrawId: string){
+        return await this.withdrawService.cancelWithDraw(Number(withdrawId));
     }
 }
