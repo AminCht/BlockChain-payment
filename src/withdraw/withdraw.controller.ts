@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { WithdrawService } from './withdraw.service';
-import { CreateWithdrawDto } from './dto/withdraw.dto';
+import { CreateWithdrawDto, UpdateWithdrawRequestDto } from './dto/withdraw.dto';
 import { Request } from 'express';
 
 @Controller('withdraw')
@@ -27,8 +27,8 @@ export class WithdrawController {
     }
 
     @UseGuards(AuthGuard(['jwt']))
-    @Put()
-    async updateWithdraw(@Body() dto){
-        return await this.withdrawService.updateWithdraw(dto);
+    @Put(':id')
+    async updateWithdraw(@Body() dto: UpdateWithdrawRequestDto, @Param('id') id: string, @Req() req: Request){
+        return await this.withdrawService.updateWithdraw(dto, Number(id), req['user']);
     }
 }
