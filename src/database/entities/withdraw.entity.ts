@@ -18,7 +18,7 @@ export class Withdraw{
     status: Status
     
     @Column()
-    amound: string
+    amount: string
     
     @Column()
     token: string
@@ -29,10 +29,10 @@ export class Withdraw{
     @Column()
     dst_wallet: string
 
-    @Column()
+    @Column({ nullable: true })
     tx_hash: string
 
-    @Column()
+    @Column({ nullable: true })
     tx_url: string
 
     @ManyToOne(() => User, (user) => user.transactions)
