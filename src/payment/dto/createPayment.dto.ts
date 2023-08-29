@@ -10,7 +10,6 @@ export class CreatePaymentRequestDto {
     @IsDecimal()
     @IsNumberString()
     amount: string;
-
 }
 
 export class CreatePaymentResponseDto {

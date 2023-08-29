@@ -17,6 +17,7 @@
     "create-admin": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main create-admin",
     "create:test-wallet": "npm run build && dotenv -e test.env dotenv -v MODE=cmd node dist/main create-wallet",
     "check-balance": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main check-balance",
+    "add-access": "npm run build && dotenv -e development.env dotenv -v MODE=cmd node dist/main add-access",
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "createmigration:dev": "dotenv -e development.env -- npm run typeorm -- -d ./src/database/developmentDatasource.config.ts migration:generate ./src/database/dev_migrations/dev_migrations",
     "migrate:dev": "npm run build && dotenv -e development.env -- npm run typeorm migration:run -- -d ./src/database/developmentDatasource.config.ts",
@@ -49,10 +50,15 @@
     "dotenv-cli": "^7.2.1",
     "env-cmd": "^10.1.0",
     "ethers": "^6.7.0",
+    "fs-extra": "^11.1.1",
     "mysql": "^2.18.1",
     "nest-commander": "^3.11.0",
     "nestjs-seeder": "^0.3.2",
+    "passport-custom": "^1.1.1",
+    "passport-headerapikey": "^1.2.2",
+    "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
     "pg": "^8.11.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
@@ -103,5 +109,6 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "globalSetup": "<rootDir>/testConfig/beforTests.ts",
-    "globalTeardown": "<rootDir>/testConfig/afterTests.ts"}
+    "globalTeardown": "<rootDir>/testConfig/afterTests.ts"
+  }
 }

@@ -37,7 +37,6 @@ export class CheckBalanceCommand extends CommandRunner {
         let currentBalance;
         let decimals;
         if (
-
             transaction.currency.symbol == 'eth' &&
             transaction.currency.network == 'ethereum'
         ) {

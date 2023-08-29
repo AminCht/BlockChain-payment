@@ -6,108 +6,107 @@ import { Role } from "../../database/entities/User.entity";
 export class AdminRequestDto{ 
     @ApiProperty()
     @IsNotEmpty()
-    username: string
+    username: string;
 
     @ApiProperty()
     @IsNotEmpty()
-    password: string
+    password: string;
 }
 
 
 export class CreateAdminResponseDto{
     @ApiProperty({ default: 'You have successfully Signed Up' })
-    message: string
+    message: string;
 }
 
 export class CreateExistUsernameResponseDto{
     @ApiProperty({ default: 'This UserName has already taken' })
-    message: string
+    message: string;
 
     @ApiProperty({default: 'Bad Request'})
-    error: string
+    error: string;
 
     @ApiProperty({default: 400})
-    statusCode: number
+    statusCode: number;
 }
 
 export class LogingAdminResponseDto{
     @ApiProperty({ default: 'You have successfully logged in' })
-    message: string
+    message: string;
 }
 
 export class LogingWrongInfoAdminResponseDto{
     @ApiProperty({ default:'Credentials incorrect' })
-    message: string
+    message: string;
 
     @ApiProperty({default: 'Unauthorized'})
-    error: string
+    error: string;
 
     @ApiProperty({default: 401})
-    statusCode: number
+    statusCode: number;
 }
 
 export class DeleteAdminResponseDto{
     @ApiProperty({ default: 'Admin deleted' })
-    message: string
+    message: string;
 }
 
 export class DeleteNotAdminResponseDto{
     @ApiProperty({ default: 'Admin not found' })
-    message: string
+    message: string;
 
     @ApiProperty({default: 'Not Found'})
-    error: string
+    error: string;
 
     @ApiProperty({default: 404})
-    statusCode: number
+    statusCode: number;
 }
 
 export class DeleteAdminByNotAdminResponseDto{
     @ApiProperty({ default: 'Only Admins can delete admins' })
-    message: string
+    message: string;
 
     @ApiProperty({default: 'Unauthorized'})
-    error: string
+    error: string;
 
     @ApiProperty({default: 401})
-    statusCode: number
+    statusCode: number;
 }
 
 export class GetAllUsersResponseDto{
 
     @ApiProperty()
-    id: number
+    id: number;
 
     @ApiProperty()
-    username: string
+    username: string;
 
     @ApiProperty()
-    password: string
+    password: string;
 
     @ApiProperty()
-    createdAt: Date
+    createdAt: Date;
 
     @ApiProperty()
-    updatedAt: Date
+    updatedAt: Date;
 
     @ApiProperty()
-    role: Role
+    role: Role;
 }
 export class GetAllUserByNotAdminResponseDto{
     @ApiProperty({default: 'Only Admins can see All users'})
-    message: string
-    
+    message: string;
     @ApiProperty({default: 'Unauthorized'})
-    error: string
+    error: string;
 
     @ApiProperty({default: 401})
-    statusCode: number
+    statusCode: number;
 }
 
 export class UnAuthorizeResponseDto{
     @ApiProperty({default: "Unauthorized"})
-    message: string
+    message: string;
 
     @ApiProperty({default: 401})
-    statusCode: number
+    statusCode: number;
 }

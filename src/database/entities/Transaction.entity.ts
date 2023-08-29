@@ -2,11 +2,13 @@ import { BeforeInsert, Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 
 import { Wallet } from './Wallet.entity';
 import { User } from './User.entity';
 import { Currency } from './Currency.entity';
- export enum Status {
+export enum Status {
     PENDING = 'Pending',
     SUCCESSFUL = 'Successful',
     FAILED = 'Failed'
 }
+
+
 @Entity({ name: 'Transactions' })
 export class Transaction{
     @PrimaryGeneratedColumn()
@@ -14,6 +16,7 @@ export class Transaction{
 
     @Column({nullable: false })
     amount: string;
+
     @Column({ type: 'enum', enum: Status, default: 'Pending' })
     status: string;
 
@@ -23,12 +26,12 @@ export class Transaction{
     @Column({ nullable: true })
     wallet_balance_after: string;
 
-
     @Column()
     createdDate: Date;
 
     @Column()
     expireTime: Date;
+
     @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
     wallet: Wallet;
 
