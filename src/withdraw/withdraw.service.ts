@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Withdraw } from '../database/entities/withdraw.entity';
 import { Repository } from 'typeorm';
@@ -41,13 +41,7 @@ export class WithdrawService {
 
     }
 
-    async cancelWithDraw(id: number){
-        return await this.withdrawRepo.update(id,{
-            status: withdrawStatus.CANCEL
-        });
-    }
-
-
+    
     async getUserWithdraw(userId: number){
         const withDraw = await this.withdrawRepo.findOne({
             where:{
@@ -62,10 +56,10 @@ export class WithdrawService {
     async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <Number>{
         const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
         const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(user);
-               
+        
         return transactionsAmount - acceptedWithdrawAmount;
     }
-
+    
     async getAllSuccessfulTransactions(currency: {token: string, network: string}, user: User){
         const transaction = await this.transactionRepo.createQueryBuilder('transaction')
         .leftJoinAndSelect('transaction.currency', 'currency')
@@ -75,7 +69,7 @@ export class WithdrawService {
         .andWhere('transaction.status=:status', {status: Status.SUCCESSFUL}).getRawOne();
         return transaction.sum;
     }
-
+    
     async getAllAcceptedWithDraw(user: User){
         const acceptedwithdraw = await this.transactionRepo.createQueryBuilder('withdraw')
         .leftJoinAndSelect('withdraw.user', 'user')
@@ -83,5 +77,32 @@ export class WithdrawService {
         .where('withdraw.userId=:userId',{userId: user.id}).andWhere('withdraw.status:status', {status: withdrawStatus.SUCCESSFUL})
         .getRawOne();
         return acceptedwithdraw.sum; 
+    }
+
+    async cancelWithdraw(id: number){
+        await this.checkWithdrawById(id);
+        return await this.withdrawRepo.update(id,{
+            status: withdrawStatus.CANCEL
+        });
+    }
+
+    async updateWithdraw(dto, id: number){
+        await this.checkWithdrawById(id);
+        await this.withdrawRepo.save({
+            id: id,
+
+        })
+    }
+
+    async checkWithdrawById(id: number){
+        const withdraw = await this.withdrawRepo.findOne({
+            where:{
+                id: id
+            }
+        });
+        if(!withdraw){
+            throw new NotFoundException(`Withdraw with id ${id} not found`);
+        }
+
     }
 }
