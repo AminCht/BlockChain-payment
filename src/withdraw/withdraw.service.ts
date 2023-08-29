@@ -24,8 +24,18 @@ export class WithdrawService {
     }
 
     async createWithdraw(dto: CreateWithdrawDto, user: User){
+        const withdraw = await this.withdrawRepo.findOne({
+            where:{
+                status: withdrawStatus.PENDING,
+                user:{
+                    id: user.id
+                }
+            }
+        });
+        if(withdraw){
+            throw new BadRequestException('You have a pending Withdraw Request');
+        }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-        console.log(allowedAmount);
         if(Number(dto.amount) < Number(allowedAmount)){
             const withdraw = this.withdrawRepo.create({
                 user: user,
