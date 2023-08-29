@@ -24,14 +24,7 @@ export class WithdrawService {
     }
 
     async createWithdraw(dto: CreateWithdrawDto, user: User){
-        const withdraw = await this.withdrawRepo.findOne({
-            where:{
-                status: withdrawStatus.PENDING,
-                user:{
-                    id: user.id
-                }
-            }
-        });
+        const withdraw = this.getUserWithdraw(user.id); 
         if(withdraw){
             throw new BadRequestException('You have a pending Withdraw Request');
         }
@@ -46,6 +39,17 @@ export class WithdrawService {
         }
         throw new BadRequestException('Your requested amount is less than your payments');
 
+    }
+    async getUserWithdraw(userId: number){
+        const withDraw = await this.withdrawRepo.findOne({
+            where:{
+                status: withdrawStatus.PENDING,
+                user:{
+                    id: userId
+                }
+            }
+        });
+        return withDraw;
     }
     async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <Number>{
         const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
