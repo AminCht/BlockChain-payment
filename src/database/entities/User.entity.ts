@@ -9,6 +9,7 @@ import {
 import { Transaction } from './Transaction.entity';
 import { Currency } from './Currency.entity';
 import { ApiKey } from './apikey.entity';
+import { Withdraw } from './withdraw.entity';
 
 export enum Role{
     USER = 'User',
@@ -44,6 +45,9 @@ export class User {
     @ManyToMany(() => Currency, (token) => token.users)
     tokens: Currency[];
 
+    @OneToMany(()=> Withdraw, (withdraw)=> withdraw.user)
+    withdraws: Withdraw[]
+    
     @BeforeInsert()
     setDates() {
         const date = new Date();

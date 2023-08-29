@@ -53,7 +53,7 @@ export class ApikeyService {
             if (apiKeyUpdateDto.endPointList) {
                 endPoints = await this.getEndPoints(apiKeyUpdateDto.endPointList);
             }
-            const updatedApiKey = this.apiKeyRepo.save({
+            const updatedApiKey = await this.apiKeyRepo.save({
                 id: apikey.id,
                 accesses: endPoints,
                 status: apiKeyUpdateDto.status,
