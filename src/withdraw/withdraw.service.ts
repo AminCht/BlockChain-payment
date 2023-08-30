@@ -25,7 +25,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-   /*    if(BigInt(dto.amount) <= allowedAmount){
+       if(Number(dto.amount) <= Number(allowedAmount)){
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
                 token: dto.token,
@@ -34,7 +34,7 @@ export class WithdrawService {
                 user: user
             });
             return await this.withdrawRepo.save(withdraw);
-       }*/
+       }
         throw new BadRequestException('Your requested amount is less than your payments');
 
     }
@@ -43,12 +43,8 @@ export class WithdrawService {
     async getUserWithdraw(userId: number){
         const withDraw = await this.withdrawRepo.findOne({
             where:{
-                status: withdrawStatus.PENDING,
-                user:{
-                    id: userId
-                }
-            }
-        });
+                status: withdrawStatus.PENDING || withdrawStatus.APPROVED,
+                user:{ id: userId }}});
         return withDraw;
     }
     async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <BigInt>{
@@ -65,10 +61,10 @@ export class WithdrawService {
         .andWhere('currency.symbol=:token', {token: currency.token})
         .andWhere('currency.network=:network', {network: currency.network})
         .andWhere('transaction.status=:status', {status: Status.SUCCESSFUL})
-        .select(['amount']).getMany();
-        let sumOfAmounts;
-        for( var withdraw of successfulTransactions){
-            sumOfAmounts += BigInt(withdraw.amount);
+        .select(['transaction.amount']).getMany();
+        let sumOfAmounts: bigint= BigInt(0);
+        for( var transaction of successfulTransactions){
+            sumOfAmounts += BigInt(transaction.amount);
         }
         return BigInt(sumOfAmounts); 
     }
@@ -80,13 +76,13 @@ export class WithdrawService {
         .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
         .select(['amount'])
         .getMany();
-        let sumOfAmounts;
+        let sumOfAmounts: bigint = BigInt(0);
         for( var withdraw of acceptedwithdraw){
             sumOfAmounts += BigInt(withdraw.amount);
         }
         return BigInt(sumOfAmounts); 
     }
-
+    
     async cancelWithdraw(id: number){
         await this.checkWithdrawById(id);
         return await this.withdrawRepo.update(id,{

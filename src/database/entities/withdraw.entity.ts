@@ -1,12 +1,11 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable,
-    ManyToMany, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity,  ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import { User } from "./User.entity";
 
 export enum Status{
-    SUCCESSFUL = 'Successful',
-    PENDING = 'Pending',
-    CANCEL = 'Failed',
-    APPROVED = 'Apporved'
+    SUCCESSFUL = 0,
+    PENDING = 1,
+    CANCEL = 2,
+    APPROVED = 3
 }
 
 @Entity({name: 'Withdraws'})
