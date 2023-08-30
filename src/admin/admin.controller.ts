@@ -66,10 +66,11 @@ export class AdminController {
 
     @Get('withdraw')
     @UseGuards(JwtAdminAuthGuard)
-    public async getWithdraw(@Query('page', ParseIntPipe) page: number,
-    @Query('pageSize', ParseIntPipe) limit: number,
+    public async getWithdraw(
+    @Query('page', ParseIntPipe) page: number,
+    @Query('pageSize', ParseIntPipe) size: number,
     @Query('orderBy') order: string,
     @Query('sort') sort: 'ASC' | 'DESC',){
-        return await this.adminService.getAllWithdraws({page: page, pageSize: limit, sortBy: order, sortOrder: sort});
+        return await this.adminService.getAllWithdraws({page: page, pageSize: size, sortBy: order, sortOrder: sort});
     }
 }
