@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminRequestDto, GetAllUsersResponseDto, CreateAdminResponseDto, LogingAdminResponseDto, UnAuthorizeResponseDto
     , DeleteAdminResponseDto, DeleteNotAdminResponseDto,CreateExistUsernameResponseDto, LogingWrongInfoAdminResponseDto } from './dto/createAdmin.dto';
@@ -6,6 +6,7 @@ import { Response } from 'express';
 import { User } from '../database/entities/User.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
+import { PaginationDto } from '../pagination/pagination.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -61,5 +62,13 @@ export class AdminController {
         res.cookie('accessToken', token, {
             httpOnly: true,
         });
+    }
+
+    @Get('withdraw')
+    public async getWithdraw(@Query('page', ParseIntPipe) page: number,
+    @Query('pageSize', ParseIntPipe) limit: number,
+    @Query('orderBy') order: string,
+    @Query('sort') sort: 'ASC' | 'DESC',){
+        return await this.adminService.getAllWithdraws({page: page, pageSize: limit, sortBy: order, sortOrder: sort});
     }
 }
