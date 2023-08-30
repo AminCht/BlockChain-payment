@@ -100,6 +100,6 @@ export class AdminService {
             query = query.orderBy(sortBy, sortOrder);
         }
         return query.skip(skip).take(take).getMany()*/
-        return await PaginationHelper.paginate(this.userRepo,paginationDto)
+        return await PaginationHelper.paginate(this.withdrawRepo,paginationDto);
     }
 }
