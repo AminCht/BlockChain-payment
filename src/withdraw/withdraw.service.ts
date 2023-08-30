@@ -15,11 +15,7 @@ export class WithdrawService {
 
     async getAllWithdraws(userId: number){
         return await this.withdrawRepo.find({
-            where: {
-                user:{
-                    id: userId
-                }
-            }
+            where: { user:{ id: userId}}
         });
     }
 
@@ -29,7 +25,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-        if(Number(dto.amount) <= Number(allowedAmount)){
+   /*    if(BigInt(dto.amount) <= allowedAmount){
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
                 token: dto.token,
@@ -38,7 +34,7 @@ export class WithdrawService {
                 user: user
             });
             return await this.withdrawRepo.save(withdraw);
-        }
+       }*/
         throw new BadRequestException('Your requested amount is less than your payments');
 
     }
@@ -55,7 +51,7 @@ export class WithdrawService {
         });
         return withDraw;
     }
-    async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <Number>{
+    async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <BigInt>{
         const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
         const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(user);
         
@@ -63,22 +59,32 @@ export class WithdrawService {
     }
     
     async getAllSuccessfulTransactions(currency: {token: string, network: string}, user: User){
-        const transaction = await this.transactionRepo.createQueryBuilder('transaction')
+        const successfulTransactions = await this.transactionRepo.createQueryBuilder('transaction')
         .leftJoinAndSelect('transaction.currency', 'currency')
-        .select('SUM(CAST(transaction.amount AS DECIMAL))', 'sum')
-        .where('transaction.userId=:userId',{userId: user.id}).andWhere('currency.symbol=:token', {token: currency.token})
+        .where('transaction.userId=:userId',{userId: user.id})
+        .andWhere('currency.symbol=:token', {token: currency.token})
         .andWhere('currency.network=:network', {network: currency.network})
-        .andWhere('transaction.status=:status', {status: Status.SUCCESSFUL}).getRawOne();
-        return transaction.sum;
+        .andWhere('transaction.status=:status', {status: Status.SUCCESSFUL})
+        .select(['amount']).getMany();
+        let sumOfAmounts;
+        for( var withdraw of successfulTransactions){
+            sumOfAmounts += BigInt(withdraw.amount);
+        }
+        return BigInt(sumOfAmounts); 
     }
     
     async getAllAcceptedWithDraw(user: User){
         const acceptedwithdraw = await this.withdrawRepo.createQueryBuilder('withdraw')
         .leftJoinAndSelect('withdraw.user', 'user')
-        .select('SUM(CAST(withdraw.amount AS DECIMAL))', 'sum')
-        .where('withdraw.userId=:userId',{userId: user.id}).andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
-        .getRawOne();
-        return acceptedwithdraw.sum; 
+        .where('withdraw.userId=:userId',{userId: user.id})
+        .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
+        .select(['amount'])
+        .getMany();
+        let sumOfAmounts;
+        for( var withdraw of acceptedwithdraw){
+            sumOfAmounts += BigInt(withdraw.amount);
+        }
+        return BigInt(sumOfAmounts); 
     }
 
     async cancelWithdraw(id: number){
