@@ -49,7 +49,7 @@ export class WithdrawService {
 
     public async updateWithdraw(dto: UpdateWithdrawRequestDto, id: number,user: User): Promise<Withdraw>{
         let allowedAmount;
-        if (dto.amount || dto.token || dto.token) {
+        if (dto.amount || dto.token || dto.network) {
             const withdraw = await this.getWithdrawById(id);
             allowedAmount = await this.getAllowedAmount(
             { token: dto.token ?? withdraw.token, network: dto.network?? withdraw.network }, user);}
