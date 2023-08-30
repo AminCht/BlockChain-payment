@@ -65,6 +65,7 @@ export class AdminController {
     }
 
     @Get('withdraw')
+    @UseGuards(JwtAdminAuthGuard)
     public async getWithdraw(@Query('page', ParseIntPipe) page: number,
     @Query('pageSize', ParseIntPipe) limit: number,
     @Query('orderBy') order: string,
