@@ -39,4 +39,5 @@ export class UpdateWithdrawRequestDto{
     @ApiProperty()
     @IsOptional()
     dst_wallet?: string
+
 }

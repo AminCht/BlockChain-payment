@@ -13,19 +13,18 @@ export class WithdrawService {
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
         @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
 
-    async getAllWithdraws(userId: number){
+    public async getAllWithdraws(userId: number): Promise<Withdraw[]> {
         return await this.withdrawRepo.find({
-            where: { user:{ id: userId}}
+            where: { user: { id: userId } },
         });
     }
-
-    async createWithdraw(dto: CreateWithdrawDto, user: User){
-        const withdraw = await this.getUserWithdraw(user.id); 
-        if(withdraw){
+    public async createWithdraw(dto: CreateWithdrawDto, user: User): Promise<Withdraw>{
+        const withdraw = await this.getPendingWithdraw(user.id);
+        if (withdraw) {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-       if(Number(dto.amount) <= Number(allowedAmount)){
+        if(Number(dto.amount) <= Number(allowedAmount)){
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
                 token: dto.token,
@@ -34,27 +33,51 @@ export class WithdrawService {
                 user: user
             });
             return await this.withdrawRepo.save(withdraw);
-       }
-        throw new BadRequestException('Your requested amount is less than your payments');
+        }
+        throw new BadRequestException('Your requested amount is more than your payments');
 
     }
+    public async cancelWithdraw(id: number): Promise<Withdraw> {
+        const result = await this.withdrawRepo.update(id,{
+            status: withdrawStatus.CANCEL
+        });
+        if(result.affected == 1){
+            return await this.getWithdrawById(id);
+        }
+        throw new NotFoundException(`Withdraw with id ${id} not found`);
+    }
 
-    
-    async getUserWithdraw(userId: number){
+    public async updateWithdraw(dto: UpdateWithdrawRequestDto, id: number,user: User): Promise<Withdraw>{
+        let allowedAmount;
+        if (dto.amount || dto.token || dto.token) {
+            const withdraw = await this.getWithdrawById(id);
+            allowedAmount = await this.getAllowedAmount(
+            { token: dto.token ?? withdraw.token, network: dto.network?? withdraw.network }, user);}
+        if (!allowedAmount || Number(dto.amount) <= Number(allowedAmount)) {
+            const result = await this.withdrawRepo.update(id, { ...dto });
+            if(result.affected == 1){
+                return await this.getWithdrawById(id);
+            }
+            throw new NotFoundException(`Withdraw with id ${id} not found`);
+        }
+        throw new BadRequestException('Your requested amount is more than your payments');
+    }
+    private async getPendingWithdraw(userId: number): Promise<Withdraw>{
         const withDraw = await this.withdrawRepo.findOne({
             where:{
                 status: withdrawStatus.PENDING || withdrawStatus.APPROVED,
-                user:{ id: userId }}});
+                user: { id: userId },
+            },
+        });
         return withDraw;
     }
-    async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <BigInt>{
+    private async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <bigint>{
         const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
         const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(user);
-        
         return transactionsAmount - acceptedWithdrawAmount;
     }
     
-    async getAllSuccessfulTransactions(currency: {token: string, network: string}, user: User){
+    private async getAllSuccessfulTransactions(currency: {token: string, network: string}, user: User): Promise <bigint>{
         const successfulTransactions = await this.transactionRepo.createQueryBuilder('transaction')
         .leftJoinAndSelect('transaction.currency', 'currency')
         .where('transaction.userId=:userId',{userId: user.id})
@@ -69,7 +92,7 @@ export class WithdrawService {
         return BigInt(sumOfAmounts); 
     }
     
-    async getAllAcceptedWithDraw(user: User){
+    private async getAllAcceptedWithDraw(user: User): Promise <bigint>{
         const acceptedwithdraw = await this.withdrawRepo.createQueryBuilder('withdraw')
         .leftJoinAndSelect('withdraw.user', 'user')
         .where('withdraw.userId=:userId',{userId: user.id})
@@ -82,44 +105,11 @@ export class WithdrawService {
         }
         return BigInt(sumOfAmounts); 
     }
-    
-    async cancelWithdraw(id: number){
-        const result = await this.withdrawRepo.update(id,{
-            status: withdrawStatus.CANCEL
-        });
-        if(result.affected == 1){
-            return await this.getWithdrawById(id);
-        }
-        throw new NotFoundException(`Withdraw with id ${id} not found`);
-    }
-
-    async updateWithdraw(dto: UpdateWithdrawRequestDto, id: number,user: User){
-        const withdraw = await this.getWithdrawById(id);
-        let allowedAmount;
-        if(dto.network && dto.token){
-            allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-        }
-        else{
-            allowedAmount = await this.getAllowedAmount({ token: withdraw.token, network: withdraw.network }, user)
-        }
-        if(Number(dto.amount)<=Number(allowedAmount)){
-            const result = await this.withdrawRepo.update(id, {...dto});
-            if(result.affected == 1){
-                return await this.getWithdrawById(id);
-            }
-            throw new NotFoundException(`Withdraw with id ${id} not found`);
-            
-        }
-        throw new BadRequestException('Your requested amount is less than your payments');
-    }
-
-    async getWithdrawById(id: number){
+    private async getWithdrawById(id: number): Promise<Withdraw>{
         const withdraw = await this.withdrawRepo.findOne({
-            where:{
-                id: id
-            }
+            where: { id: id },
         });
-        if(!withdraw){
+        if (!withdraw) {
             throw new NotFoundException(`Withdraw with id ${id} not found`);
         }
         return withdraw;
