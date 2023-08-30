@@ -25,7 +25,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-        if(BigInt(dto.amount) <= allowedAmount){
+   /*    if(BigInt(dto.amount) <= allowedAmount){
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
                 token: dto.token,
@@ -34,7 +34,7 @@ export class WithdrawService {
                 user: user
             });
             return await this.withdrawRepo.save(withdraw);
-        }
+       }*/
         throw new BadRequestException('Your requested amount is less than your payments');
 
     }
