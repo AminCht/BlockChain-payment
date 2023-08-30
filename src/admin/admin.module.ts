@@ -6,10 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../database/entities/User.entity';
 import { AuthService } from '../auth/auth.service';
 import { JwtAdminStrategy } from '../auth/strategy/jwt.admin.startegy';
+import { Withdraw } from '../database/entities/withdraw.entity';
 
 @Module({
   imports:[JwtModule.register({secret: process.env.JWT_SECRET_ADMIN, signOptions: { expiresIn: '20d' }}),
-  TypeOrmModule.forFeature([User])],
+  TypeOrmModule.forFeature([User, Withdraw])],
   controllers: [AdminController],
   providers: [AdminService,JwtAdminStrategy, AuthService]
 })

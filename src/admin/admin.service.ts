@@ -7,10 +7,13 @@ import {AdminRequestDto, CreateAdminResponseDto, GetAllUsersResponseDto} from '.
 import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from '../pagination/pagination.dto';
+import { Withdraw } from '../database/entities/withdraw.entity';
+import { PaginationHelper } from '../pagination/pagination.helper';
 @Injectable()
 export class AdminService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
+        @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
         private jwt: JwtService,
         private authService: AuthService,
     ){}
@@ -89,13 +92,14 @@ export class AdminService {
 
 
     async getAllWithdraws(paginationDto: PaginationDto){
-        const { page, pageSize, sortBy, sortOrder } = paginationDto;
+     /*   const { page, pageSize, sortBy, sortOrder } = paginationDto;
         const skip = (page - 1) * pageSize;
         const take = pageSize;
-        let query: SelectQueryBuilder<User> = this.userRepo.createQueryBuilder();
+        let query: SelectQueryBuilder<Withdraw> = this.withdrawRepo.createQueryBuilder();
         if (sortBy) {
             query = query.orderBy(sortBy, sortOrder);
         }
-        return query.skip(skip).take(take).getMany()
+        return query.skip(skip).take(take).getMany()*/
+        return await PaginationHelper.paginate(this.userRepo,paginationDto)
     }
 }
