@@ -84,14 +84,17 @@ export class WithdrawService {
     }
     
     async cancelWithdraw(id: number){
-        await this.checkWithdrawById(id);
-        return await this.withdrawRepo.update(id,{
+        const result = await this.withdrawRepo.update(id,{
             status: withdrawStatus.CANCEL
         });
+        if(result.affected == 1){
+            return await this.getWithdrawById(id);
+        }
+        throw new NotFoundException(`Withdraw with id ${id} not found`);
     }
 
     async updateWithdraw(dto: UpdateWithdrawRequestDto, id: number,user: User){
-        const withdraw = await this.checkWithdrawById(id);
+        const withdraw = await this.getWithdrawById(id);
         let allowedAmount;
         if(dto.network && dto.token){
             allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
@@ -102,7 +105,7 @@ export class WithdrawService {
         if(Number(dto.amount)<=Number(allowedAmount)){
             const result = await this.withdrawRepo.update(id, {...dto});
             if(result.affected == 1){
-                return await this.checkWithdrawById(id);
+                return await this.getWithdrawById(id);
             }
             throw new NotFoundException(`Withdraw with id ${id} not found`);
             
@@ -110,7 +113,7 @@ export class WithdrawService {
         throw new BadRequestException('Your requested amount is less than your payments');
     }
 
-    async checkWithdrawById(id: number){
+    async getWithdrawById(id: number){
         const withdraw = await this.withdrawRepo.findOne({
             where:{
                 id: id
