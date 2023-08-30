@@ -1,11 +1,12 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import {AdminRequestDto, CreateAdminResponseDto, GetAllUsersResponseDto} from './dto/createAdmin.dto';
 import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
+import { PaginationDto } from '../pagination/pagination.dto';
 @Injectable()
 export class AdminService {
     constructor(
@@ -84,5 +85,17 @@ export class AdminService {
         const payload = {role: role, id: id, username: username};
         const token = await this.jwt.signAsync(payload);
         return { access_token: token };
+    }
+
+
+    async getAllWithdraws(paginationDto: PaginationDto){
+        const { page, pageSize, sortBy, sortOrder } = paginationDto;
+        const skip = (page - 1) * pageSize;
+        const take = pageSize;
+        let query: SelectQueryBuilder<User> = this.userRepo.createQueryBuilder();
+        if (sortBy) {
+            query = query.orderBy(sortBy, sortOrder);
+        }
+        return query.skip(skip).take(take).getMany()
     }
 }
