@@ -24,7 +24,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-        if(Number(dto.amount) <= Number(allowedAmount)){
+        if (BigInt(dto.amount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
                 token: dto.token,
@@ -73,7 +73,7 @@ export class WithdrawService {
     }
     private async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <bigint>{
         const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
-        const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(user);
+        const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(currency, user);
         return transactionsAmount - acceptedWithdrawAmount;
     }
     
@@ -92,15 +92,17 @@ export class WithdrawService {
         return BigInt(sumOfAmounts); 
     }
     
-    private async getAllAcceptedWithDraw(user: User): Promise <bigint>{
+    private async getAllAcceptedWithDraw( currency: {token: string, network: string},user: User): Promise <bigint>{
         const acceptedwithdraw = await this.withdrawRepo.createQueryBuilder('withdraw')
         .leftJoinAndSelect('withdraw.user', 'user')
         .where('withdraw.userId=:userId',{userId: user.id})
         .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
+        .andWhere('withdraw.network=:network', {network: currency.network})
+        .andWhere('withdraw.token=:token', {token: currency.token})
         .select(['amount'])
         .getMany();
         let sumOfAmounts: bigint = BigInt(0);
-        for( var withdraw of acceptedwithdraw){
+        for(const withdraw of acceptedwithdraw){
             sumOfAmounts += BigInt(withdraw.amount);
         }
         return BigInt(sumOfAmounts); 
