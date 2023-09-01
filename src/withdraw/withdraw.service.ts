@@ -35,7 +35,6 @@ export class WithdrawService {
             return await this.withdrawRepo.save(withdraw);
         }
         throw new BadRequestException('Your requested amount is more than your payments');
-
     }
     public async cancelWithdraw(id: number): Promise<Withdraw> {
         const result = await this.withdrawRepo.update(id,{
@@ -91,16 +90,15 @@ export class WithdrawService {
         }
         return BigInt(sumOfAmounts);
     }
-
     private async getAllAcceptedWithDraw( currency: {token: string, network: string},user: User): Promise <bigint>{
         const acceptedwithdraw = await this.withdrawRepo.createQueryBuilder('withdraw')
-            .leftJoinAndSelect('withdraw.user', 'user')
-            .where('withdraw.userId=:userId',{userId: user.id})
-            .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
-            .andWhere('withdraw.network=:network', {network: currency.network})
-            .andWhere('withdraw.token=:token', {token: currency.token})
-            .select(['amount'])
-            .getMany();
+        .leftJoinAndSelect('withdraw.user', 'user')
+        .where('withdraw.userId=:userId',{userId: user.id})
+        .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
+        .andWhere('withdraw.network=:network', {network: currency.network})
+        .andWhere('withdraw.token=:token', {token: currency.token})
+        .select(['amount'])
+        .getMany();
         let sumOfAmounts: bigint = BigInt(0);
         for(const withdraw of acceptedwithdraw){
             sumOfAmounts += BigInt(withdraw.amount);
