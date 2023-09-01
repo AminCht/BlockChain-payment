@@ -24,7 +24,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const allowedAmount = await this.getAllowedAmount({ token: dto.token, network: dto.network }, user);
-        if(Number(dto.amount) <= Number(allowedAmount)){
+        if (BigInt(dto.amount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
                 token: dto.token,
@@ -35,7 +35,6 @@ export class WithdrawService {
             return await this.withdrawRepo.save(withdraw);
         }
         throw new BadRequestException('Your requested amount is more than your payments');
-
     }
     public async cancelWithdraw(id: number): Promise<Withdraw> {
         const result = await this.withdrawRepo.update(id,{
@@ -52,7 +51,7 @@ export class WithdrawService {
         if (dto.amount || dto.token || dto.network) {
             const withdraw = await this.getWithdrawById(id);
             allowedAmount = await this.getAllowedAmount(
-            { token: dto.token ?? withdraw.token, network: dto.network?? withdraw.network }, user);}
+                { token: dto.token ?? withdraw.token, network: dto.network?? withdraw.network }, user);}
         if (!allowedAmount || Number(dto.amount) <= Number(allowedAmount)) {
             const result = await this.withdrawRepo.update(id, { ...dto });
             if(result.affected == 1){
@@ -73,37 +72,38 @@ export class WithdrawService {
     }
     private async getAllowedAmount(currency: {token: string, network: string}, user: User): Promise <bigint>{
         const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
-        const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(user);
+        const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(currency, user);
         return transactionsAmount - acceptedWithdrawAmount;
     }
-    
+
     private async getAllSuccessfulTransactions(currency: {token: string, network: string}, user: User): Promise <bigint>{
         const successfulTransactions = await this.transactionRepo.createQueryBuilder('transaction')
-        .leftJoinAndSelect('transaction.currency', 'currency')
-        .where('transaction.userId=:userId',{userId: user.id})
-        .andWhere('currency.symbol=:token', {token: currency.token})
-        .andWhere('currency.network=:network', {network: currency.network})
-        .andWhere('transaction.status=:status', {status: Status.SUCCESSFUL})
-        .select(['transaction.amount']).getMany();
+            .leftJoinAndSelect('transaction.currency', 'currency')
+            .where('transaction.userId=:userId',{userId: user.id})
+            .andWhere('currency.symbol=:token', {token: currency.token})
+            .andWhere('currency.network=:network', {network: currency.network})
+            .andWhere('transaction.status=:status', {status: Status.SUCCESSFUL})
+            .select(['transaction.amount']).getMany();
         let sumOfAmounts: bigint= BigInt(0);
         for( var transaction of successfulTransactions){
             sumOfAmounts += BigInt(transaction.amount);
         }
-        return BigInt(sumOfAmounts); 
+        return BigInt(sumOfAmounts);
     }
-    
-    private async getAllAcceptedWithDraw(user: User): Promise <bigint>{
+    private async getAllAcceptedWithDraw( currency: {token: string, network: string},user: User): Promise <bigint>{
         const acceptedwithdraw = await this.withdrawRepo.createQueryBuilder('withdraw')
         .leftJoinAndSelect('withdraw.user', 'user')
         .where('withdraw.userId=:userId',{userId: user.id})
         .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
+        .andWhere('withdraw.network=:network', {network: currency.network})
+        .andWhere('withdraw.token=:token', {token: currency.token})
         .select(['amount'])
         .getMany();
         let sumOfAmounts: bigint = BigInt(0);
-        for( var withdraw of acceptedwithdraw){
+        for(const withdraw of acceptedwithdraw){
             sumOfAmounts += BigInt(withdraw.amount);
         }
-        return BigInt(sumOfAmounts); 
+        return BigInt(sumOfAmounts);
     }
     private async getWithdrawById(id: number): Promise<Withdraw>{
         const withdraw = await this.withdrawRepo.findOne({
