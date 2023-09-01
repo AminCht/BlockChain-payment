@@ -17,4 +17,11 @@ export class PaginationDto {
     @IsOptional()
     @IsIn(['ASC', 'DESC'])
     sortOrder: 'ASC' | 'DESC'  = 'ASC'
+
+    @IsOptional()
+    userId: string
+
+    @IsOptional()
+    status: string
+
   }

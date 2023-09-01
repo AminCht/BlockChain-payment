@@ -92,14 +92,16 @@ export class AdminService {
 
 
     async getAllWithdraws(paginationDto: PaginationDto){
-     /*   const { page, pageSize, sortBy, sortOrder } = paginationDto;
-        const skip = (page - 1) * pageSize;
-        const take = pageSize;
-        let query: SelectQueryBuilder<Withdraw> = this.withdrawRepo.createQueryBuilder();
-        if (sortBy) {
-            query = query.orderBy(sortBy, sortOrder);
+        let query = await PaginationHelper.paginate(this.withdrawRepo,paginationDto);
+        
+        if(paginationDto.userId){
+            query = query.where('Withdraw.userId =:userId', {userId: paginationDto.userId})
         }
-        return query.skip(skip).take(take).getMany()*/
-        return await PaginationHelper.paginate(this.withdrawRepo,paginationDto);
+        if(paginationDto.status){
+            query = query.where('Withdraw.status =:status',{ status: paginationDto.status});
+        }
+        const data = await query.getMany()
+        const pageCount = Math.ceil(data.length  / paginationDto.pageSize);
+        return {page: paginationDto.page, pageCount: pageCount, data: {data}};
     }
 }

@@ -65,12 +65,14 @@ export class AdminController {
     }
 
     @Get('withdraw')
-    @UseGuards(JwtAdminAuthGuard)
+    //@UseGuards(JwtAdminAuthGuard)
     public async getWithdraw(
     @Query('page', ParseIntPipe) page: number,
     @Query('pageSize', ParseIntPipe) size: number,
     @Query('orderBy') order: string,
-    @Query('sort') sort: 'ASC' | 'DESC',){
-        return await this.adminService.getAllWithdraws({page: page, pageSize: size, sortBy: order, sortOrder: sort});
+    @Query('sort') sort: 'ASC' | 'DESC',
+    @Query('userId') id: string,
+    @Query('status') status: string){
+        return await this.adminService.getAllWithdraws({page: page, pageSize: size, sortBy: order, sortOrder: sort, userId: id, status: status});
     }
 }

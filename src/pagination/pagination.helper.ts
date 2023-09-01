@@ -11,6 +11,6 @@ export class PaginationHelper {
         if (sortBy) {
             query = query.orderBy(sortBy, sortOrder);
         }
-        return query.skip(skip).take(take).getMany()
+        return query.skip(skip).take(take)
   }
 }
