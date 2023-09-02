@@ -1,11 +1,10 @@
 import { IsOptional, IsInt, Min, IsIn } from 'class-validator';
 
-export class PaginationDto<T> {
+export class PaginationDto {
     @IsOptional()
     @IsInt()
     @Min(1)
     page: number
-  
     @IsOptional()
     @IsInt()
     @Min(1)
@@ -18,11 +17,5 @@ export class PaginationDto<T> {
     @IsIn(['ASC', 'DESC'])
     sortOrder: 'ASC' | 'DESC'  = 'ASC'
 
-    @IsOptional()
-    userId: string
-
-    @IsOptional()
-    status: string
-
-    condition : T
+    condition : Record<string, any>;
   }
