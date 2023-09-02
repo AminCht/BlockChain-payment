@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, R
 import { AdminService } from './admin.service';
 import { AdminRequestDto, GetAllUsersResponseDto, CreateAdminResponseDto, LogingAdminResponseDto, UnAuthorizeResponseDto
     , DeleteAdminResponseDto, DeleteNotAdminResponseDto,CreateExistUsernameResponseDto, LogingWrongInfoAdminResponseDto } from './dto/createAdmin.dto';
-import { Response } from 'express';
+import { Request, Response} from 'express';
 import { User } from '../database/entities/User.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
@@ -71,8 +71,10 @@ export class AdminController {
     @Query('pageSize', ParseIntPipe) size: number,
     @Query('orderBy') order: string,
     @Query('sort') sort: 'ASC' | 'DESC',
-    @Query('userId') id: string,
-    @Query('status') status: string){
-        return await this.adminService.getAllWithdraws({page: page, pageSize: size, sortBy: order, sortOrder: sort, userId: id, status: status});
+    @Query('userId',ParseIntPipe) id: number,
+    @Query('status') status: string,@Req() req:Request) {
+        const queries = new Map<string, any>();
+        return await this.adminService.getAllWithdraws(
+        {page: page, pageSize: size, sortBy: order, sortOrder: sort,condition: req.query});
     }
 }

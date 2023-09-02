@@ -8,7 +8,7 @@ import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from '../pagination/pagination.dto';
 import { Withdraw } from '../database/entities/withdraw.entity';
-import { PaginationHelper } from '../pagination/pagination.helper';
+import { Pagination } from '../pagination/pagination';
 @Injectable()
 export class AdminService {
     constructor(
@@ -92,16 +92,15 @@ export class AdminService {
 
 
     async getAllWithdraws(paginationDto: PaginationDto){
-        let query = await PaginationHelper.paginate(this.withdrawRepo,paginationDto);
-        
-        if(paginationDto.userId){
+        const query = await Pagination.paginate(this.withdrawRepo, paginationDto);
+        /*if(paginationDto.userId){
             query = query.where('Withdraw.userId =:userId', {userId: paginationDto.userId})
         }
         if(paginationDto.status){
             query = query.where('Withdraw.status =:status',{ status: paginationDto.status});
-        }
-        const data = await query.getMany()
-        const pageCount = Math.ceil(data.length  / paginationDto.pageSize);
-        return {page: paginationDto.page, pageCount: pageCount, data: {data}};
+        }*/
+        //const data = await query.getMany()
+        const pageCount = Math.ceil(query.pageCount / paginationDto.pageSize);
+        return { page: paginationDto.page, pageCount: pageCount, data: query.data };
     }
 }
