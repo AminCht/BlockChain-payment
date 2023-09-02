@@ -1,6 +1,6 @@
 import { IsOptional, IsInt, Min, IsIn } from 'class-validator';
 
-export class PaginationDto {
+export class PaginationDto<T> {
     @IsOptional()
     @IsInt()
     @Min(1)
@@ -24,4 +24,5 @@ export class PaginationDto {
     @IsOptional()
     status: string
 
+    condition : T
   }
