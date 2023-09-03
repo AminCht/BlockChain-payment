@@ -67,14 +67,37 @@ export class AdminController {
     @Get('withdraw')
     //@UseGuards(JwtAdminAuthGuard)
     public async getWithdraw(
-    @Query('page', ParseIntPipe) page: number,
-    @Query('pageSize', ParseIntPipe) size: number,
-    @Query('orderBy') order: string,
-    @Query('sort') sort: 'ASC' | 'DESC',
-    @Query('userId',ParseIntPipe) id: number,
-    @Query('status') status: string,@Req() req:Request) {
-        const queries = new Map<string, any>();
+    @Query('page', new ParseIntPipe({optional: true})) page: number = 1,
+    @Query('pageSize', new ParseIntPipe({optional: true})) size: number = 4,
+    @Query('sort') sort: 'ASC' | 'DESC' = 'ASC',
+    @Query('orderBy') order?: string,
+    @Query('userId',new ParseIntPipe({optional: true})) id?: number,
+    @Query('status') status?: string) {
+        const numericStatus = this.statusConvert(status);
+        const queries = {
+            user: { id: id },
+            status: numericStatus,
+        };
+
         return await this.adminService.getAllWithdraws(
-        {page: page, pageSize: size, sortBy: order, sortOrder: sort,condition: req.query});
+        {page: page, pageSize: size, sortBy: order, sortOrder: sort,condition:queries});
+    }
+    private statusConvert(status: string) {
+        let convertedStatus;
+        switch (status) {
+            case 'pending':
+                convertedStatus = 0;
+                break;
+            case 'failed':
+                convertedStatus = 1;
+                break;
+            case 'canceled':
+                convertedStatus = 2;
+                break;
+            default:
+                convertedStatus = -1;
+                break;
+        }
+        return convertedStatus;
     }
 }
