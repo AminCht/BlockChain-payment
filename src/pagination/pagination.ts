@@ -15,7 +15,7 @@ export class Pagination {
         if (sortBy) {
             query = query.orderBy(sortBy, sortOrder);
         }
-        query = query.where({ user: { id: 1 } });
+        query = query.where(paginationDto.condition);
         const pageCount = await query.getCount();
         const data = await query.skip(skip).take(take).getMany();
         return { data: data, pageCount: pageCount };
