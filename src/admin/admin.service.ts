@@ -91,7 +91,7 @@ export class AdminService {
         return { access_token: token };
     }
 
-    async getAllWithdraws(paginationDto: PaginationDto<WithdrawCondition>){
+    async getAllWithdraws(paginationDto: PaginationDto<any>){
         return await Pagination.paginate(this.withdrawRepo, paginationDto);
     }
 }

@@ -1,11 +1,13 @@
 import { IsOptional, IsInt, Min, IsIn } from 'class-validator';
 import { ObjectLiteral } from "typeorm";
+import { WithdrawCondition } from '../admin/dto/withdrawCondition.dto';
 
 export interface ICondition {
-    queryToCondtion(query: any): ObjectLiteral 
+    queryToCondition(query: any): ObjectLiteral 
 };
 
 export class PaginationDto<G extends ICondition> {
+    
     @IsOptional()
     @IsInt()
     @Min(1)
@@ -17,33 +19,34 @@ export class PaginationDto<G extends ICondition> {
     pageSize: number
   
     @IsOptional()
-    sortBy: string; 
+    orderBy: string; 
   
     @IsOptional()
     @IsIn(['ASC', 'DESC'])
-    sortOrder: 'ASC' | 'DESC'  = 'ASC'
+    sortOrder: 'ASC' | 'DESC'
 
     condition : ObjectLiteral;
 
     conditionMaker: G
 
     // TODO: Consider default values
-    queryToPaginationDto<G extends ICondition>(query: any, ): PaginationDto<G> {
+    queryToPaginationDto<G extends ICondition>(query: any, conditionMaker): PaginationDto<G> {
         const result = new PaginationDto<G>();
+        result.conditionMaker = conditionMaker
         if (query.page) {
             result.page = query.page;
         }
         if (query.pageSize) {
             result.pageSize = query.pageSize;
         }
-        if (query.sortBy) {
-            result.sortBy = query.sortBy;
+        if (query.orderBy) {
+            result.orderBy = query.orderBy;
         }
-        if (query.sortOrder) {
-            result.sortOrder = query.sortOrder;
+        if (query.sort) {
+            result.sortOrder = query.sort;
         }
-        result.condition = result.conditionMaker.queryToCondtion(query);
-        return result;
+        result.condition = result.conditionMaker.queryToCondition(query);
+        return result
     }
 
   }

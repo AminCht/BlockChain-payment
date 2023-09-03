@@ -1,9 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsOptional } from "class-validator";
 import { ObjectLiteral } from "typeorm";
+import { ICondition } from "../../pagination/pagination.dto";
 
 // TODO: Add better validation
-export class WithdrawCondition { 
+export class WithdrawCondition implements ICondition {
     static statuses = {
         'pending': 0,
         'failed': 1,
@@ -18,10 +19,10 @@ export class WithdrawCondition {
     @IsOptional()
     status: number;
 
-    queryToCondtion(query: any): ObjectLiteral {
+    queryToCondition(query: any): ObjectLiteral {
         const result : ObjectLiteral = new Object(); 
         if (query.userId) {
-            result.userId = query.userId;
+            result.user = {id: query.userId};
         }
         if (query.status) {
             result.status = WithdrawCondition.statusToStatusNumber(query.status);
