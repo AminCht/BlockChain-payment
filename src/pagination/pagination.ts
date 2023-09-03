@@ -1,23 +1,21 @@
-import {EntityMetadata, Repository, SelectQueryBuilder} from "typeorm";
-import { PaginationDto } from "./pagination.dto";
-import {Type} from "class-transformer";
+import { Repository, SelectQueryBuilder} from "typeorm";
+import { ICondition, PaginationDto } from "./pagination.dto";
 
 
 export class Pagination {
     // TODO: whole response shold be created here
-    static async paginate<T>(repository: Repository<T>, paginationDto: PaginationDto) {
+    static async paginate<T,G extends ICondition>(repository: Repository<T>, paginationDto: PaginationDto<G>) {
         const { page, pageSize, sortBy, sortOrder } = paginationDto;
         const skip = (page - 1) * pageSize;
         const take = pageSize;
         let query: SelectQueryBuilder<T> = repository.createQueryBuilder();
-        //const entityMetadata: EntityMetadata = repository.metadata;
-       // const tableName: string = entityMetadata.name;
         if (sortBy) {
             query = query.orderBy(sortBy, sortOrder);
         }
         query = query.where(paginationDto.condition);
         const pageCount = await query.getCount();
         const data = await query.skip(skip).take(take).getMany();
+        // TODO: Whole response
         return { data: data, pageCount: pageCount };
     }
 }

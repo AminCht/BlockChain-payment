@@ -1,12 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Res, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminRequestDto, GetAllUsersResponseDto, CreateAdminResponseDto, LogingAdminResponseDto, UnAuthorizeResponseDto
     , DeleteAdminResponseDto, DeleteNotAdminResponseDto,CreateExistUsernameResponseDto, LogingWrongInfoAdminResponseDto } from './dto/createAdmin.dto';
+import { WithdrawCondition } from "./dto/withdrawCondition.dto"
 import { Request, Response} from 'express';
-import { User } from '../database/entities/User.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
-import { PaginationDto } from '../pagination/pagination.dto';
+import { PaginationDto } from 'src/pagination/pagination.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -31,6 +31,7 @@ export class AdminController {
         this.setCookie(res, token.access_token);
         res.send({message: 'You have successfully logged in'});
     }
+
     @ApiOperation({ summary: 'Get All users(Only Admin token to this)' })
     @ApiResponse({ status: 200, description: 'Get all users', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
@@ -39,6 +40,7 @@ export class AdminController {
     public async getAllUsers(): Promise <GetAllUsersResponseDto[]>{
         return await this.adminService.getAllUsers();
     }
+
     @ApiOperation({ summary: 'Get All Admins(Only Admin token to this)' })
     @ApiResponse({ status: 200, description: 'Get all Admins', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
@@ -66,38 +68,9 @@ export class AdminController {
 
     @Get('withdraw')
     //@UseGuards(JwtAdminAuthGuard)
-    public async getWithdraw(
-    @Query('page', new ParseIntPipe({optional: true})) page: number = 1,
-    @Query('pageSize', new ParseIntPipe({optional: true})) size: number = 4,
-    @Query('sort') sort: 'ASC' | 'DESC' = 'ASC',
-    @Query('orderBy') order?: string,
-    @Query('userId',new ParseIntPipe({optional: true})) id?: number,
-    @Query('status') status?: string) {
-        const numericStatus = this.statusConvert(status);
-        const queries = {
-            user: { id: id },
-            status: numericStatus,
-        };
-
-        return await this.adminService.getAllWithdraws(
-        {page: page, pageSize: size, sortBy: order, sortOrder: sort,condition:queries});
-    }
-    private statusConvert(status: string) {
-        let convertedStatus;
-        switch (status) {
-            case 'pending':
-                convertedStatus = 0;
-                break;
-            case 'failed':
-                convertedStatus = 1;
-                break;
-            case 'canceled':
-                convertedStatus = 2;
-                break;
-            default:
-                convertedStatus = -1;
-                break;
-        }
-        return convertedStatus;
+    public async getWithdraw(@Req() request: Request) {
+        const pagination = new PaginationDto<WithdrawCondition>();
+        const condition = pagination.queryToPaginationDto(request.query); 
+        return await this.adminService.getAllWithdraws(condition);
     }
 }

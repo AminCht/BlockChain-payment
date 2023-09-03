@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { PaginationDto } from '../pagination/pagination.dto';
 import { Withdraw } from '../database/entities/withdraw.entity';
 import { Pagination } from '../pagination/pagination';
+import { WithdrawCondition } from './dto/withdrawCondition.dto';
 @Injectable()
 export class AdminService {
     constructor(
@@ -90,17 +91,7 @@ export class AdminService {
         return { access_token: token };
     }
 
-
-    async getAllWithdraws(paginationDto: PaginationDto){
-        const query = await Pagination.paginate(this.withdrawRepo, paginationDto);
-        /*if(paginationDto.userId){
-            query = query.where('Withdraw.userId =:userId', {userId: paginationDto.userId})
-        }
-        if(paginationDto.status){
-            query = query.where('Withdraw.status =:status',{ status: paginationDto.status});
-        }*/
-        //const data = await query.getMany()
-        const pageCount = Math.ceil(query.pageCount / paginationDto.pageSize);
-        return { page: paginationDto.page, pageCount: pageCount, data: query.data };
+    async getAllWithdraws(paginationDto: PaginationDto<WithdrawCondition>){
+        return await Pagination.paginate(this.withdrawRepo, paginationDto);
     }
 }
