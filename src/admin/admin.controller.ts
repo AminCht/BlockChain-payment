@@ -69,9 +69,7 @@ export class AdminController {
     @Get('withdraw')
     //@UseGuards(JwtAdminAuthGuard)
     public async getWithdraw(@Req() req: Request) {
-        const pagination = new PaginationDto<WithdrawCondition>();
-        const conditionMaker = new WithdrawCondition();
-        const dto = pagination.queryToPaginationDto<WithdrawCondition>(req.query, conditionMaker);
-        return await this.adminService.getAllWithdraws(dto);
+        const pagination = new PaginationDto<WithdrawCondition>(WithdrawCondition,req.query);
+        return await this.adminService.getAllWithdraws(pagination);
     }
 }
