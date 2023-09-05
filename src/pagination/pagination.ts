@@ -37,9 +37,9 @@ export class Pagination {
                         }
                     }
                 } else {
-                    /*const customCondition: { [key: string]: any } = {};
+                    const customCondition: { [key: string]: any } = {};
                     customCondition[key] = value;
-                    query = query.andWhere(customCondition)*/
+                    query = query.andWhere(customCondition)
                 }
             }
         }
