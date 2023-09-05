@@ -27,7 +27,7 @@ export class Transaction{
     wallet_balance_after: string;
 
     @Column()
-    createdDate: Date;
+    created_date: Date;
 
     @Column()
     expireTime: Date;
@@ -43,7 +43,7 @@ export class Transaction{
 
     @BeforeInsert()
     setTimes() {
-        this.createdDate = new Date();
-        this.expireTime = new Date(this.createdDate.getTime() + 60 * 60 * 1000);
+        this.created_date = new Date();
+        this.expireTime = new Date(this.created_date.getTime() + 60 * 60 * 1000);
     }
 }
