@@ -9,12 +9,13 @@ import * as bcrypt from 'bcrypt';
 import { PaginationDto } from '../pagination/pagination.dto';
 import { Withdraw } from '../database/entities/withdraw.entity';
 import { Pagination } from '../pagination/pagination';
-import { WithdrawCondition } from './dto/withdrawCondition.dto';
+import { Wallet } from '../database/entities/Wallet.entity';
 @Injectable()
 export class AdminService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
+        @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
         private jwt: JwtService,
         private authService: AuthService,
     ){}
@@ -91,7 +92,17 @@ export class AdminService {
         return { access_token: token };
     }
 
-    async getAllWithdraws(paginationDto: PaginationDto<any>){
+    public async getAllWithdraws(paginationDto: PaginationDto<any>){
         return await Pagination.paginate(this.withdrawRepo, paginationDto);
+    }
+
+    public async getWallets(paginationDto: PaginationDto<any>){
+        const wallet = await this.walletRepo.find({
+            where:{
+                status: true
+            }
+        });
+        console.log(wallet)
+        return await Pagination.paginate(this.walletRepo, paginationDto);
     }
 }
