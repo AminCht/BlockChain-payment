@@ -10,12 +10,14 @@ import { PaginationDto } from '../pagination/pagination.dto';
 import { Withdraw } from '../database/entities/withdraw.entity';
 import { Pagination } from '../pagination/pagination';
 import { Wallet } from '../database/entities/Wallet.entity';
+import { Transaction } from '../database/entities/Transaction.entity';
 @Injectable()
 export class AdminService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
         @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
+        @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
         private jwt: JwtService,
         private authService: AuthService,
     ){}
@@ -97,12 +99,9 @@ export class AdminService {
     }
 
     public async getWallets(paginationDto: PaginationDto<any>){
-        const wallet = await this.walletRepo.find({
-            where:{
-                status: true
-            }
-        });
-        console.log(wallet)
         return await Pagination.paginate(this.walletRepo, paginationDto);
+    }
+    public async getTransactions(paginationDto: PaginationDto<any>){
+        return await Pagination.paginate(this.transactionRepo, paginationDto);
     }
 }

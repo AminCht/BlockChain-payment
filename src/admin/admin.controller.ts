@@ -8,6 +8,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
 import { PaginationDto } from 'src/pagination/pagination.dto';
 import { WalletCondition } from './dto/walletCondition';
+import { TransactionCondition } from './dto/transactionCondition';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -78,5 +79,11 @@ export class AdminController {
     public async getWallets(@Req() req: Request){
         const pagination = new PaginationDto<WalletCondition>(WalletCondition, req.query)
         return await this.adminService.getWallets(pagination);
+    }
+
+    @Get('transactions')
+    public async getTransactions(@Req() req: Request){
+        const pagination = new PaginationDto<TransactionCondition>(TransactionCondition, req.query);
+        return await this.adminService.getTransactions(pagination);
     }
 }
