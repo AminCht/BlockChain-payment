@@ -1,15 +1,20 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import {AdminRequestDto, CreateAdminResponseDto, GetAllUsersResponseDto} from './dto/createAdmin.dto';
 import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
+import { PaginationDto } from '../pagination/pagination.dto';
+import { Withdraw } from '../database/entities/withdraw.entity';
+import { Pagination } from '../pagination/pagination';
+import { WithdrawCondition } from './dto/withdrawCondition.dto';
 @Injectable()
 export class AdminService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
+        @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
         private jwt: JwtService,
         private authService: AuthService,
     ){}
@@ -84,5 +89,9 @@ export class AdminService {
         const payload = {role: role, id: id, username: username};
         const token = await this.jwt.signAsync(payload);
         return { access_token: token };
+    }
+
+    async getAllWithdraws(paginationDto: PaginationDto<any>){
+        return await Pagination.paginate(this.withdrawRepo, paginationDto);
     }
 }

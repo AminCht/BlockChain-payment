@@ -10,10 +10,11 @@ import { TokenModule } from './token/token.module';
 import { AdminModule } from './admin/admin.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ApikeyModule } from './apikey/apikey.module';
+import { WithdrawModule } from './withdraw/withdraw.module';
 import DatabaseModule from './database/database.module';
 
 @Module({
-    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, TokenModule, AdminModule, CurrencyModule, ApikeyModule],
+    imports: [DatabaseModule, PaymentModule, WalletModule, TransactionModule, AuthModule, TokenModule, AdminModule, CurrencyModule, ApikeyModule, WithdrawModule],
     controllers: [AppController],
     providers: [AppService],
 })

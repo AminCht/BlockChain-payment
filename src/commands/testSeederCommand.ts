@@ -7,6 +7,8 @@ import {Role, User} from "../database/entities/User.entity";
 import {Transaction} from "../database/entities/Transaction.entity";
 import * as bcrypt from "bcrypt";
 import {Currency} from "../database/entities/Currency.entity";
+import {Withdraw} from "../database/entities/withdraw.entity";
+import { Status as withdrawStatus} from '../database/entities/withdraw.entity';
 
 @Command({ name: 'test-db-seeder' })
 export class TestSeederCommand extends CommandRunner {
@@ -19,6 +21,8 @@ export class TestSeederCommand extends CommandRunner {
         private readonly userRepo: Repository<User>,
         @InjectRepository(Currency)
         private readonly currencyRepo: Repository<Currency>,
+        @InjectRepository(Withdraw)
+        private readonly withdrawRepo: Repository<Withdraw>,
     ) {
         super();
     }
@@ -40,9 +44,11 @@ export class TestSeederCommand extends CommandRunner {
         await this.createWallet('token');
         const currency = await this.createCurrency(currencyDto);
         const currency1 = await this.createCurrency(currencyDto1);
-        const user = await this.createUser([currency,currency1]);
+        const user = await this.createUser([currency, currency1]);
         await this.createTransaction(user, currency);
         await this.createAdmin();
+        await this.createWithdraw(0, user);
+       // await this.createWithdraw(1, user);
     }
     private async createWallet(type: 'token' | 'main') {
         const wallet = Wallet.createRandom();
@@ -75,6 +81,7 @@ export class TestSeederCommand extends CommandRunner {
             amount: '12',
             currency: currency,
             wallet_balance_before: '1',
+            status: 'Successful',
         });
         await this.transactionRepo.save(transaction);
     }
@@ -85,5 +92,16 @@ export class TestSeederCommand extends CommandRunner {
             role: Role.ADMIN
         });
         await this.userRepo.save(admin);
+    }
+    private async createWithdraw(status: number, user: User) {
+        const withdraw = await this.withdrawRepo.create({
+            amount: '1',
+            token: 'eth',
+            network: 'ethereum',
+            dst_wallet: '123abc',
+            user: user,
+            status: status,
+        });
+        await this.withdrawRepo.save(withdraw);
     }
 }

@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Res, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminRequestDto, GetAllUsersResponseDto, CreateAdminResponseDto, LogingAdminResponseDto, UnAuthorizeResponseDto
     , DeleteAdminResponseDto, DeleteNotAdminResponseDto,CreateExistUsernameResponseDto, LogingWrongInfoAdminResponseDto } from './dto/createAdmin.dto';
-import { Response } from 'express';
-import { User } from '../database/entities/User.entity';
+import { WithdrawCondition } from "./dto/withdrawCondition.dto"
+import { Request, Response} from 'express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
+import { PaginationDto } from 'src/pagination/pagination.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -30,6 +31,7 @@ export class AdminController {
         this.setCookie(res, token.access_token);
         res.send({message: 'You have successfully logged in'});
     }
+
     @ApiOperation({ summary: 'Get All users(Only Admin token to this)' })
     @ApiResponse({ status: 200, description: 'Get all users', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
@@ -38,6 +40,7 @@ export class AdminController {
     public async getAllUsers(): Promise <GetAllUsersResponseDto[]>{
         return await this.adminService.getAllUsers();
     }
+
     @ApiOperation({ summary: 'Get All Admins(Only Admin token to this)' })
     @ApiResponse({ status: 200, description: 'Get all Admins', type: [GetAllUsersResponseDto]})
     @ApiResponse({ status: 401, description: 'UnAuthorized Admin' , type: UnAuthorizeResponseDto})
@@ -61,5 +64,12 @@ export class AdminController {
         res.cookie('accessToken', token, {
             httpOnly: true,
         });
+    }
+
+    @Get('withdraw')
+    //@UseGuards(JwtAdminAuthGuard)
+    public async getWithdraw(@Req() req: Request) {
+        const pagination = new PaginationDto<WithdrawCondition>(WithdrawCondition,req.query);
+        return await this.adminService.getAllWithdraws(pagination);
     }
 }
