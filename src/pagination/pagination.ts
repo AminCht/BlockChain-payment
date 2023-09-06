@@ -11,8 +11,9 @@ export class Pagination {
         if (orderBy) {
             query = query.orderBy(orderBy, sortOrder);
         }
-        Pagination.rangeConditions(repository, condition, query)     
-        //query = query.where(condition);
+        console.log(condition)
+        //Pagination.rangeConditions(repository, condition, query)     
+        query = query.where(condition);
         const pageCount = await query.getCount();
         const data = await query.skip(skip).take(take).getMany();
         return { data: data, page: page, pageSize: pageSize, pageCount: pageCount };
@@ -29,7 +30,7 @@ export class Pagination {
                             query = query.andWhere(`${key} >= :${key}1`, { [key+'1']: value['Gt']});
                         }else{
                             query = query.andWhere(`${key}::numeric >= :${key}1`, { [key+'1']: value['Gt']});
-                            
+            
                         }
                     }
                     console.log(query.getParameters())

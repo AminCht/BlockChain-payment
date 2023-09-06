@@ -1,4 +1,4 @@
-import { ObjectLiteral } from "typeorm";
+import { MoreThan,LessThan, ObjectLiteral } from "typeorm";
 import { ICondition } from "../../pagination/pagination.dto";
 
 export class TransactionCondition implements ICondition {
@@ -12,20 +12,21 @@ export class TransactionCondition implements ICondition {
             result.amount= query.amount;
         }
         if (query.amountGt || query.amountLt) {
-            if (query.amountLt) {
-                amountObj['Lt'] = query.amountLt
+            /*if (query.amountLt) {
+                amountObj['Lt'] = LessThan(query.amountLt)
             }
             if(query.amountGt){
-                amountObj['Gt'] = query.amountGt
-            }
+                amountObj['Gt'] = MoreThan(query.amountGt)
+            }*/
+            
             result.amount  = amountObj
         }
         if (query.createdAtGt || query.createdAtLt) {
             if (query.createdAtLt) {
-                createdAtObj['Lt'] = query.createdAtLt
+                createdAtObj['Lt'] = LessThan(query.createdAtLt)
             }
             if(query.createdAtGt){
-                createdAtObj['Gt'] = query.createdAtGt
+                createdAtObj['Gt'] = MoreThan(query.createdAtGt)
             }
             result.created_date  = createdAtObj;
         }
