@@ -1,4 +1,4 @@
-import { MoreThan,LessThan, ObjectLiteral } from "typeorm";
+import { MoreThan,LessThan, ObjectLiteral, Between, Raw } from "typeorm";
 import { ICondition } from "../../pagination/pagination.dto";
 
 export class TransactionCondition implements ICondition {
@@ -18,17 +18,23 @@ export class TransactionCondition implements ICondition {
             if(query.amountGt){
                 amountObj['Gt'] = MoreThan(query.amountGt)
             }*/
-            
-            result.amount  = amountObj
+
+            result.amount  = Between(query.amountGt, query.amountLt)
         }
         if (query.createdAtGt || query.createdAtLt) {
-            if (query.createdAtLt) {
-                createdAtObj['Lt'] = LessThan(query.createdAtLt)
+            if(query.createdAtGt && query.createdAtLt){
+                const endDate = new Date(query.createdAtLt);
+                result.created_date  = Raw(alias => `${alias} >= :startDate AND ${alias} <= :enddate`, {
+                    startDate: query.createdAtGt,
+                    enddate: new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
+                  });
             }
-            if(query.createdAtGt){
-                createdAtObj['Gt'] = MoreThan(query.createdAtGt)
+            else if (query.createdAtLt) {
+                result.created_date = LessThan(query.createdAtLt)
             }
-            result.created_date  = createdAtObj;
+            else if(query.createdAtGt){
+                result.created_date = MoreThan(query.createdAtGt)
+            }
         }
         if (query.status) {
             result.status = query.status;
