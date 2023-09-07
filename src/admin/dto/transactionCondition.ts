@@ -6,8 +6,7 @@ export class TransactionCondition implements ICondition {
 
     queryToCondition(query: any): ObjectLiteral {
         const result : ObjectLiteral = new Object();
-        const amountObj: ObjectLiteral = new Object();
-        const createdAtObj: ObjectLiteral = new Object();
+        
         if (query.amount) {
             result.amount= query.amount;
         }
