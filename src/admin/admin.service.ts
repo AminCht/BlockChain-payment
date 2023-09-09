@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from '../database/entities/User.entity';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository, SelectQueryBuilder } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import {AdminRequestDto, CreateAdminResponseDto, GetAllUsersResponseDto} from './dto/createAdmin.dto';
 import { AuthService } from '../auth/auth.service';
@@ -9,12 +9,15 @@ import * as bcrypt from 'bcrypt';
 import { PaginationDto } from '../pagination/pagination.dto';
 import { Withdraw } from '../database/entities/withdraw.entity';
 import { Pagination } from '../pagination/pagination';
-import { WithdrawCondition } from './dto/withdrawCondition.dto';
+import { Wallet } from '../database/entities/Wallet.entity';
+import { Transaction } from '../database/entities/Transaction.entity';
 @Injectable()
 export class AdminService {
     constructor(
         @InjectRepository(User) private userRepo: Repository<User>,
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
+        @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
+        @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
         private jwt: JwtService,
         private authService: AuthService,
     ){}
@@ -91,7 +94,14 @@ export class AdminService {
         return { access_token: token };
     }
 
-    async getAllWithdraws(paginationDto: PaginationDto<any>){
+    public async getAllWithdraws(paginationDto: PaginationDto<any>){
         return await Pagination.paginate(this.withdrawRepo, paginationDto);
+    }
+
+    public async getWallets(paginationDto: PaginationDto<any>){
+        return await Pagination.paginate(this.walletRepo, paginationDto);
+    }
+    public async getTransactions(paginationDto: PaginationDto<any>){
+        return await Pagination.paginate(this.transactionRepo, paginationDto);
     }
 }

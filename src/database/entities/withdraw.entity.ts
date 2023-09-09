@@ -1,5 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity,  ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import { User } from "./User.entity";
+import { Currency } from "./Currency.entity";
 
 export enum Status{
     SUCCESSFUL = 0,
@@ -18,13 +19,6 @@ export class Withdraw{
     
     @Column()
     amount: string
-    
-    @Column()
-    token: string
-
-    @Column()
-    network: string
-
     @Column()
     dst_wallet: string
 
@@ -34,8 +28,10 @@ export class Withdraw{
     @Column({ nullable: true })
     tx_url: string
 
-    @ManyToOne(() => User, (user) => user.transactions)
+    @ManyToOne(() => User, (user) => user.withdraws)
     user: User;
+    @ManyToOne(() => Currency, (currency) => currency.withdraws)
+    currency: Currency;
 
     @Column()
     created_At: Date
