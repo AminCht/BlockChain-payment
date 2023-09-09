@@ -16,8 +16,8 @@ export class TransactionCondition implements ICondition {
             }
             if(query.amountGt){
                 amountObj['Gt'] = MoreThan(query.amountGt)
-            }*/
-
+            }
+            */
             result.amount  = Between(query.amountGt, query.amountLt)
         }
         if (query.createdAtGt || query.createdAtLt) {
