@@ -1,11 +1,10 @@
-import { Command, CommandRunner } from 'nest-commander';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Wallet, Wallet as WalletEntity } from "../database/entities/Wallet.entity";
-import { Status, Transaction } from '../database/entities/Transaction.entity';
-import { Contract, InfuraProvider } from 'ethers';
-import { ethers } from 'ethers';
-import { DataSource, Repository } from "typeorm";
-import { ethereumTokenAddresses } from '../payment/tokenAddresses/EthereumTokenAddresses';
+import {Command, CommandRunner} from 'nest-commander';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Wallet} from "../database/entities/Wallet.entity";
+import {Status, Transaction} from '../database/entities/Transaction.entity';
+import {Contract, ethers, InfuraProvider} from 'ethers';
+import {DataSource, Repository} from "typeorm";
+import {ethereumTokenAddresses} from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
 export class CheckBalanceCommand extends CommandRunner {
@@ -54,16 +53,16 @@ export class CheckBalanceCommand extends CommandRunner {
         const expectedAmount = ethers.parseUnits(transaction.amount, decimals);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         if (now >= transaction.expireTime) {
-           await this.changeTransactionStatus(transaction, Status.FAILED, currentBalance);
+           await this.changeTransactionStatus(transaction,Status.FAILED , currentBalance);
         } else if (receivedAmount >= expectedAmount) {
             await this.changeTransactionStatus(transaction, Status.SUCCESSFUL, currentBalance);}
         else {await this.changeTransactionStatus(transaction, Status.PENDING, currentBalance);}
     }
 
-    async changeTransactionStatus(transaction: Transaction, status: Status.SUCCESSFUL|Status.FAILED|Status.PENDING, afterBalance: string) {
+    async changeTransactionStatus(transaction: Transaction, status: Status, afterBalance: string) {
         const queryRunner = this.dataSource.createQueryRunner();
         const wallet = transaction.wallet;
-        if(status!=Status.PENDING){
+        if(status != Status.PENDING){
             wallet.lock = false;
         }
         transaction.status = status;

@@ -6,14 +6,17 @@ import { User } from '../database/entities/User.entity';
 import {JwtAdminStrategy} from "../auth/strategy/jwt.admin.startegy";
 import {JwtModule} from "@nestjs/jwt";
 import {AuthService} from "../auth/auth.service";
-import {BadRequestException, ForbiddenException, NotFoundException} from "@nestjs/common";
+import {BadRequestException, ForbiddenException, NotFoundException, UnauthorizedException} from "@nestjs/common";
+import {Withdraw} from "../database/entities/withdraw.entity";
+import {Wallet} from "../database/entities/Wallet.entity";
+import {Transaction} from "../database/entities/Transaction.entity";
 
 describe('AdminService', () => {
     let service: AdminService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            imports: [DatabaseModule, TypeOrmModule.forFeature([User]),
+            imports: [DatabaseModule, TypeOrmModule.forFeature([User,Withdraw, Wallet, Transaction]),
                 JwtModule.register({
                     secret: process.env.JWT_SECRET,
                     signOptions: { expiresIn: '20d' },
@@ -53,14 +56,14 @@ describe('AdminService', () => {
                 await service.adminLogin(adminDto);
                 fail('Expected an exception to be thrown');
             } catch (error) {
-                expect(error).toBeInstanceOf(ForbiddenException);
+                expect(error).toBeInstanceOf(UnauthorizedException);
                 expect(error.message).toBe('Credentials incorrect');
             }
         });
     });
     describe('deleteAdmin', () => {
-        it('should delete an admin', async()=>{
-            const response = await service.deleteAdmin(1);
+        it('should delete an admin', async () => {
+            const response = await service.deleteAdmin(2);
             expect(response.message).toBe('Admin deleted');
         });
         it('given id is not belong to an admin and should return not fond expetion', async()=>{

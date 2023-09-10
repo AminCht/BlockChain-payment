@@ -1,6 +1,7 @@
 import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique} from 'typeorm';
 import { User } from './User.entity';
 import { Transaction } from './Transaction.entity';
+import { Withdraw } from "./withdraw.entity";
 
 
 @Unique(['network', 'symbol'])
@@ -26,4 +27,7 @@ export class Currency {
 
     @OneToMany(() => Transaction, (transaction) => transaction.currency)
     transactions: Transaction[]
+
+    @OneToMany(() => Withdraw, (withdraw) => withdraw.currency)
+    withdraws: Withdraw[];
 }

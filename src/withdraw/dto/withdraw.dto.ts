@@ -11,12 +11,7 @@ export class CreateWithdrawDto{
 
     @ApiProperty()
     @IsNotEmpty()
-    token: string
-    
-    @ApiProperty()
-    @IsNotEmpty()
-    network: string
-    
+    currencyId: number;
     @ApiProperty()
     @IsNotEmpty()
     dst_wallet: string
@@ -30,11 +25,7 @@ export class UpdateWithdrawRequestDto{
 
     @ApiProperty()
     @IsOptional()
-    token?: string
-    
-    @ApiProperty()
-    @IsOptional()
-    network?: string
+    currencyId?: number;
     
     @ApiProperty()
     @IsOptional()

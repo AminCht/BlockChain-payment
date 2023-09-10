@@ -4,11 +4,10 @@ import {Wallet as WalletEntity} from '../database/entities/Wallet.entity';
 import {Repository} from 'typeorm';
 import {Wallet} from "ethers";
 import {Role, User} from "../database/entities/User.entity";
-import {Status, Transaction} from "../database/entities/Transaction.entity";
+import {Status as transactionStatus, Transaction} from '../database/entities/Transaction.entity';
 import * as bcrypt from "bcrypt";
 import {Currency} from "../database/entities/Currency.entity";
-import {Withdraw} from "../database/entities/withdraw.entity";
-import { Status as withdrawStatus} from '../database/entities/withdraw.entity';
+import {Status as withdrawStatus, Withdraw} from "../database/entities/withdraw.entity";
 
 @Command({ name: 'test-db-seeder' })
 export class TestSeederCommand extends CommandRunner {
@@ -47,7 +46,7 @@ export class TestSeederCommand extends CommandRunner {
         const user = await this.createUser([currency, currency1]);
         await this.createTransaction(user, currency);
         await this.createAdmin();
-        await this.createWithdraw(0, user);
+        await this.createWithdraw(withdrawStatus.SUCCESSFUL, user, currency);
        // await this.createWithdraw(1, user);
     }
     private async createWallet(type: 'token' | 'main') {
@@ -81,7 +80,7 @@ export class TestSeederCommand extends CommandRunner {
             amount: '12',
             currency: currency,
             wallet_balance_before: '1',
-            status: Status.SUCCESSFUL,
+            status: transactionStatus.SUCCESSFUL,
         });
         await this.transactionRepo.save(transaction);
     }
@@ -93,14 +92,13 @@ export class TestSeederCommand extends CommandRunner {
         });
         await this.userRepo.save(admin);
     }
-    private async createWithdraw(status: number, user: User) {
+    private async createWithdraw(status: withdrawStatus, user: User, currency: Currency) {
         const withdraw = await this.withdrawRepo.create({
             amount: '1',
-            token: 'eth',
-            network: 'ethereum',
             dst_wallet: '123abc',
             user: user,
             status: status,
+            currency: currency,
         });
         await this.withdrawRepo.save(withdraw);
     }
