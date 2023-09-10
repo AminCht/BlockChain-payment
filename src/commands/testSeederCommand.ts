@@ -4,7 +4,7 @@ import {Wallet as WalletEntity} from '../database/entities/Wallet.entity';
 import {Repository} from 'typeorm';
 import {Wallet} from "ethers";
 import {Role, User} from "../database/entities/User.entity";
-import {Transaction} from "../database/entities/Transaction.entity";
+import {Status, Transaction} from "../database/entities/Transaction.entity";
 import * as bcrypt from "bcrypt";
 import {Currency} from "../database/entities/Currency.entity";
 import {Withdraw} from "../database/entities/withdraw.entity";
@@ -81,7 +81,7 @@ export class TestSeederCommand extends CommandRunner {
             amount: '12',
             currency: currency,
             wallet_balance_before: '1',
-            status: 'Successful',
+            status: Status.SUCCESSFUL,
         });
         await this.transactionRepo.save(transaction);
     }
