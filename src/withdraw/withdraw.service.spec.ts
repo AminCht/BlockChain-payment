@@ -39,8 +39,7 @@ describe('WithdrawService', () => {
         it('should create a withdraw', async () => {
             const withdrawDto = {
                 amount: '1',
-                token: 'eth',
-                network: 'ethereum',
+                currencyId: 1,
                 dst_wallet: '123abc',
             };
             const withdraw = await service.createWithdraw(withdrawDto, user);
