@@ -11,7 +11,6 @@ import { User } from '../database/entities/User.entity';
 @Injectable()
 export class PaymentService {
     private provider: InfuraProvider;
-    private contract: Contract;
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
         'function decimals() view returns (uint8)'];
 
@@ -23,7 +22,9 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
-    ) {}
+    ) {
+        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+    }
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
         const user = await this.userRepo
@@ -59,7 +60,8 @@ export class PaymentService {
                 [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                const {balance,decimals} = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
+                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
+                const decimals = user.tokens[0].decimals;
                 const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
@@ -89,32 +91,29 @@ export class PaymentService {
             await queryRunner.release();
         }
     }
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string): Promise<{ balance: string; decimals: number; }>{
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string): Promise<string>{
         let balance: string;
-        let decimals: number;
         if (type == 'main') {
             balance = await this.getBalance(wallet[0].address);
         } else {
             balance = await this.getTokenBalance(wallet[0].address, currencySimbol);
-            decimals = await this.contract.decimals();
         }
-        return { balance: balance, decimals: decimals };
+        return balance;
     }
     public async getBalance(address: string): Promise<string> {
-        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
         const balance = await this.provider.getBalance(address);
         return balance.toString();
     }
     public async getTokenBalance(address: string, currency: string): Promise<string> {
-        this.contract = new ethers.Contract(
+        const contract = new ethers.Contract(
             ethereumTokenAddresses.get(currency),
             this.tokenABI,
             this.provider,
         );
-        const balance = await this.contract.balanceOf(address);
+        const balance = await contract.balanceOf(address);
         return balance.toString();
     }
-    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number|undefined,wallet:Wallet, user: User) {
+    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number,wallet:Wallet, user: User) {
         const amount = ethers.parseUnits(createPaymentDto.amount, decimals);
         return this.transactionRepo.create({
             wallet: wallet[0],
