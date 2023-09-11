@@ -26,12 +26,11 @@ export class PaymentService {
     ) {}
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
-        console.log(createPaymentDto.currencyId);
         const user = await this.userRepo
             .createQueryBuilder('user')
             .leftJoinAndSelect('user.tokens', 'tokens')
             .where('user.id = :id', { id: id })
-            .andWhere('tokens.id = :id', { id: createPaymentDto.currencyId })
+            .andWhere('tokens.id = :tokenId', { tokenId: createPaymentDto.currencyId })
             .select(['user', 'tokens'])
             .getOne();
         if (!user) {
