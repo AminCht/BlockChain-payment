@@ -36,9 +36,9 @@ export class WithdrawService {
         }
         const currency = await this.currencyRepo.findOneById(dto.currencyId);
         const allowedAmount = await this.getAllowedAmount(currency, user);
-        const decimals = await this.getDecimals(currency.symbol);
-        console.log(decimals);
-        const requestedAmount = ethers.parseUnits(dto.amount, decimals);
+        const requestedAmount = ethers.parseUnits(dto.amount, currency.decimals);
+        console.log(allowedAmount);
+        console.log(requestedAmount);
         if (BigInt(requestedAmount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: String(requestedAmount),
@@ -130,14 +130,5 @@ export class WithdrawService {
             throw new NotFoundException(`Withdraw with id ${id} not found`);
         }
         return withdraw;
-
-    }
-    private async getDecimals(currencySymbol: string) {
-        this.tokenContract = new ethers.Contract(
-            ethereumTokenAddresses.get(currencySymbol),
-            this.tokenABI,
-            this.provider,
-        );
-        return await this.tokenContract.decimals();
     }
 }
