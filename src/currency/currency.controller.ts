@@ -30,7 +30,7 @@ export class CurrencyController {
     @ApiResponse({ status: 200, description: 'Create a currency and return it as a response', type: GetCurrenciesResponseDto})
     @ApiResponse({ status: 401, description: 'return Unauthorize and status code 401 if an admin dont send this request', type: UnAuthorizeResponseDto})
     @Post()
-    @UseGuards(JwtAdminAuthGuard)
+    //@UseGuards(JwtAdminAuthGuard)
     async addCurrency(@Body() dto: CreateCurrencyDto){
         return await this.currencyService.addCurrency(dto);
     }
