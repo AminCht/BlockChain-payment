@@ -48,9 +48,8 @@ export class CheckBalanceCommand extends CommandRunner {
                 transaction.wallet.address,
                 transaction.currency.symbol,
             );
-            decimals = await this.tokenContract.decimals();
         } else { return; }
-        const expectedAmount = ethers.parseUnits(transaction.amount, decimals);
+        const expectedAmount = BigInt(transaction.amount);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         if (now >= transaction.expireTime) {
            await this.changeTransactionStatus(transaction,Status.FAILED , currentBalance);

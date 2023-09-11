@@ -4,14 +4,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { DataSource, Repository} from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
-import { ethers, InfuraProvider } from 'ethers';
+import {Contract, ethers, InfuraProvider} from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
 
 @Injectable()
 export class PaymentService {
-    private readonly provider: InfuraProvider;
-    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
+    private provider: InfuraProvider;
+    private contract: Contract;
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
+        'function decimals() view returns (uint8)'];
 
     constructor(
         @InjectRepository(Wallet)
@@ -21,11 +23,10 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
-    ) {
-        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
-    }
+    ) {}
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
+        console.log(createPaymentDto.currencyId);
         const user = await this.userRepo
             .createQueryBuilder('user')
             .leftJoinAndSelect('user.tokens', 'tokens')
@@ -35,8 +36,8 @@ export class PaymentService {
             .getOne();
         if (!user) {
             throw new ForbiddenException(
-                'You dont have token to create payment with ' + `${user.tokens[0].symbol}` +
-                    `on ${user.tokens[0].network} network`,
+                'You dont have token to create payment with currency: ' +
+                    createPaymentDto.currencyId,
             );
         }
         const currency = user.tokens[0];
@@ -59,8 +60,8 @@ export class PaymentService {
                 [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
-                const transaction = this.createTransaction(createPaymentDto, balance, wallet,user);
+                const {balance,decimals} = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
+                const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -89,34 +90,37 @@ export class PaymentService {
             await queryRunner.release();
         }
     }
-
-    public async getBalance(address: string): Promise<string> {
-        const balance = await this.provider.getBalance(address);
-        return balance.toString();
-    }
-    public async getTokenBalance(address: string, currency: string): Promise<string> {
-        const tokenContract = new ethers.Contract(
-            ethereumTokenAddresses.get(currency),
-            this.tokenABI,
-            this.provider,
-        );
-        const balance = await tokenContract.balanceOf(address);
-        return balance.toString();
-    }
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string):Promise<string> {
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string): Promise<{ balance: string; decimals: number; }>{
         let balance: string;
+        let decimals: number;
         if (type == 'main') {
             balance = await this.getBalance(wallet[0].address);
         } else {
             balance = await this.getTokenBalance(wallet[0].address, currencySimbol);
+            decimals = await this.contract.decimals();
         }
-        return balance;
+        return { balance: balance, decimals: decimals };
     }
-    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,wallet:Wallet, user: User) {
+    public async getBalance(address: string): Promise<string> {
+        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+        const balance = await this.provider.getBalance(address);
+        return balance.toString();
+    }
+    public async getTokenBalance(address: string, currency: string): Promise<string> {
+        this.contract = new ethers.Contract(
+            ethereumTokenAddresses.get(currency),
+            this.tokenABI,
+            this.provider,
+        );
+        const balance = await this.contract.balanceOf(address);
+        return balance.toString();
+    }
+    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number|undefined,wallet:Wallet, user: User) {
+        const amount = ethers.parseUnits(createPaymentDto.amount, decimals);
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
-            amount: createPaymentDto.amount,
+            amount: amount.toString(),
             currency: user.tokens[0],
             wallet_balance_before: balance,
         });
