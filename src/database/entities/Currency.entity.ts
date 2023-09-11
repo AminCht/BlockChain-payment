@@ -20,7 +20,9 @@ export class Currency {
 
     @Column({ default: true })
     status: boolean;
-    
+
+    @Column({ default: 18 })
+    decimals: number;
     @ManyToMany(() => User, (user) => user.tokens)
     @JoinTable({ name: 'currency_user' })
     users: User[];
