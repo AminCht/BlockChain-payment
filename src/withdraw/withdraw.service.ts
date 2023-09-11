@@ -29,7 +29,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const currency = await this.currencyRepo.findOneById(dto.currencyId)
-        const allowedAmount = await this.getAllowedAmount(dto.currencyId, user);
+        const allowedAmount = await this.getAllowedAmount(currency, user);
         if (BigInt(dto.amount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
@@ -55,8 +55,8 @@ export class WithdrawService {
         let allowedAmount;
         if (dto.currencyId) {
             const withdraw = await this.getWithdrawById(id);
-            allowedAmount = await this.getAllowedAmount(
-                dto.currencyId, user);}
+            const currency = await this.currencyRepo.findOneById(dto.currencyId);
+            allowedAmount = await this.getAllowedAmount(currency, user);}
         if (!allowedAmount || Number(dto.amount) <= Number(allowedAmount)) {
             const result = await this.withdrawRepo.update(id, { ...dto });
             if(result.affected == 1){
@@ -75,9 +75,9 @@ export class WithdrawService {
         });
         return withDraw;
     }
-    private async getAllowedAmount(currencyId: number, user: User): Promise <bigint>{
-        const transactionsAmount = await this.getAllSuccessfulTransactions(currencyId, user)
-        const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(currencyId, user);
+    private async getAllowedAmount(currency: Currency, user: User): Promise <bigint>{
+        const transactionsAmount = await this.getAllSuccessfulTransactions(currency, user)
+        const acceptedWithdrawAmount = await this.getAllAcceptedWithDraw(currency, user);
         return transactionsAmount - acceptedWithdrawAmount;
     }
 
