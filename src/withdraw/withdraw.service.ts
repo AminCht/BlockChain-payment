@@ -6,12 +6,17 @@ import { CreateWithdrawDto, UpdateWithdrawRequestDto } from './dto/withdraw.dto'
 import { User } from '../database/entities/User.entity';
 import { Status, Transaction } from '../database/entities/Transaction.entity';
 import { Status as withdrawStatus} from '../database/entities/withdraw.entity';
+import {Currency} from "../database/entities/Currency.entity";
+import {ethers} from "ethers";
 
 @Injectable()
 export class WithdrawService {
     constructor (
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
-        @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
+        @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
+        @InjectRepository(Transaction) private currencyRepo: Repository<Currency>,
+        )
+    {}
 
     public async getAllWithdraws(userId: number): Promise<Withdraw[]> {
         return await this.withdrawRepo.find({
@@ -23,11 +28,12 @@ export class WithdrawService {
         if (withdraw) {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
+        const currency = await this.currencyRepo.findOneById(dto.currencyId)
         const allowedAmount = await this.getAllowedAmount(dto.currencyId, user);
         if (BigInt(dto.amount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: dto.amount,
-                currency: { id: dto.currencyId },
+                currency: currency,
                 dst_wallet: dto.dst_wallet,
                 user: user,
             });
@@ -75,10 +81,10 @@ export class WithdrawService {
         return transactionsAmount - acceptedWithdrawAmount;
     }
 
-    private async getAllSuccessfulTransactions(currencyId: number, user: User): Promise <bigint>{
+    private async getAllSuccessfulTransactions(currency:Currency, user: User): Promise <bigint>{
         const successfulTransactions = await this.transactionRepo.createQueryBuilder('transaction')
             .where('transaction.userId=:userId', { userId: user.id })
-            .andWhere('transaction.currencyId=:token', { token: currencyId })
+            .andWhere('transaction.currency=:token', { token: currency })
             .andWhere('transaction.status=:status', { status: Status.SUCCESSFUL })
             .select(['transaction.amount'])
             .getMany();
@@ -86,22 +92,22 @@ export class WithdrawService {
         for( var transaction of successfulTransactions){
             sumOfAmounts += BigInt(transaction.amount);
         }
-        return BigInt(sumOfAmounts);
+        return BigInt(ethers.formatUnits(sumOfAmounts, currency.symbol));
     }
-    private async getAllAcceptedWithDraw( currencyId: number,user: User): Promise <bigint>{
+    private async getAllAcceptedWithDraw( currency: Currency,user: User): Promise <bigint>{
         const acceptedwithdraw = await this.withdrawRepo.createQueryBuilder('withdraw')
         .leftJoinAndSelect('withdraw.user', 'user')
           .leftJoinAndSelect('withdraw.currency', 'currency')
         .where('withdraw.userId=:userId',{userId: user.id})
         .andWhere('withdraw.status=:status', {status: withdrawStatus.SUCCESSFUL})
-        .andWhere('withdraw.currencyId=:id', {id: currencyId})
+        .andWhere('withdraw.currency=:currency', {currency: currency})
         .select(['amount'])
         .getMany();
         let sumOfAmounts: bigint = BigInt(0);
         for(const withdraw of acceptedwithdraw){
             sumOfAmounts += BigInt(withdraw.amount);
         }
-        return BigInt(sumOfAmounts);
+        return BigInt(ethers.formatUnits(sumOfAmounts, currency.symbol));
     }
     private async getWithdrawById(id: number): Promise<Withdraw>{
         const withdraw = await this.withdrawRepo.findOne({
