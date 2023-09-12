@@ -4,14 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { DataSource, Repository} from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
-import { ethers, InfuraProvider} from 'ethers';
+import { ethers, InfuraProvider, Provider} from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
 
 @Injectable()
 export class PaymentService {
     private provider: InfuraProvider;
-    private smartProvider;
+    private smartProvider: Provider;
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
         'function decimals() view returns (uint8)'];
 
