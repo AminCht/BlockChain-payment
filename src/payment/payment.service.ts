@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { DataSource, Repository} from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
-import {Contract, ethers, InfuraProvider} from 'ethers';
+import { ethers, InfuraProvider} from 'ethers';
 import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
 
