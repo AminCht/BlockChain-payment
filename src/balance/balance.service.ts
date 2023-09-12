@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Transaction } from '../database/entities/Transaction.entity';
-import { Currency } from '../database/entities/Currency.entity';
-import { Withdraw } from '../database/entities/withdraw.entity';
+import {Injectable} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import {Status as transactionStatus, Transaction} from '../database/entities/Transaction.entity';
+import {Currency} from '../database/entities/Currency.entity';
+import {Status as withdrawStatus, Withdraw} from '../database/entities/withdraw.entity';
+import {ethers} from "ethers";
 
 @Injectable()
 export class BalanceService {
@@ -22,21 +23,44 @@ export class BalanceService {
 
         }
     }
-    public async getBalanceByTokenId(userId: number, currencyId: number) {
-        const sum = await this.transactionRepo
-            .createQueryBuilder('transaction')
-            .select('SUM(CAST(transaction.amount AS DECIMAL))', 'totalAmount')
-            .where('transaction.user.id = :userId', { userId })
-            .andWhere('transaction.status = :status', { status: 'Successful' })
-            .andWhere('transaction.currency.id = :currencyId', { currencyId })
-            .getRawOne();
-        const withdrawSum = await this.withdrawRepo
-            .createQueryBuilder('withdraw')
-            .select('SUM(CAST(withdraw.amount AS DECIMAL))', 'totalAmount')
-            .where('withdraw.user.id = :userId', { userId })
-            .andWhere('withdraw.status = :status', { status: 0 })
-            .andWhere('withdraw.currency.id = :currencyId', { currencyId })
-            .getRawOne();
-        return { balance: sum - withdrawSum };
+    public async getBalanceByTokenId(userId: number, currencyId: number): Promise<string> {
+        const transactionSum = await this.transactionSum(userId, currencyId);
+        const withdrawSum = await this.withdrawSum(userId, currencyId);
+        const balance = transactionSum - withdrawSum;
+        return this.convertWei(currencyId, balance);
+    }
+    private async transactionSum(userId: number, currencyId: number): Promise<bigint> {
+        const transactionAmounts = await this.transactionRepo.find({
+            where: {
+                user: { id: userId },
+                currency: { id: currencyId },
+                status: transactionStatus.SUCCESSFUL,
+            },
+            select: ['amount'],
+        });
+        let transactionSum = BigInt(0);
+        for (let i = 0; i < transactionAmounts.length; i++) {
+            transactionSum += BigInt(transactionAmounts[i].amount);
+        }
+        return transactionSum;
+    }
+    private async withdrawSum(userId: number, currencyId: number): Promise<bigint> {
+        const withdrawAmounts = await this.withdrawRepo.find({
+            where: {
+                user: { id: userId },
+                currency: { id: currencyId },
+                status: withdrawStatus.SUCCESSFUL,
+            },
+            select: ['amount'],
+        });
+        let withdrawSum = BigInt(0);
+        for (let i = 0; i < withdrawAmounts.length; i++) {
+            withdrawSum += BigInt(withdrawAmounts[i].amount);
+        }
+        return withdrawSum;
+    }
+    private async convertWei(currencyId: number, balance: bigint): Promise<string> {
+        const currency = await this.currencyRepo.findOneById(currencyId);
+        return ethers.formatUnits(balance, currency.decimals);
     }
 }
