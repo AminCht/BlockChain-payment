@@ -15,13 +15,37 @@ export class BalanceService {
 
     ) {}
     public async getAllBalances(userId: number) {
-        const currencies = await this.currencyRepo.find({
-            relations: ['tokens'],
-        });
-        let balances = [currencies.length];
-        for (let i = 0; i < currencies.length; i++) {
-
-        }
+        const transactionSum = await this.transactionRepo
+            .createQueryBuilder('transaction')
+            .select('currency.id', 'currencyId')
+            .addSelect('currency.name', 'currencyName')
+            .addSelect('SUM(CAST(transaction.amount AS DECIMAL))', 'totalAmount')
+            .innerJoin('transaction.currency', 'currency')
+            .innerJoin('transaction.user', 'user')
+            .where('user.id = :userId', { userId })
+            .where('transaction.status = :status',{status :transactionStatus.SUCCESSFUL})
+            .groupBy('currency.id, currency.name')
+            .getRawMany();
+        const withdrawSum = await this.withdrawRepo
+            .createQueryBuilder('withdraw')
+            .select('currency.id', 'currencyId')
+            .addSelect('currency.name', 'currencyName')
+            .addSelect('SUM(CAST(withdraw.amount AS DECIMAL))', 'totalAmount')
+            .innerJoin('withdraw.currency', 'currency')
+            .innerJoin('withdraw.user', 'user')
+            .where('user.id = :userId', { userId })
+            .where('withdraw.status = :status',{status :withdrawStatus.SUCCESSFUL})
+            .groupBy('currency.id, currency.name')
+            .getRawMany();
+        const transactionSumMap = transactionSum.reduce((map, item) => {
+            map[item.currencyId] = item.totalAmount;
+            return map;
+        }, {});
+        const result = withdrawSum.map(item => ({
+            currencyId: item.currencyId,
+            currencyName: item.currencyName,
+            totalAmount: (transactionSumMap[item.currencyId] || 0) - item.totalAmount,
+        }));
     }
     public async getBalanceByTokenId(userId: number, currencyId: number): Promise<string> {
         const transactionSum = await this.transactionSum(userId, currencyId);
