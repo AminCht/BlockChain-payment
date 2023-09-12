@@ -11,6 +11,7 @@ import { User } from '../database/entities/User.entity';
 @Injectable()
 export class PaymentService {
     private provider: InfuraProvider;
+
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
         'function decimals() view returns (uint8)'];
 
