@@ -11,6 +11,7 @@ import { User } from '../database/entities/User.entity';
 @Injectable()
 export class PaymentService {
     private provider: InfuraProvider;
+    private smartProvider;
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
         'function decimals() view returns (uint8)'];
 
@@ -24,6 +25,7 @@ export class PaymentService {
         private dataSource: DataSource,
     ) {
         this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+        this.smartProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN)
     }
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
@@ -42,14 +44,16 @@ export class PaymentService {
         }
         const currency = user.tokens[0];
         if (currency.symbol == 'eth' && currency.network == 'ethereum') {
-            return await this.createEthPayment(createPaymentDto, 'main', user);
+            return await this.createEthPayment(createPaymentDto, 'main', user, currency.network);
         } else if (currency.symbol != 'eth' && currency.network == 'ethereum') {
-            return await this.createEthPayment(createPaymentDto, 'token', user);
+            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network);
+        }else if(currency.symbol == 'eth' && currency.network == 'smartchain'){
+            return await this.createEthPayment(createPaymentDto,'main', user, currency.network)
         }
     }
 
     private async createEthPayment(
-        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User,): Promise<CreatePaymentResponseDto> {
+        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, network: string): Promise<CreatePaymentResponseDto> {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -60,7 +64,13 @@ export class PaymentService {
                 [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
+                let balance;
+                if(network == 'ethereum'){
+                    balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
+                }
+                else if(network == 'smartchain'){
+                    balance = (await this.smartProvider.getBalance(wallet[0].address)).toString();
+                }
                 const decimals = user.tokens[0].decimals;
                 const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
