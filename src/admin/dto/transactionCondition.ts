@@ -6,28 +6,13 @@ export class TransactionCondition implements ICondition {
 
     queryToCondition(query: any): ObjectLiteral {
         const result : ObjectLiteral = new Object();
-        const amountObj: ObjectLiteral = new Object();
-        const createdAtObj: ObjectLiteral = new Object();
-        if (query.amount) {
-            result.amount= query.amount;
-        }
-        if (query.amountGt || query.amountLt) {
-            /*if (query.amountLt) {
-                amountObj['Lt'] = LessThan(query.amountLt)
-            }
-            if(query.amountGt){
-                amountObj['Gt'] = MoreThan(query.amountGt)
-            }*/
-
-            result.amount  = Between(query.amountGt, query.amountLt)
-        }
+        
         if (query.createdAtGt || query.createdAtLt) {
             if(query.createdAtGt && query.createdAtLt){
+                const startDate = new Date(query.createdAtGt);
                 const endDate = new Date(query.createdAtLt);
-                result.created_date  = Raw(alias => `${alias} >= :startDate AND ${alias} <= :enddate`, {
-                    startDate: query.createdAtGt,
-                    enddate: new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
-                  });
+                const untillDate = this.getNextDayDate(endDate);
+                  result.created_date = Between(startDate, untillDate);
             }
             else if (query.createdAtLt) {
                 result.created_date = LessThan(query.createdAtLt)
@@ -49,5 +34,8 @@ export class TransactionCondition implements ICondition {
             result.currency = {id: query.currencyId}
         }
         return result;
+    }
+    getNextDayDate(date: Date){
+        return new Date(date.getTime() + 24 * 60 * 60 * 1000)
     }
 }

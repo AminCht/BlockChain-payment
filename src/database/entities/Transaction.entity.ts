@@ -3,9 +3,9 @@ import { Wallet } from './Wallet.entity';
 import { User } from './User.entity';
 import { Currency } from './Currency.entity';
 export enum Status {
-    PENDING = 'Pending',
-    SUCCESSFUL = 'Successful',
-    FAILED = 'Failed'
+    PENDING = 0,
+    SUCCESSFUL = 1,
+    FAILED = 2
 }
 
 
@@ -17,8 +17,8 @@ export class Transaction{
     @Column({nullable: false })
     amount: string;
 
-    @Column({ type: 'enum', enum: Status, default: 'Pending' })
-    status: string;
+    @Column({ default: Status.PENDING })
+    status: Status;
 
     @Column({ nullable: false })
     wallet_balance_before: string;
