@@ -25,10 +25,9 @@ export class PaymentService {
         private userRepo: Repository<User>,
         private dataSource: DataSource,
     ) {
-        // TODO: use correct env variable for each one of them
-        this.ethProvider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
-        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN)
-        this.sepoliaPrivider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN);
+        this.ethProvider = new InfuraProvider(process.env.ETH_NETWORK, process.env.ETH_APIKEY);
+        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
+        this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
     }
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
@@ -41,20 +40,24 @@ export class PaymentService {
             .getOne();
         if (!user) {
             throw new ForbiddenException(
-                'You dont have token to create payment with currency: ' +
+                'You dont have access to create payment with currency: ' +
                     createPaymentDto.currencyId,
             );
         }
         const currency = user.tokens[0];
         const provider = this.selectEvmProvider(currency.network);
-        // TODO: there are 6 mode
-        // bnb
         if (currency.symbol == 'eth' && currency.network == 'ethereum') {
             return await this.createEthPayment(createPaymentDto, 'main', user, currency.network, provider);
         } else if (currency.symbol != 'eth' && currency.network == 'ethereum') {
             return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
-        }else if(currency.symbol == 'eth' && currency.network == 'smartchain'){
+        } else if (currency.symbol == 'bnb' && currency.network == 'bsc') {
             return await this.createEthPayment(createPaymentDto,'main', user, currency.network, provider)
+        } else if (currency.symbol != 'bnb' && currency.network == 'bsc') {
+            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
+        } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
+            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
+        } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
+            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
         }
     }
 
@@ -79,13 +82,7 @@ export class PaymentService {
                 [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                let balance;
-                if(network == 'ethereum'){
-                    balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol);
-                }
-                else if(network == 'smartchain'){
-                    balance = (await this.smartProvider.getBalance(wallet[0].address)).toString();
-                }
+                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol,provider);
                 const decimals = user.tokens[0].decimals;
                 const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
@@ -117,24 +114,24 @@ export class PaymentService {
         }
     }
 
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string): Promise<string>{
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string, provider:Provider): Promise<string>{
         let balance: string;
         if (type == 'main') {
-            balance = await this.getBalance(wallet[0].address);
+            balance = await this.getBalance(wallet[0].address, provider);
         } else {
-            balance = await this.getTokenBalance(wallet[0].address, currencySimbol);
+            balance = await this.getTokenBalance(wallet[0].address, currencySimbol, provider);
         }
         return balance;
     }
-    public async getBalance(address: string): Promise<string> {
-        const balance = await this.provider.getBalance(address);
+    public async getBalance(address: string, provider: Provider): Promise<string> {
+        const balance = await provider.getBalance(address);
         return balance.toString();
     }
-    public async getTokenBalance(address: string, currency: string): Promise<string> {
+    public async getTokenBalance(address: string, currency: string, provider:Provider): Promise<string> {
         const contract = new ethers.Contract(
             ethereumTokenAddresses.get(currency),
             this.tokenABI,
-            this.provider,
+            provider,
         );
         const balance = await contract.balanceOf(address);
         return balance.toString();
