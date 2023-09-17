@@ -64,7 +64,7 @@ export class WithdrawService {
         if (dto.currencyId) {
             const currency = await this.currencyRepo.findOneById(dto.currencyId);
             allowedAmount = await this.getAllowedAmount(currency.id, user);
-            requestedAmount = ethers.parseUnits(dto.amount, currency.decimals);
+            requestedAmount = ethers.parseUnits(dto.amount ?? withdraw.amount, currency.decimals);
         }
         if(dto.amount){
             allowedAmount = await this.getAllowedAmount(withdraw.currency.id, user);
