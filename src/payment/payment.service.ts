@@ -12,9 +12,8 @@ import { User } from '../database/entities/User.entity';
 export class PaymentService {
     private ethProvider: InfuraProvider;
     private bscProvider: Provider;
-    private sepoliaPrivider: Provider;
-    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
-        'function decimals() view returns (uint8)'];
+    private sepoliaPrivider: InfuraProvider;
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)'];
 
     constructor(
         @InjectRepository(Wallet)

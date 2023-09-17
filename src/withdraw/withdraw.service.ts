@@ -11,18 +11,13 @@ import {Contract, ethers, InfuraProvider} from "ethers";
 
 @Injectable()
 export class WithdrawService {
-    private tokenContract: Contract;
-    private readonly provider: InfuraProvider;
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
         'function decimals() view returns (uint8)'];
     constructor (
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
         @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
         @InjectRepository(Currency) private currencyRepo: Repository<Currency>,
-        )
-    {
-        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
-    }
+        ) {}
 
     public async getAllWithdraws(userId: number): Promise<Withdraw[]> {
         return await this.withdrawRepo.find({
@@ -37,8 +32,6 @@ export class WithdrawService {
         const currency = await this.currencyRepo.findOneById(dto.currencyId);
         const allowedAmount = await this.getAllowedAmount(currency, user);
         const requestedAmount = ethers.parseUnits(dto.amount, currency.decimals);
-        console.log(allowedAmount);
-        console.log(requestedAmount);
         if (BigInt(requestedAmount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: String(requestedAmount),
