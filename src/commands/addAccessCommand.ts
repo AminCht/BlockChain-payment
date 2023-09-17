@@ -21,8 +21,7 @@ export class AddAccessCommand extends CommandRunner {
     }
 
     async getDataFromJson(){
-        // TODO: fix this one
-        return await fs.readJson('src/apikey/token.json');
+        return await fs.readJson('src/apikey/access.json');
     }
 
     async addAccess(accesses){
