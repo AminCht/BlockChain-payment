@@ -10,8 +10,9 @@ import { User } from '../database/entities/User.entity';
 
 @Injectable()
 export class PaymentService {
-    private provider: InfuraProvider;
-    private smartProvider: Provider;
+    private ethProvider: InfuraProvider;
+    private bscProvider: Provider;
+    private sepoliaPrivider: Provider;
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
         'function decimals() view returns (uint8)'];
 
@@ -24,8 +25,10 @@ export class PaymentService {
         private userRepo: Repository<User>,
         private dataSource: DataSource,
     ) {
-        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
-        this.smartProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN)
+        // TODO: use correct env variable for each one of them
+        this.ethProvider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN)
+        this.sepoliaPrivider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN);
     }
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
@@ -43,17 +46,29 @@ export class PaymentService {
             );
         }
         const currency = user.tokens[0];
+        const provider = this.selectEvmProvider(currency.network);
+        // TODO: there are 6 mode
+        // bnb
         if (currency.symbol == 'eth' && currency.network == 'ethereum') {
-            return await this.createEthPayment(createPaymentDto, 'main', user, currency.network);
+            return await this.createEthPayment(createPaymentDto, 'main', user, currency.network, provider);
         } else if (currency.symbol != 'eth' && currency.network == 'ethereum') {
-            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network);
+            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
         }else if(currency.symbol == 'eth' && currency.network == 'smartchain'){
-            return await this.createEthPayment(createPaymentDto,'main', user, currency.network)
+            return await this.createEthPayment(createPaymentDto,'main', user, currency.network, provider)
         }
     }
 
+    private selectEvmProvider(network: string): Provider {
+        if (network == "ethereum") return this.ethProvider;
+        if (network == "sepolia") return this.sepoliaPrivider;
+        if (network == "bsc") return this.bscProvider;
+        throw 'Invalid network';
+
+    }
+
     private async createEthPayment(
-        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, network: string): Promise<CreatePaymentResponseDto> {
+        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, network: string, provider: Provider): Promise<CreatePaymentResponseDto> {
+        // TODO: use correct provider in this body
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -101,6 +116,7 @@ export class PaymentService {
             await queryRunner.release();
         }
     }
+
     public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string): Promise<string>{
         let balance: string;
         if (type == 'main') {
