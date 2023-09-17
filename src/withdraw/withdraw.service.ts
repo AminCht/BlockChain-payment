@@ -30,7 +30,7 @@ export class WithdrawService {
             throw new BadRequestException('You have a pending Withdraw Request');
         }
         const currency = await this.currencyRepo.findOneById(dto.currencyId);
-        const allowedAmount = await this.getAllowedAmount(currency, user);
+        const allowedAmount = await this.getAllowedAmount(dto.currencyId, user);
         const requestedAmount = ethers.parseUnits(dto.amount, currency.decimals);
         if (BigInt(requestedAmount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({

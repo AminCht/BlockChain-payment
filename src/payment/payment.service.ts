@@ -53,8 +53,8 @@ export class PaymentService {
             return await this.createEthPayment(createPaymentDto,'main', user, currency.network, provider)
         } else if (currency.symbol != 'bnb' && currency.network == 'bsc') {
             return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
-        } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
-            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
+        } else if (currency.symbol == 'eth' && currency.network == 'sepolia') {
+            return await this.createEthPayment(createPaymentDto, 'main', user, currency.network, provider);
         } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
             return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
         }
