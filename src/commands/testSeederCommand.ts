@@ -77,7 +77,7 @@ export class TestSeederCommand extends CommandRunner {
         const transaction = this.transactionRepo.create({
             wallet: wallet,
             user: user,
-            amount: '12',
+            amount: '12000000000000000000',
             currency: currency,
             wallet_balance_before: '1',
             status: transactionStatus.SUCCESSFUL,

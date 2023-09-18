@@ -12,7 +12,7 @@ describe('checkBalanceCommand', () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [
                 DatabaseModule,
-                TypeOrmModule.forFeature([Wallet, Transaction]),
+                TypeOrmModule.forFeature([Transaction]),
             ],
             providers: [CheckBalanceCommand],
         }).compile();
