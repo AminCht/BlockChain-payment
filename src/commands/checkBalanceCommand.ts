@@ -4,7 +4,6 @@ import {Wallet} from "../database/entities/Wallet.entity";
 import {Status, Transaction} from '../database/entities/Transaction.entity';
 import {Contract, ethers, InfuraProvider, Provider} from 'ethers';
 import {DataSource, Repository} from "typeorm";
-import {ethereumTokenAddresses} from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
 export class CheckBalanceCommand extends CommandRunner {
@@ -95,9 +94,10 @@ export class CheckBalanceCommand extends CommandRunner {
         const balance = await this.tokenContract.balanceOf(address, provider);
         return balance.toString();
     }
+    //todo
     async createTokenContract(currency: string,provider) {
         this.tokenContract = new ethers.Contract(
-            ethereumTokenAddresses.get(currency),
+            '1',
             this.tokenABI,
             provider,
         );

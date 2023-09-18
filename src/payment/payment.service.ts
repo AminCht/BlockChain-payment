@@ -5,8 +5,8 @@ import { Wallet } from '../database/entities/Wallet.entity';
 import { DataSource, Repository} from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider, Provider} from 'ethers';
-import { ethereumTokenAddresses } from './tokenAddresses/EthereumTokenAddresses';
 import { User } from '../database/entities/User.entity';
+import * as fs from 'fs-extra';
 
 @Injectable()
 export class PaymentService {
@@ -70,7 +70,6 @@ export class PaymentService {
 
     private async createEthPayment(
         createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, network: string, provider: Provider): Promise<CreatePaymentResponseDto> {
-        // TODO: use correct provider in this body
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -81,7 +80,7 @@ export class PaymentService {
                 [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol,provider);
+                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol,user.tokens[0].network,provider);
                 const decimals = user.tokens[0].decimals;
                 const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
@@ -113,12 +112,12 @@ export class PaymentService {
         }
     }
 
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySimbol: string, provider:Provider): Promise<string>{
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySymbol: string,currencyNetwork: string ,provider:Provider): Promise<string>{
         let balance: string;
         if (type == 'main') {
             balance = await this.getBalance(wallet[0].address, provider);
         } else {
-            balance = await this.getTokenBalance(wallet[0].address, currencySimbol, provider);
+            balance = await this.getTokenBalance(wallet[0].address, currencySymbol,currencyNetwork, provider);
         }
         return balance;
     }
@@ -126,9 +125,10 @@ export class PaymentService {
         const balance = await provider.getBalance(address);
         return balance.toString();
     }
-    public async getTokenBalance(address: string, currency: string, provider:Provider): Promise<string> {
+    public async getTokenBalance(address: string, currencySymbol: string,currencyNetwork: string, provider:Provider): Promise<string> {
+        const tokenAddresses = await this.getTokenAddress(currencySymbol,currencyNetwork)
         const contract = new ethers.Contract(
-            ethereumTokenAddresses.get(currency),
+            tokenAddresses,
             this.tokenABI,
             provider,
         );
@@ -156,5 +156,17 @@ export class PaymentService {
             where: { address: address },
         });
         return wallet;
+    }
+    private async getTokenAddress(currencySymbol: string, currencyNetwork: string) {
+        const tokenAddress = await fs.readJson('src/payment/TokenAddresses.json');
+        for (const item of tokenAddress) {
+            if (item.network == currencyNetwork) {
+                for (const token of item.tokens) {
+                    if (token.hasOwnProperty(currencySymbol)) {
+                        return token[currencySymbol];
+                    }
+                }
+            }
+        }
     }
 }

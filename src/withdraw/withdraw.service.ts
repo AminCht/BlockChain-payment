@@ -6,7 +6,6 @@ import {CreateWithdrawDto, UpdateWithdrawRequestDto} from './dto/withdraw.dto';
 import {User} from '../database/entities/User.entity';
 import {Status, Transaction} from '../database/entities/Transaction.entity';
 import {Currency} from "../database/entities/Currency.entity";
-import {ethereumTokenAddresses} from "../payment/tokenAddresses/EthereumTokenAddresses";
 import {Contract, ethers, InfuraProvider} from "ethers";
 
 @Injectable()

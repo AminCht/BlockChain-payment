@@ -4,7 +4,6 @@ import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
 import {ethers, InfuraProvider} from "ethers";
-import {ethereumTokenAddresses} from "../payment/tokenAddresses/EthereumTokenAddresses";
 
 @Injectable()
 export class CurrencyService {
@@ -29,7 +28,7 @@ export class CurrencyService {
         try {
             let decimals;
             if(createCurrnecyDto.symbol != 'eth' && createCurrnecyDto.network == 'ethereum'){
-                decimals = Number(await this.getDecimals(createCurrnecyDto.symbol));
+               // decimals = Number(await this.getDecimals(createCurrnecyDto.symbol));
             }
             const createdCurrency = this.currencyRepo.create({ ...createCurrnecyDto ,decimals:decimals});
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
@@ -73,12 +72,13 @@ export class CurrencyService {
         }
         return {message: `Currency with id ${id} Deleted`}
     }
-    public async getDecimals(currencySymbol: string): Promise<string> {
+    //todo
+    /*public async getDecimals(currencySymbol: string): Promise<string> {
         const contract = new ethers.Contract(
-            ethereumTokenAddresses.get(currencySymbol),
+            tokenAddresses.get(currencySymbol),
             this.tokenABI,
             this.provider,
         );
         return await contract.decimals();
-    }
+    }*/
 }
