@@ -70,7 +70,6 @@ export class PaymentService {
 
     private async createEthPayment(
         createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, network: string, provider: Provider): Promise<CreatePaymentResponseDto> {
-        // TODO: use correct provider in this body
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -83,7 +82,7 @@ export class PaymentService {
             if (wallet.length == 1) {
                 const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol,provider);
                 const decimals = user.tokens[0].decimals;
-                const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
+                const transaction = this.createEthTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -135,7 +134,7 @@ export class PaymentService {
         const balance = await contract.balanceOf(address);
         return balance.toString();
     }
-    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number,wallet:Wallet, user: User) {
+    private createEthTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number,wallet:Wallet, user: User) {
         const amount = ethers.parseUnits(createPaymentDto.amount, decimals);
         return this.transactionRepo.create({
             wallet: wallet[0],
