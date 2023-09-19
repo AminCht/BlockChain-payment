@@ -1,16 +1,21 @@
-import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, ConflictException, Injectable, NotFoundException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
-import {ethers, InfuraProvider} from "ethers";
+import {ethers, InfuraProvider, Provider} from "ethers";
 
 @Injectable()
 export class CurrencyService {
-    private provider: InfuraProvider;
+    private ethProvider: InfuraProvider;
+    private bscProvider: Provider;
+    private sepoliaPrivider: InfuraProvider;
+    
     private readonly tokenABI = ['function decimals() view returns (uint8)'];
     constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>) {
-        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+        this.ethProvider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
+        this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
     }
     public async getAllCurrencies(): Promise<Currency[]> {
         return await this.currencyRepo.find();
@@ -27,10 +32,16 @@ export class CurrencyService {
     public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<GetCurrenciesResponseDto> {
         try {
             let decimals;
-            if(createCurrnecyDto.symbol != 'eth' && createCurrnecyDto.network == 'ethereum'){
-               // decimals = Number(await this.getDecimals(createCurrnecyDto.symbol));
+            if (createCurrnecyDto.symbol != 'eth' && createCurrnecyDto.symbol != 'bnc'){
+                if(createCurrnecyDto.network == 'sepolia' || 
+                    createCurrnecyDto.network == 'ethereum' ||
+                    createCurrnecyDto.network == 'bsc'
+                ) {
+                    const provider = this.selectEvmProvider(createCurrnecyDto.network);
+                    decimals = Number(await this.getDecimals(createCurrnecyDto.address, provider));
+                }
             }
-            const createdCurrency = this.currencyRepo.create({ ...createCurrnecyDto ,decimals:decimals});
+            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto ,decimals:decimals});
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
             const responseDto: GetCurrenciesResponseDto = {
                 id: savedCurrency.id,
@@ -38,12 +49,16 @@ export class CurrencyService {
                 name: savedCurrency.name,
                 symbol: savedCurrency.symbol,
                 status: savedCurrency.status,
-              };
+                address: createCurrnecyDto.address,
+            };
             return responseDto;
 
         } catch (error) {
             if(error.code == '23505'){
                 throw new ConflictException('This network and symbol has already exist');
+            }
+            if(error.code == 'INVALID_ARGUMENT'){
+                throw new BadRequestException('you must set a valid address for tokens');
             }
             throw error;
         }
@@ -72,13 +87,19 @@ export class CurrencyService {
         }
         return {message: `Currency with id ${id} Deleted`}
     }
-    //todo
-    /*public async getDecimals(currencySymbol: string): Promise<string> {
+    public async getDecimals(currencyAddress: string,provider: Provider): Promise<string> {
         const contract = new ethers.Contract(
-            tokenAddresses.get(currencySymbol),
+            currencyAddress,
             this.tokenABI,
-            this.provider,
+           provider,
         );
         return await contract.decimals();
-    }*/
+    }
+    public selectEvmProvider(network: string): Provider {
+        if (network == "ethereum") return this.ethProvider;
+        if (network == "sepolia") return this.sepoliaPrivider;
+        if (network == "bsc") return this.bscProvider;
+        throw 'Invalid network';
+
+    }
 }

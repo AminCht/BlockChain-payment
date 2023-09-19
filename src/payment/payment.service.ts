@@ -60,7 +60,7 @@ export class PaymentService {
         }
     }
 
-    private selectEvmProvider(network: string): Provider {
+    public selectEvmProvider(network: string): Provider {
         if (network == "ethereum") return this.ethProvider;
         if (network == "sepolia") return this.sepoliaPrivider;
         if (network == "bsc") return this.bscProvider;
@@ -80,7 +80,7 @@ export class PaymentService {
                 [user.tokens[0].network, type],
             );
             if (wallet.length == 1) {
-                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].symbol,user.tokens[0].network,provider);
+                const balance = await this.getBalanceByType(type, wallet, user.tokens[0].address,provider);
                 const decimals = user.tokens[0].decimals;
                 const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
@@ -112,12 +112,12 @@ export class PaymentService {
         }
     }
 
-    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencySymbol: string,currencyNetwork: string ,provider:Provider): Promise<string>{
+    public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencyAddress ,provider:Provider): Promise<string>{
         let balance: string;
         if (type == 'main') {
             balance = await this.getBalance(wallet[0].address, provider);
         } else {
-            balance = await this.getTokenBalance(wallet[0].address, currencySymbol,currencyNetwork, provider);
+            balance = await this.getTokenBalance(wallet[0].address, currencyAddress, provider);
         }
         return balance;
     }
@@ -125,10 +125,9 @@ export class PaymentService {
         const balance = await provider.getBalance(address);
         return balance.toString();
     }
-    public async getTokenBalance(address: string, currencySymbol: string,currencyNetwork: string, provider:Provider): Promise<string> {
-        const tokenAddresses = await this.getTokenAddress(currencySymbol,currencyNetwork)
+    public async getTokenBalance(address: string, currencyAddress: string, provider:Provider): Promise<string> {
         const contract = new ethers.Contract(
-            tokenAddresses,
+            currencyAddress,
             this.tokenABI,
             provider,
         );
@@ -156,17 +155,5 @@ export class PaymentService {
             where: { address: address },
         });
         return wallet;
-    }
-    private async getTokenAddress(currencySymbol: string, currencyNetwork: string) {
-        const tokenAddress = await fs.readJson('src/payment/TokenAddresses.json');
-        for (const item of tokenAddress) {
-            if (item.network == currencyNetwork) {
-                for (const token of item.tokens) {
-                    if (token.hasOwnProperty(currencySymbol)) {
-                        return token[currencySymbol];
-                    }
-                }
-            }
-        }
     }
 }

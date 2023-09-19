@@ -45,7 +45,7 @@ export class CheckBalanceCommand extends CommandRunner {
         ) {
             currentBalance = await this.getTokenBalance(
                 transaction.wallet.address,
-                transaction.currency.symbol,
+                transaction.currency.address,
                 provider,
             );
         } else { return; }
@@ -89,15 +89,14 @@ export class CheckBalanceCommand extends CommandRunner {
         const balancePromise = await provider.getBalance(address);
         return balancePromise.toString();
     }
-    async getTokenBalance(address: string, currency: string, provider): Promise<string> {
-        await this.createTokenContract(currency, provider);
+    async getTokenBalance(address: string, currencyAddress: string, provider): Promise<string> {
+        await this.createTokenContract(currencyAddress, provider);
         const balance = await this.tokenContract.balanceOf(address, provider);
         return balance.toString();
     }
-    //todo
-    async createTokenContract(currency: string,provider) {
+    async createTokenContract(currencyAddress: string,provider) {
         this.tokenContract = new ethers.Contract(
-            '1',
+            currencyAddress,
             this.tokenABI,
             provider,
         );

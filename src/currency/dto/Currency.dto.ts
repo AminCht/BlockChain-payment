@@ -18,6 +18,12 @@ export class CreateCurrencyDto {
     @ApiProperty()
     @IsOptional()
     status?: boolean;
+    @ApiProperty()
+    @IsOptional()
+    address?: string;
+    @ApiProperty()
+    @IsOptional()
+    CoinGeckoId?: string;
 }
 export class UpdateCurrencyDto {
     @ApiProperty()
@@ -34,6 +40,12 @@ export class UpdateCurrencyDto {
     @ApiProperty()
     @IsOptional()
     status?: boolean;
+    @ApiProperty()
+    @IsOptional()
+    address?: string;
+    @ApiProperty()
+    @IsNotEmpty()
+    CoinGeckoId?: string;
 }
 
 export class GetCurrenciesResponseDto{
@@ -42,7 +54,7 @@ export class GetCurrenciesResponseDto{
         return new GetCurrenciesResponseDto(currency);
     }
     @ApiProperty()
-    id: number
+    id: number;
 
     @ApiProperty()
     network: string;
@@ -54,6 +66,10 @@ export class GetCurrenciesResponseDto{
 
     @ApiProperty()
     status: boolean;
+    @ApiProperty()
+    address: string;
+    @ApiProperty()
+    CoinGeckoId?: string;
 }
 
 export class UnAuthorizeResponseDto{
