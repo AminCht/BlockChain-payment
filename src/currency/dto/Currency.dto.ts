@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {IsNotEmpty, IsOptional} from 'class-validator';
 import { Currency } from '../../database/entities/Currency.entity';
-
 export class CreateCurrencyDto {
 
     @ApiProperty()
@@ -20,7 +19,27 @@ export class CreateCurrencyDto {
     status?: boolean;
     @ApiProperty()
     @IsOptional()
-    address?: string;
+    CoinGeckoId?: string;
+}
+export class CreateTokenDto {
+
+    @ApiProperty()
+    @IsNotEmpty()
+    network: string;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    name: string;
+    @ApiProperty()
+    @IsNotEmpty()
+    symbol: string;
+
+    @ApiProperty()
+    @IsOptional()
+    status?: boolean;
+    @ApiProperty()
+    @IsNotEmpty()
+    address: string;
     @ApiProperty()
     @IsOptional()
     CoinGeckoId?: string;

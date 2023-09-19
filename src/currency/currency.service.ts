@@ -2,7 +2,7 @@ import {BadRequestException, ConflictException, Injectable, NotFoundException} f
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
-import {CreateCurrencyDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
+import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
 import {ethers, InfuraProvider, Provider} from "ethers";
 
 @Injectable()
@@ -31,17 +31,7 @@ export class CurrencyService {
     }
     public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<GetCurrenciesResponseDto> {
         try {
-            let decimals;
-            if (createCurrnecyDto.symbol != 'eth' && createCurrnecyDto.symbol != 'bnc'){
-                if(createCurrnecyDto.network == 'sepolia' || 
-                    createCurrnecyDto.network == 'ethereum' ||
-                    createCurrnecyDto.network == 'bsc'
-                ) {
-                    const provider = this.selectEvmProvider(createCurrnecyDto.network);
-                    decimals = Number(await this.getDecimals(createCurrnecyDto.address, provider));
-                }
-            }
-            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto ,decimals:decimals});
+            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto ,decimals:18});
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
             const responseDto: GetCurrenciesResponseDto = {
                 id: savedCurrency.id,
@@ -49,7 +39,7 @@ export class CurrencyService {
                 name: savedCurrency.name,
                 symbol: savedCurrency.symbol,
                 status: savedCurrency.status,
-                address: createCurrnecyDto.address,
+                address: '',
             };
             return responseDto;
 
@@ -57,7 +47,39 @@ export class CurrencyService {
             if(error.code == '23505'){
                 throw new ConflictException('This network and symbol has already exist');
             }
-            if(error.code == 'INVALID_ARGUMENT'){
+            throw error;
+        }
+    }
+    public async addTokenCurrency(createTokenDto: CreateTokenDto): Promise<GetCurrenciesResponseDto> {
+        try {
+            let decimals;
+            if (createTokenDto.symbol != 'eth' && createTokenDto.symbol != 'bnc'){
+                if(createTokenDto.network == 'sepolia' ||
+                    createTokenDto.network == 'ethereum' ||
+                    createTokenDto.network == 'bsc'
+                ) {
+                    const provider = this.selectEvmProvider(createTokenDto.network);
+                    decimals = Number(await this.getDecimals(createTokenDto.address, provider));
+                }
+            }
+            const createdCurrency = this.currencyRepo.create({...createTokenDto ,decimals:decimals});
+            const savedCurrency = await this.currencyRepo.save(createdCurrency);
+            const responseDto: GetCurrenciesResponseDto = {
+                id: savedCurrency.id,
+                network: savedCurrency.network,
+                name: savedCurrency.name,
+                symbol: savedCurrency.symbol,
+                status: savedCurrency.status,
+                address: createTokenDto.address,
+            };
+            return responseDto;
+
+        } catch (error) {
+            console.log(error);
+            if(error.code == '23505'){
+                throw new ConflictException('This network and symbol has already exist');
+            }
+            if(error.code == 'INVALID_ARGUMENT' ||error.code =='UNSUPPORTED_OPERATION'){
                 throw new BadRequestException('you must set a valid address for tokens');
             }
             throw error;

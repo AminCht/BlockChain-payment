@@ -1,7 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { CurrencyService } from './currency.service';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
-import { CreateCurrencyDto, CurrencyNotFoundResponseDto, GetCurrenciesResponseDto, UnAuthorizeResponseDto, UpdateCurrencyDto } from './dto/Currency.dto';
+import {
+    CreateCurrencyDto,
+    CreateTokenDto,
+    CurrencyNotFoundResponseDto,
+    GetCurrenciesResponseDto,
+    UnAuthorizeResponseDto,
+    UpdateCurrencyDto
+} from './dto/Currency.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Currency')
@@ -26,13 +33,22 @@ export class CurrencyController {
     }
 
 
-    @ApiOperation({ summary: 'Create a Currencies' })
+    @ApiOperation({ summary: 'Create a currency' })
     @ApiResponse({ status: 200, description: 'Create a currency and return it as a response', type: GetCurrenciesResponseDto})
     @ApiResponse({ status: 401, description: 'return Unauthorize and status code 401 if an admin dont send this request', type: UnAuthorizeResponseDto})
     @Post()
     //@UseGuards(JwtAdminAuthGuard)
     async addCurrency(@Body() dto: CreateCurrencyDto){
         return await this.currencyService.addCurrency(dto);
+    }
+
+    @ApiOperation({ summary: 'Create a token' })
+    @ApiResponse({ status: 200, description: 'Create a token and return it as a response', type: GetCurrenciesResponseDto})
+    @ApiResponse({ status: 401, description: 'return Unauthorize and status code 401 if an admin dont send this request', type: UnAuthorizeResponseDto})
+    @Post('token')
+    //@UseGuards(JwtAdminAuthGuard)
+    async addTokenCurrency(@Body() dto: CreateTokenDto){
+        return await this.currencyService.addTokenCurrency(dto);
     }
 
     @ApiOperation({ summary: 'Update a Currencies' })
