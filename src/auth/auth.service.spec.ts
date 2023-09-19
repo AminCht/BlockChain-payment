@@ -25,7 +25,6 @@ describe('AuthService', () => {
                 username: 'foad',
                 password: '1234',
             });
-            console.log(message);
             expect(message).not.toBeNull();
         });
     });

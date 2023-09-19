@@ -2,27 +2,26 @@ import {Command, CommandRunner} from 'nest-commander';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Wallet} from "../database/entities/Wallet.entity";
 import {Status, Transaction} from '../database/entities/Transaction.entity';
-import {Contract, ethers, InfuraProvider} from 'ethers';
+import {Contract, ethers, InfuraProvider, Provider} from 'ethers';
 import {DataSource, Repository} from "typeorm";
-import {ethereumTokenAddresses} from '../payment/tokenAddresses/EthereumTokenAddresses';
 
 @Command({ name: 'check-balance' })
 export class CheckBalanceCommand extends CommandRunner {
 
-    private readonly provider: InfuraProvider;
+    private ethProvider: InfuraProvider;
+    private bscProvider: Provider;
+    private sepoliaPrivider: InfuraProvider;
     private tokenContract: Contract;
-    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)',
-        'function decimals() view returns (uint8)',]
+    private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)']
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
-        @InjectRepository(Wallet)
-        private readonly walletRepo: Repository<Wallet>,
-
         private dataSource: DataSource,
     ) {
         super();
-        this.provider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+        this.ethProvider = new InfuraProvider(process.env.ETH_NETWORK, process.env.ETH_APIKEY);
+        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
+        this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
     }
     public async run(): Promise<void> {
         const transactions = await this.transactionRepo.find({ where: { status: Status.PENDING},relations:["wallet","currency"] });
@@ -34,19 +33,20 @@ export class CheckBalanceCommand extends CommandRunner {
     async updateTransactionStatus(transaction: Transaction) {
         const now = new Date();
         let currentBalance;
-        let decimals;
+        const provider = this.selectEvmProvider(transaction.currency.network);
         if (
             transaction.currency.symbol == 'eth' &&
             transaction.currency.network == 'ethereum'
         ) {
-            currentBalance = await this.getBalance(transaction.wallet.address);
+            currentBalance = await this.getBalance(transaction.wallet.address, provider);
         } else if (
             transaction.currency.symbol != 'eth' &&
             transaction.currency.network == 'ethereum'
         ) {
             currentBalance = await this.getTokenBalance(
                 transaction.wallet.address,
-                transaction.currency.symbol,
+                transaction.currency.address,
+                provider,
             );
         } else { return; }
         const expectedAmount = BigInt(transaction.amount);
@@ -85,20 +85,27 @@ export class CheckBalanceCommand extends CommandRunner {
             await queryRunner.release();
         }
     }
-    async getBalance(address: string): Promise<string> {
-        const balancePromise = await this.provider.getBalance(address);
+    async getBalance(address: string, provider): Promise<string> {
+        const balancePromise = await provider.getBalance(address);
         return balancePromise.toString();
     }
-    async getTokenBalance(address: string, currency: string): Promise<string> {
-        await this.createTokenContract(currency);
-        const balance = await this.tokenContract.balanceOf(address);
+    async getTokenBalance(address: string, currencyAddress: string, provider): Promise<string> {
+        await this.createTokenContract(currencyAddress, provider);
+        const balance = await this.tokenContract.balanceOf(address, provider);
         return balance.toString();
     }
-    async createTokenContract(currency: string) {
+    async createTokenContract(currencyAddress: string,provider) {
         this.tokenContract = new ethers.Contract(
-            ethereumTokenAddresses.get(currency),
+            currencyAddress,
             this.tokenABI,
-            this.provider,
+            provider,
         );
+    }
+    private selectEvmProvider(network: string): Provider {
+        if (network == "ethereum") return this.ethProvider;
+        if (network == "sepolia") return this.sepoliaPrivider;
+        if (network == "bsc") return this.bscProvider;
+        throw 'Invalid network';
+
     }
 }

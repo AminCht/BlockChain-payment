@@ -21,8 +21,9 @@ export class AddAccessCommand extends CommandRunner {
     }
 
     async getDataFromJson(){
-        return await fs.readJson('src/apikey/token.json');
+        return await fs.readJson('src/apikey/access.json');
     }
+
     async addAccess(accesses){
         for(const item of accesses){
             const access = await this.accessRepo.findOne({

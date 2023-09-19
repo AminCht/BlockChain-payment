@@ -15,13 +15,17 @@ export class BalanceService {
 
     ) {}
     public async getAllBalances(userId: number) {
-        const currencies = await this.currencyRepo.find({
-            relations: ['tokens'],
-        });
-        let balances = [currencies.length];
-        for (let i = 0; i < currencies.length; i++) {
-
-        }
+        const transactionSum = await this.groupTransactions(userId);
+        const withdrawSum = await this.groupWithdraws(userId);
+        const withdrawSumMap = withdrawSum.reduce((map, item) => {
+            map[item.currencyId] = item.totalAmount;
+            return map;
+        }, {});
+        return transactionSum.map(item => ({
+            currencyId: item.currencyId,
+            currencyName: item.currencyName,
+            totalAmount: item.totalAmount - (withdrawSumMap[item.currencyId] || 0),
+        }));
     }
     public async getBalanceByTokenId(userId: number, currencyId: number): Promise<string> {
         const transactionSum = await this.transactionSum(userId, currencyId);
@@ -62,5 +66,31 @@ export class BalanceService {
     private async convertWei(currencyId: number, balance: bigint): Promise<string> {
         const currency = await this.currencyRepo.findOneById(currencyId);
         return ethers.formatUnits(balance, currency.decimals);
+    }
+    private async groupTransactions(userId: number){
+        return await this.transactionRepo
+            .createQueryBuilder('transaction')
+            .select('currency.id', 'currencyId')
+            .addSelect('currency.name', 'currencyName')
+            .addSelect('SUM(CAST(transaction.amount AS DECIMAL))', 'totalAmount')
+            .innerJoin('transaction.currency', 'currency')
+            .innerJoin('transaction.user', 'user')
+            .where('user.id = :userId', {userId})
+            .where('transaction.status = :status', {status: transactionStatus.SUCCESSFUL})
+            .groupBy('currency.id, currency.name')
+            .getRawMany();
+    }
+    private async groupWithdraws(userId: number) {
+        return await this.withdrawRepo
+            .createQueryBuilder('withdraw')
+            .select('currency.id', 'currencyId')
+            .addSelect('currency.name', 'currencyName')
+            .addSelect('SUM(CAST(withdraw.amount AS DECIMAL))', 'totalAmount')
+            .innerJoin('withdraw.currency', 'currency')
+            .innerJoin('withdraw.user', 'user')
+            .where('user.id = :userId', { userId })
+            .where('withdraw.status = :status',{status :withdrawStatus.SUCCESSFUL})
+            .groupBy('currency.id, currency.name')
+            .getRawMany();
     }
 }

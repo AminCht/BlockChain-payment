@@ -18,10 +18,10 @@ export class WalletService {
                 address:address
             }
         });
-        console.log(wallet);
-        if(wallet){
+        //todo
+        /*if(wallet){
             return await this.paymentService.getBalance(address);
         }
-        throw new WalletNotFoundException(address);
+        throw new WalletNotFoundException(address);*/
     }
 }
