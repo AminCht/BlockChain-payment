@@ -128,25 +128,28 @@ export class CurrencyService {
 
     }
 
-    async getPrice(){
-        console.log(1)
+    async getPrice(userId: number): Promise<any[]>{
         const getPriceApi = 'https://api.coingecko.com/api/v3/simple/price';
-        const coinsId = await this.currencyRepo.find({
-            select: ['name']
-        });
-        console.log(coinsId)
-        const data = []
+        const coinsId = await this.getUserCurrencies(userId);
+        const data = [];
         for(const coinId of coinsId){
-            console.log(coinId.name)
             const response = await axios.get(getPriceApi, {
                 params: {
-                  ids: [coinId.name, 'bitcoin'],
+                  ids: [coinId.name],
                   vs_currencies: 'usd'
                 },
               });
               data.push({[coinId.name]: response.data[coinId.name].usd})
         }
         return data
+    }
+    async getUserCurrencies(userId: number){
+        return await this.currencyRepo.find({
+            where:{
+                users:{ id: userId}
+            },
+            select: ['name']
+        });
     }
 
 }

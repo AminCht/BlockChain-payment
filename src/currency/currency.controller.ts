@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { CurrencyService } from './currency.service';
 import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
 import {
@@ -10,6 +10,7 @@ import {
     UpdateCurrencyDto
 } from './dto/Currency.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Currency')
 @Controller('currency')
@@ -69,9 +70,9 @@ export class CurrencyController {
         return await this.currencyService.DeleteCurrency(id);
     }
 
-
+    @UseGuards(AuthGuard(['jwt']))
     @Get('price/token')
-    async getPrice(){
-        return await this.currencyService.getPrice();
+    async getPrice(@Req() req: Request){
+        return await this.currencyService.getPrice(req['user'].id);
     }
 }
