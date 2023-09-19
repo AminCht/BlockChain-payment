@@ -4,6 +4,8 @@ import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
 import {ethers, InfuraProvider, Provider} from "ethers";
+import axios from 'axios';
+
 
 @Injectable()
 export class CurrencyService {
@@ -21,6 +23,7 @@ export class CurrencyService {
         return await this.currencyRepo.find();
     }
     public async getCurrencyById(id: number): Promise<Currency> {
+        console.log(1)
         const currency = await this.currencyRepo.findOne({
             where: { id: id },
         });
@@ -123,6 +126,27 @@ export class CurrencyService {
         if (network == "bsc") return this.bscProvider;
         throw 'Invalid network';
 
+    }
+
+    async getPrice(){
+        console.log(1)
+        const getPriceApi = 'https://api.coingecko.com/api/v3/simple/price';
+        const coinsId = await this.currencyRepo.find({
+            select: ['name']
+        });
+        console.log(coinsId)
+        const data = []
+        for(const coinId of coinsId){
+            console.log(coinId.name)
+            const response = await axios.get(getPriceApi, {
+                params: {
+                  ids: [coinId.name, 'bitcoin'],
+                  vs_currencies: 'usd'
+                },
+              });
+              data.push({[coinId.name]: response.data[coinId.name].usd})
+        }
+        return data
     }
 
 }

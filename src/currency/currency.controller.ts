@@ -27,7 +27,7 @@ export class CurrencyController {
     @ApiOperation({ summary: 'Get Currenciy by id' })
     @ApiResponse({ status: 200, description: 'return currency with given id as a parameter', type: GetCurrenciesResponseDto})
     @ApiResponse({ status: 404, description: 'Currency not found and return a message', type: CurrencyNotFoundResponseDto})
-    @Get(':id')
+    @Get('/:id/')
     async getCurrencybyId(@Param('id') id: string){
         return await this.currencyService.getCurrencyById(Number(id));
     }
@@ -67,5 +67,11 @@ export class CurrencyController {
     @UseGuards(JwtAdminAuthGuard)
     async deleteCurrency(@Param('id') id: number) {
         return await this.currencyService.DeleteCurrency(id);
+    }
+
+
+    @Get('price/token')
+    async getPrice(){
+        return await this.currencyService.getPrice();
     }
 }
