@@ -38,7 +38,7 @@ describe('AppController (e2e)', () => {
   }) 
  
   it('should create transaction', async() => {
-    jest.spyOn(paymentService, 'getBalance').mockReturnValue(Promise.resolve('3'));
+    jest.spyOn(paymentService, 'getEthBalance').mockReturnValue(Promise.resolve('3'));
     const paymentDto = {
       network: 'ethereum',
       currency: 'eth',
