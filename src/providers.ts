@@ -1,4 +1,5 @@
 import { ethers, InfuraProvider, Provider } from 'ethers';
+import { TronWeb } from 'tronweb';
 
 export class Providers {
     public static selectEvmProvider(network: string): Provider {
@@ -7,5 +8,12 @@ export class Providers {
         if (network == "bsc") return new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
         throw 'Invalid network';
     }
+    public static selectEtmProvider(network:string){
+        if (network == 'nile')
+            return new TronWeb({
+                fullHost: 'https://api.shasta.trongrid.io', // Replace with your desired full node URL
+        });
+    }
+
 }
 
