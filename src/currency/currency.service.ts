@@ -5,6 +5,8 @@ import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
 import {ethers, InfuraProvider, Provider} from "ethers";
 import axios from 'axios';
+import { HttpService } from '@nestjs/axios';
+import * as querystring from 'querystring';
 
 
 @Injectable()
@@ -14,7 +16,7 @@ export class CurrencyService {
     private sepoliaPrivider: InfuraProvider;
     
     private readonly tokenABI = ['function decimals() view returns (uint8)'];
-    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>) {
+    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>, private readonly httpService: HttpService) {
         this.ethProvider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
         this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
         this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
@@ -128,27 +130,31 @@ export class CurrencyService {
 
     }
 
-    async getPrice(userId: number): Promise<any[]>{
-        const getPriceApi = 'https://api.coingecko.com/api/v3/simple/price';
-        const coinsId = await this.getUserCurrencies(userId);
-        const data = [];
-        for(const coinId of coinsId){
-            const response = await axios.get(getPriceApi, {
-                params: {
-                  ids: [coinId.name],
-                  vs_currencies: 'usd'
-                },
-              });
-              data.push({[coinId.name]: response.data[coinId.name].usd})
-        }
-        return data
+    async getPrice(userId: number){
+        const getPriceApi = process.env.COINGECKO;
+        const coins = await this.getUserCurrencies(userId);
+        const reqHeader = this.setReqHeader(coins);
+        const queryString = `ids=${reqHeader.ids.join('%2C')}&vs_currencies=${reqHeader.vs_currencies}`;
+        const response = await this.httpService.get(`${getPriceApi}?${queryString}`).toPromise();
+        return response.data;
+          
     }
+
+    setReqHeader(coins: Currency[]) {
+        const coinsAsHeader = [];
+        for(const coinId of coins){
+            coinsAsHeader.push(coinId.CoinGeckoId)
+        }
+        const vs_currencies = 'usd';
+        return { ids: coinsAsHeader, vs_currencies: vs_currencies}
+    }
+
     async getUserCurrencies(userId: number){
         return await this.currencyRepo.find({
             where:{
                 users:{ id: userId}
             },
-            select: ['name']
+            select: ['CoinGeckoId']
         });
     }
 
