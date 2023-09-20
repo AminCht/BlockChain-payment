@@ -8,11 +8,11 @@ export class Providers {
         if (network == "bsc") return new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
         throw 'Invalid network';
     }
-    public static selectEtmProvider(network:string){
+    public static selectTvmProvider(network: string) {
         if (network == 'nile')
             return new TronWeb({
-                fullHost: 'https://api.shasta.trongrid.io', // Replace with your desired full node URL
-        });
+                fullHost: 'https://nile.trongrid.io',
+            });
     }
 
 }

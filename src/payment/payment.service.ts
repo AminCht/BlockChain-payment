@@ -50,13 +50,17 @@ export class PaymentService {
             return await this.createEthPayment(createPaymentDto, 'main', user, provider);
         } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
             return await this.createEthPayment(createPaymentDto, 'token', user, provider);
+        } else if(currency.symbol== 'trx' && currency.network == 'nile'){
+
         }
     }
 
     public selectEvmProvider(network: string): Provider {
         return Providers.selectEvmProvider(network);
     }
-
+    public selectTvmProvider(network: string): Provider {
+        return Providers.selectTvmProvider(network);
+    }
     private async createEthPayment(
         createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, provider: Provider): Promise<CreatePaymentResponseDto> {
         const queryRunner = this.dataSource.createQueryRunner();
@@ -99,6 +103,9 @@ export class PaymentService {
         } finally {
             await queryRunner.release();
         }
+    }
+    private async createTrxPayment(){
+
     }
 
     public async getBalanceByType(type: 'main' | 'token',wallet:Wallet,currencyAddress ,provider:Provider): Promise<string>{
