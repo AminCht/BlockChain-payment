@@ -1,4 +1,4 @@
-import {Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique} from 'typeorm';
+import {BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, Unique} from 'typeorm';
 import { User } from './User.entity';
 import { Transaction } from './Transaction.entity';
 import { Withdraw } from "./withdraw.entity";
@@ -20,9 +20,15 @@ export class Currency {
 
     @Column({ default: true })
     status: boolean;
-
+    
     @Column({ default: 18 })
     decimals: number;
+    @Column()
+    address: string;
+    
+    @Column({ nullable: true })
+    CoinGeckoId: string;
+    
     @ManyToMany(() => User, (user) => user.tokens)
     @JoinTable({ name: 'currency_user' })
     users: User[];
@@ -32,4 +38,10 @@ export class Currency {
 
     @OneToMany(() => Withdraw, (withdraw) => withdraw.currency)
     withdraws: Withdraw[];
+    @BeforeInsert()
+    checkAddress() {
+        if (this.symbol == 'eth' || 'bnc') {
+            this.address = '';
+        }
+    }
 }

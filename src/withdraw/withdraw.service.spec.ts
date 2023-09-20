@@ -52,7 +52,7 @@ describe('WithdrawService', () => {
                 amount: '2',
         }
         const update = await service.updateWithdraw(updateDto,1,user);
-        expect(update.amount).toBe('2');
+        expect(update.amount).toBe('2000000000000000000');
     });
   });
 });

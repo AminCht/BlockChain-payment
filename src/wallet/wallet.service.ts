@@ -18,6 +18,7 @@ export class WalletService {
                 address:address
             }
         });
+        //todo
         /*if(wallet){
             return await this.paymentService.getBalance(address);
         }

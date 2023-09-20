@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, Injectable, InternalServerErrorException, NotFoundException} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Status as withdrawStatus, Withdraw} from '../database/entities/withdraw.entity';
 import {Repository} from 'typeorm';
@@ -6,7 +6,6 @@ import {CreateWithdrawDto, UpdateWithdrawRequestDto} from './dto/withdraw.dto';
 import {User} from '../database/entities/User.entity';
 import {Status, Transaction} from '../database/entities/Transaction.entity';
 import {Currency} from "../database/entities/Currency.entity";
-import {ethereumTokenAddresses} from "../payment/tokenAddresses/EthereumTokenAddresses";
 import {Contract, ethers, InfuraProvider} from "ethers";
 
 @Injectable()
@@ -56,23 +55,27 @@ export class WithdrawService {
     public async updateWithdraw(dto: UpdateWithdrawRequestDto, id: number,user: User): Promise<Withdraw>{
         let allowedAmount;
         let requestedAmount;
+        const withdraw = await this.withdrawRepo.findOne({
+            where: { id: id, user: {id:user.id} },
+            relations: ['currency'],
+        });
+        if(!withdraw){ throw new NotFoundException(`Withdraw with id ${id} not found`);}
         if (dto.currencyId) {
-            //const withdraw = await this.getWithdrawById(id);
             const currency = await this.currencyRepo.findOneById(dto.currencyId);
             allowedAmount = await this.getAllowedAmount(currency.id, user);
-            requestedAmount = ethers.parseUnits(dto.amount, currency.symbol);
+            requestedAmount = ethers.parseUnits(dto.amount ?? withdraw.amount, currency.decimals);
         }
         if(dto.amount){
-            
+            allowedAmount = await this.getAllowedAmount(withdraw.currency.id, user);
+            requestedAmount = ethers.parseUnits(dto.amount, withdraw.currency.decimals);
         }
         if (!allowedAmount || BigInt(requestedAmount) <= BigInt(allowedAmount)) {
             dto.amount = requestedAmount;
-            console.log(dto);
             const result = await this.withdrawRepo.update(id, { ...dto });
             if(result.affected == 1){
                 return await this.getWithdrawById(id);
             }
-            throw new NotFoundException(`Withdraw with id ${id} not found`);
+            throw new InternalServerErrorException();
         }
         throw new BadRequestException('Your requested amount is more than your payments');
     }
