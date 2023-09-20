@@ -6,7 +6,7 @@ import { DataSource, Repository} from 'typeorm';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { ethers, InfuraProvider, Provider} from 'ethers';
 import { User } from '../database/entities/User.entity';
-import * as fs from 'fs-extra';
+import { Providers } from '../providers';
 
 @Injectable()
 export class PaymentService {
@@ -23,11 +23,7 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
-    ) {
-        this.ethProvider = new InfuraProvider(process.env.ETH_NETWORK, process.env.ETH_APIKEY);
-        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
-        this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
-    }
+    ) {}
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
         const user = await this.userRepo
@@ -46,30 +42,26 @@ export class PaymentService {
         const currency = user.tokens[0];
         const provider = this.selectEvmProvider(currency.network);
         if (currency.symbol == 'eth' && currency.network == 'ethereum') {
-            return await this.createEthPayment(createPaymentDto, 'main', user, currency.network, provider);
+            return await this.createEthPayment(createPaymentDto, 'main', user, provider);
         } else if (currency.symbol != 'eth' && currency.network == 'ethereum') {
-            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
+            return await this.createEthPayment(createPaymentDto, 'token', user, provider);
         } else if (currency.symbol == 'bnb' && currency.network == 'bsc') {
-            return await this.createEthPayment(createPaymentDto,'main', user, currency.network, provider)
+            return await this.createEthPayment(createPaymentDto,'main', user, provider)
         } else if (currency.symbol != 'bnb' && currency.network == 'bsc') {
-            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
+            return await this.createEthPayment(createPaymentDto, 'token', user, provider);
         } else if (currency.symbol == 'eth' && currency.network == 'sepolia') {
-            return await this.createEthPayment(createPaymentDto, 'main', user, currency.network, provider);
+            return await this.createEthPayment(createPaymentDto, 'main', user, provider);
         } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
-            return await this.createEthPayment(createPaymentDto, 'token', user, currency.network, provider);
+            return await this.createEthPayment(createPaymentDto, 'token', user, provider);
         }
     }
 
     public selectEvmProvider(network: string): Provider {
-        if (network == "ethereum") return this.ethProvider;
-        if (network == "sepolia") return this.sepoliaPrivider;
-        if (network == "bsc") return this.bscProvider;
-        throw 'Invalid network';
-
+        return Providers.selectEvmProvider(network);
     }
 
     private async createEthPayment(
-        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, network: string, provider: Provider): Promise<CreatePaymentResponseDto> {
+        createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User, provider: Provider): Promise<CreatePaymentResponseDto> {
         const queryRunner = this.dataSource.createQueryRunner();
         try {
             await queryRunner.connect();
@@ -82,7 +74,7 @@ export class PaymentService {
             if (wallet.length == 1) {
                 const balance = await this.getBalanceByType(type, wallet, user.tokens[0].address,provider);
                 const decimals = user.tokens[0].decimals;
-                const transaction = this.createTransaction(createPaymentDto, balance,decimals, wallet,user);
+                const transaction = this.createEthTransaction(createPaymentDto, balance,decimals, wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -134,7 +126,7 @@ export class PaymentService {
         const balance = await contract.balanceOf(address);
         return balance.toString();
     }
-    private createTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number,wallet:Wallet, user: User) {
+    private createEthTransaction(createPaymentDto: CreatePaymentRequestDto, balance:string,decimals:number,wallet:Wallet, user: User) {
         const amount = ethers.parseUnits(createPaymentDto.amount, decimals);
         return this.transactionRepo.create({
             wallet: wallet[0],
