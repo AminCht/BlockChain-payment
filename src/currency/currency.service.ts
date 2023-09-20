@@ -3,15 +3,11 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
-import {ethers, InfuraProvider, Provider} from "ethers";
+import {ethers,Provider} from "ethers";
 import {Providers} from "../providers";
 
 @Injectable()
 export class CurrencyService {
-    private ethProvider: InfuraProvider;
-    private bscProvider: Provider;
-    private sepoliaPrivider: InfuraProvider;
-    
     private readonly tokenABI = ['function decimals() view returns (uint8)'];
     constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>) {}
     public async getAllCurrencies(): Promise<Currency[]> {
