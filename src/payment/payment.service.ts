@@ -8,6 +8,7 @@ import {ethers, Provider} from 'ethers';
 import {User} from '../database/entities/User.entity';
 import {Providers} from '../providers';
 import { TronWeb } from 'tronweb';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class PaymentService {
@@ -21,6 +22,7 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
+        private httpService: HttpService
     ) {}
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
@@ -51,6 +53,9 @@ export class PaymentService {
         } else if (currency.symbol != 'eth' && currency.network == 'sepolia') {
             return await this.createEthPayment(createPaymentDto, 'token', user);
         } else if (currency.symbol == 'trx' && currency.network == 'nile'){
+
+        }
+        else if(currency.symbol == 'btc' && currency.network == 'bitcoin'){
 
         }
     }
@@ -230,5 +235,9 @@ export class PaymentService {
             where: { address: address },
         });
         return wallet;
+    }
+    public async getBitcoinBalance(walletAddress: string){
+        const response = await this.httpService.get(`${process.env.BITCOINAPI}${walletAddress}`).toPromise();
+        return response.data['final_balance'];
     }
 }
