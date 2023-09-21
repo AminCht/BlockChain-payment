@@ -1,0 +1,19 @@
+[
+  {
+  "network": "ethereum",
+  "tokens": [
+  {
+  "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+  }
+    ]
+  },
+
+  {
+  "network": "sepolia",
+  "tokens": [
+  {
+  "USDT": "0x371345f4D90e95d1DdBe69C547028f311AdecA38"
+  }
+    ]
+  }
+]
