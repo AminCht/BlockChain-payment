@@ -130,17 +130,22 @@ export class CurrencyService {
 
     }
 
-    async getPrice(userId: number){
-        const getPriceApi = process.env.COINGECKO;
+    public async getPrice(userId: number){
+        const getPriceApi = process.env.COINGECKOID;
         const coins = await this.getUserCurrencies(userId);
-        const reqHeader = this.setReqHeader(coins);
-        const queryString = `ids=${reqHeader.ids.join('%2C')}&vs_currencies=${reqHeader.vs_currencies}`;
+        const queryStringValues = this.setqueryStringValues(coins);
+        const queryString = `ids=${queryStringValues.ids.join('%2C')}&vs_currencies=${queryStringValues.vs_currencies}`;
         const response = await this.httpService.get(`${getPriceApi}?${queryString}`).toPromise();
-        return response.data;
-          
+        const data = coins.map((coin) => {
+            return {
+                ...coin,
+                usd: response.data[coin.CoinGeckoId].usd
+            };
+        });
+        return data
     }
 
-    setReqHeader(coins: Currency[]) {
+    private setqueryStringValues(coins: Currency[]) {
         const coinsAsHeader = [];
         for(const coinId of coins){
             coinsAsHeader.push(coinId.CoinGeckoId)
@@ -149,13 +154,11 @@ export class CurrencyService {
         return { ids: coinsAsHeader, vs_currencies: vs_currencies}
     }
 
-    async getUserCurrencies(userId: number){
-        return await this.currencyRepo.find({
-            where:{
-                users:{ id: userId}
-            },
-            select: ['CoinGeckoId']
-        });
+    public async getUserCurrencies(userId: number){
+        return await this.currencyRepo.createQueryBuilder('currencies').leftJoinAndSelect('currencies.users', 'users')
+        .select(['currencies.CoinGeckoId','currencies.symbol'])
+        .where('users.id = :userid', { userid: userId }).distinctOn(['currencies.CoinGeckoId','currencies.symbol'])
+        .getMany()
     }
 
 }
