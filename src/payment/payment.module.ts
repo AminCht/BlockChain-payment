@@ -14,7 +14,7 @@ import { ApiKeyAuthGuard } from '../apikey/guard/apikey.guard';
 import { HttpService } from '@nestjs/axios';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wallet, Transaction,User, Currency]), HttpService],
+  imports: [TypeOrmModule.forFeature([Wallet, Transaction,User, Currency])],
   controllers: [PaymentController],
   providers: [PaymentService,TransactionService,TokenService, EitherGuard, JwtAuthGuard, ApiKeyAuthGuard],
 })

@@ -52,13 +52,13 @@ describe('AppController (e2e)', () => {
     });
   });
   it('transaction should stay pending',async()=>{
-    jest.spyOn(checkBalance,'getBalance').mockReturnValue(Promise.resolve('10000'));
+    jest.spyOn(checkBalance,'getEthBalance').mockReturnValue(Promise.resolve('10000'));
     await checkBalance.run();
     const transaction = await paymentService.getTransactionById(transactionId);
     expect(transaction.status).toBe('Pending');
   });
   it('transaction should Successful',async()=>{
-    jest.spyOn(checkBalance,'getBalance').mockReturnValue(Promise.resolve('10000000000000000000000000000'));
+    jest.spyOn(checkBalance,'getEthBalance').mockReturnValue(Promise.resolve('10000000000000000000000000000'));
     await checkBalance.run();
     const transaction = await paymentService.getTransactionById(transactionId);
     expect(transaction.status).toBe('Successfully');
