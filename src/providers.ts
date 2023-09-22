@@ -1,4 +1,4 @@
-import {ethers, InfuraProvider, Provider} from 'ethers';
+import { ethers, InfuraProvider, Provider } from 'ethers';
 import * as TronWeb from 'tronweb';
 
 export class Providers {
@@ -11,9 +11,8 @@ export class Providers {
     public static selectTvmProvider(network: string): TronWeb {
         if (network == 'nile')
             return new TronWeb({
-                fullHost: 'https://nile.trongrid.io',
-                //solidityNode: 'https://api.trongrid.io',
-                TRON_PRO_API_KEY: '40aeea52-44ec-4642-ba83-a62da32a00cc',
+                fullHost: process.env.TRON_NETWORK,
+                TRON_PRO_API_KEY: process.env.TRON_PRO_API_KEY,
             });
     }
 }
