@@ -3,9 +3,10 @@ import { CurrencyController } from './currency.controller';
 import { CurrencyService } from './currency.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Currency } from '../database/entities/Currency.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Currency])],
+  imports: [TypeOrmModule.forFeature([Currency]), HttpModule],
   controllers: [CurrencyController],
   providers: [CurrencyService]
 })
