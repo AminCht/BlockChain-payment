@@ -25,10 +25,10 @@ describe('checkBalanceCommand', () => {
     });
 
     it('transaction wallet balance should be updated', async () => {
-        jest.spyOn(checkBalance, 'getBalance').mockReturnValue(
+        jest.spyOn(checkBalance, 'getEthBalance').mockReturnValue(
             Promise.resolve('10'),
         );
-        jest.spyOn(checkBalance, 'getTokenBalance').mockReturnValue(
+        jest.spyOn(checkBalance, 'getEthTokenBalance').mockReturnValue(
             Promise.resolve('10'),
         );
         await checkBalance.run();

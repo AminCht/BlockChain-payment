@@ -3,15 +3,30 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
-import {ethers, Provider} from "ethers";
+import {ethers,Provider} from "ethers";
 import { HttpService } from '@nestjs/axios';
-import { Providers } from '../providers';
-
+import {Providers} from "../providers";
 
 @Injectable()
 export class CurrencyService {
-    private readonly tokenABI = ['function decimals() view returns (uint8)'];
-    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>, private httpService: HttpService) {}
+    private readonly ethereumTokenABI = ['function decimals() view returns (uint8)'];
+    private readonly tronTokenABI = [
+        {
+            constant: true,
+            inputs: [],
+            name: 'decimals',
+            outputs: [
+                {
+                    name: '',
+                    type: 'uint8',
+                },
+            ],
+            payable: false,
+            stateMutability: 'view',
+            type: 'function',
+        },
+    ];
+    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>,private readonly httpService: HttpService) {}
     public async getAllCurrencies(): Promise<Currency[]> {
         return await this.currencyRepo.find();
     }
@@ -49,14 +64,33 @@ export class CurrencyService {
     public async addTokenCurrency(createTokenDto: CreateTokenDto): Promise<GetCurrenciesResponseDto> {
         try {
             let decimals;
-            if (createTokenDto.symbol != 'eth' && createTokenDto.symbol != 'bnc'){
+            if (createTokenDto.symbol != 'eth' && createTokenDto.symbol != 'bnc' && createTokenDto.symbol!= 'trx'){
                 if(createTokenDto.network == 'sepolia' ||
                     createTokenDto.network == 'ethereum' ||
                     createTokenDto.network == 'bsc'
                 ) {
-                    const provider = this.selectEvmProvider(createTokenDto.network);
-                    decimals = Number(await this.getDecimals(createTokenDto.address, provider));
+                    try {
+                        const provider = this.selectEvmProvider(createTokenDto.network);
+                        decimals = Number(
+                            await this.getDecimals(createTokenDto.address, provider),
+                        );
+                    } catch (error) {
+                        throw new Error(`Error fetching token decimals: ${error.message}`);
+                    }
+                } else if (createTokenDto.network == 'nile') {
+                    try {
+                        const provider = this.selectTvmProvider(createTokenDto.network);
+                        provider.setAddress(createTokenDto.address);
+                        const contract = await provider.contract(this.tronTokenABI,createTokenDto.address);
+                        decimals = await contract.decimals().call();
+                    } catch (error) {
+                        throw new Error(`Error fetching token decimals: ${error.message}`);
+                    }
+                } else {
+                    throw new Error('unsupported network');
                 }
+            } else {
+                throw new Error('unsupported token');
             }
             const createdCurrency = this.currencyRepo.create({...createTokenDto ,decimals:decimals});
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
@@ -108,7 +142,7 @@ export class CurrencyService {
     public async getDecimals(currencyAddress: string,provider: Provider): Promise<string> {
         const contract = new ethers.Contract(
             currencyAddress,
-            this.tokenABI,
+            this.ethereumTokenABI,
            provider,
         );
         return await contract.decimals();
@@ -146,4 +180,7 @@ export class CurrencyService {
         .getMany()
     }
 
+    private selectTvmProvider(network: string) {
+        return Providers.selectTvmProvider(network);
+    }
 }

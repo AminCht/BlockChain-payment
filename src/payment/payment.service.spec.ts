@@ -16,8 +16,8 @@ describe('PaymentService', () => {
             providers: [PaymentService],
         }).compile();
         service = module.get<PaymentService>(PaymentService);
-        jest.spyOn(service, 'getBalance').mockReturnValue(Promise.resolve('1'));
-        jest.spyOn(service, 'getTokenBalance').mockReturnValue(Promise.resolve('1'));
+        jest.spyOn(service, 'getEthBalance').mockReturnValue(Promise.resolve('1'));
+        jest.spyOn(service, 'getEthTokenBalance').mockReturnValue(Promise.resolve('1'));
     });
 
     it('should be defined', () => {

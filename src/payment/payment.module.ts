@@ -11,6 +11,7 @@ import { Currency } from '../database/entities/Currency.entity';
 import { EitherGuard } from '../apikey/guard/either.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ApiKeyAuthGuard } from '../apikey/guard/apikey.guard';
+import { HttpService } from '@nestjs/axios';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Wallet, Transaction,User, Currency])],
