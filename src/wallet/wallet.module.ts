@@ -8,9 +8,10 @@ import { Transaction } from '../database/entities/Transaction.entity';
 import { User } from '../database/entities/User.entity';
 import { TokenService } from '../token/token.service';
 import { Currency } from '../database/entities/Currency.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wallet,Transaction, User, Currency])],
+  imports: [TypeOrmModule.forFeature([Wallet,Transaction, User, Currency]), HttpModule],
   providers: [WalletService, PaymentService, TokenService],
   controllers: [WalletController],
 })
