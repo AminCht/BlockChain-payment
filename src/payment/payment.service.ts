@@ -43,7 +43,7 @@ export class PaymentService {
         @InjectRepository(User)
         private userRepo: Repository<User>,
         private dataSource: DataSource,
-       // private httpService: HttpService
+        private httpService: HttpService
     ) {}
 
     public async createPayment(id: number, createPaymentDto: CreatePaymentRequestDto): Promise<CreatePaymentResponseDto | string> {
@@ -78,6 +78,7 @@ export class PaymentService {
         } else if (currency.symbol != 'trx' && currency.network == 'nile') {
             return await this.createTrxPayment(createPaymentDto, 'token', user);
         } else if (currency.symbol == 'btc' && currency.network == 'bitcoin'){
+            return await this.createBtcPayment(createPaymentDto, 'main', user);
         }
     }
 
@@ -164,6 +165,45 @@ export class PaymentService {
             await queryRunner.release();
         }
     }
+
+    private async createBtcPayment(createPaymentDto: CreatePaymentRequestDto, type: 'main' | 'token', user: User) {
+        const queryRunner = this.dataSource.createQueryRunner();
+        try {
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            const wallet = await this.findWallet(type ,user.tokens[0].network,queryRunner);
+            if (wallet.length == 1) {
+                const balance = await this.getBitcoinBalance(wallet);
+                const transaction = await this.createBtcTransaction(createPaymentDto.amount, balance,wallet,user);
+                await queryRunner.manager.save(transaction);
+                await queryRunner.manager.update(
+                    Wallet,
+                    { id: wallet[0].id },
+                    { lock: true },
+                );
+                await queryRunner.commitTransaction();
+                return {
+                    walletAddress: wallet[0].address,
+                    transactionId: transaction.id,
+                };
+            }
+            throw new NotFoundException('There is no wallet available!');
+        } catch (error) {
+            if (error.code == 'ECONNRESET') {
+                console.log('connection timeout');
+                throw new InternalServerErrorException();
+            } else if (error.code == 'ENOTFOUND') {
+                console.log('no connection');
+                throw new InternalServerErrorException();
+            } else {
+                await queryRunner.rollbackTransaction();
+                throw error;
+            }
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
 
     public async getEthBalanceByType(type: 'main' | 'token', wallet:Wallet, currencyAddress , provider:Provider): Promise<string>{
         let balance: string;
@@ -254,8 +294,23 @@ export class PaymentService {
         });
         return wallet;
     }
-    /*public async getBitcoinBalance(walletAddress: string){
-        const response = await this.httpService.get(`${process.env.BITCOINAPI}${walletAddress}`).toPromise();
-        return response.data['final_balance'];
-    }*/
+    public async getBitcoinBalance(wallet: Wallet){
+        if(wallet[0].wallet_network =='bitcoin'){
+            const response = await this.httpService.get(`${process.env.BITCOINMAINBALANCEAPI}${wallet[0].address}`).toPromise();
+            return response.data['final_balance'];
+        }
+        const response = await this.httpService.get(`${process.env.BITCOINTESTBALANCEAPI}${wallet[0].address}`).toPromise();
+        return response.data['final_balance']; 
+    }
+
+    private async createBtcTransaction(amount: string, balance:string, wallet:Wallet, user: User): Promise<Transaction>{
+        const satoshi =  Number(amount) * Math.pow(10, user.tokens[0].decimals);
+        return this.transactionRepo.create({
+            wallet: wallet[0],
+            user: user,
+            amount:String(satoshi),
+            currency: user.tokens[0],
+            wallet_balance_before: balance,
+        });
+    }
 }
