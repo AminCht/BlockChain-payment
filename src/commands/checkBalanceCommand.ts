@@ -2,15 +2,12 @@ import {Command, CommandRunner} from 'nest-commander';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Wallet} from "../database/entities/Wallet.entity";
 import {Status, Transaction} from '../database/entities/Transaction.entity';
-import {Contract, ethers, InfuraProvider, Provider} from 'ethers';
+import {Contract, ethers,Provider} from 'ethers';
 import {DataSource, Repository} from "typeorm";
+import {Providers} from "../providers";
 
 @Command({ name: 'check-balance' })
 export class CheckBalanceCommand extends CommandRunner {
-
-    private ethProvider: InfuraProvider;
-    private bscProvider: Provider;
-    private sepoliaPrivider: InfuraProvider;
     private tokenContract: Contract;
     private readonly tokenABI = ['function balanceOf(address owner) view returns (uint256)']
     constructor(
@@ -19,9 +16,6 @@ export class CheckBalanceCommand extends CommandRunner {
         private dataSource: DataSource,
     ) {
         super();
-        this.ethProvider = new InfuraProvider(process.env.ETH_NETWORK, process.env.ETH_APIKEY);
-        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
-        this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
     }
     public async run(): Promise<void> {
         const transactions = await this.transactionRepo.find({ where: { status: Status.PENDING},relations:["wallet","currency"] });
@@ -102,10 +96,7 @@ export class CheckBalanceCommand extends CommandRunner {
         );
     }
     private selectEvmProvider(network: string): Provider {
-        if (network == "ethereum") return this.ethProvider;
-        if (network == "sepolia") return this.sepoliaPrivider;
-        if (network == "bsc") return this.bscProvider;
-        throw 'Invalid network';
+        return Providers.selectEvmProvider(network);
 
     }
 }

@@ -9,16 +9,8 @@ import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class CurrencyService {
-    private ethProvider: InfuraProvider;
-    private bscProvider: Provider;
-    private sepoliaPrivider: InfuraProvider;
-    
     private readonly tokenABI = ['function decimals() view returns (uint8)'];
-    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>, private readonly httpService: HttpService) {
-        this.ethProvider = new InfuraProvider(process.env.NETWORK, process.env.API_KEY);
-        this.bscProvider = new ethers.JsonRpcProvider(process.env.SMARTCHAIN_NETWORK);
-        this.sepoliaPrivider = new InfuraProvider(process.env.SEPOLIA_NETWORK, process.env.SEPOLIA_APIKEY);
-    }
+    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>) {}
     public async getAllCurrencies(): Promise<Currency[]> {
         return await this.currencyRepo.find();
     }
@@ -121,11 +113,7 @@ export class CurrencyService {
         return await contract.decimals();
     }
     public selectEvmProvider(network: string): Provider {
-        if (network == "ethereum") return this.ethProvider;
-        if (network == "sepolia") return this.sepoliaPrivider;
-        if (network == "bsc") return this.bscProvider;
-        throw 'Invalid network';
-
+        return Providers.selectEvmProvider(network);
     }
 
     public async getPrice(){
