@@ -11,6 +11,7 @@ import {
 } from './dto/Currency.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import {EitherGuard} from "../apikey/guard/either.guard";
 
 @ApiTags('Currency')
 @Controller('currency')
@@ -69,10 +70,12 @@ export class CurrencyController {
     async deleteCurrency(@Param('id') id: number) {
         return await this.currencyService.DeleteCurrency(id);
     }
-
-    @UseGuards(AuthGuard(['jwt']))
-    @Get('price/token')
-    async getPrice(@Req() req: Request){
-        return await this.currencyService.getPrice(req['user'].id);
+    @ApiOperation({ summary: 'fetching usd prices' })
+    @ApiResponse({ status: 200, description: 'successful'})
+    @ApiResponse({ status: 401, description: 'return Unauthorized and status code 401 if an admin dont send this request' })
+    @UseGuards(EitherGuard)
+    @Get('price/coin')
+    async getPrice() {
+        return await this.currencyService.getPrice();
     }
 }

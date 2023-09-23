@@ -4,9 +4,7 @@ import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
 import {ethers, InfuraProvider, Provider} from "ethers";
-import axios from 'axios';
 import { HttpService } from '@nestjs/axios';
-import * as querystring from 'querystring';
 
 
 @Injectable()
@@ -130,34 +128,33 @@ export class CurrencyService {
 
     }
 
-    public async getPrice(userId: number){
-        const getPriceApi = process.env.COINGECKOID;
-        const coins = await this.getUserCurrencies(userId);
+    public async getPrice(){
+        const coins = await this.getUserCurrencies();
         const queryStringValues = this.setqueryStringValues(coins);
-        const queryString = `ids=${queryStringValues.ids.join('%2C')}&vs_currencies=${queryStringValues.vs_currencies}`;
-        const response = await this.httpService.get(`${getPriceApi}?${queryString}`).toPromise();
+        const response = await this.httpService.get(process.env.COINGECKOID_URL + '/simple/price',{params:queryStringValues}).toPromise();
         const data = coins.map((coin) => {
+            console.log(coin)
             return {
                 ...coin,
-                usd: response.data[coin.CoinGeckoId].usd
+                usd: response.data[coin.CoinGeckoId].usd,
             };
         });
         return data
     }
 
     private setqueryStringValues(coins: Currency[]) {
-        const coinsAsHeader = [];
+        const coinsToSend = [];
         for(const coinId of coins){
-            coinsAsHeader.push(coinId.CoinGeckoId)
+            coinsToSend.push(coinId.CoinGeckoId);
         }
         const vs_currencies = 'usd';
-        return { ids: coinsAsHeader, vs_currencies: vs_currencies}
+        return { ids: coinsToSend.join(','), vs_currencies: vs_currencies}
     }
 
-    public async getUserCurrencies(userId: number){
-        return await this.currencyRepo.createQueryBuilder('currencies').leftJoinAndSelect('currencies.users', 'users')
+    public async getUserCurrencies() {
+        return await this.currencyRepo.createQueryBuilder('currencies')
         .select(['currencies.CoinGeckoId','currencies.symbol'])
-        .where('users.id = :userid', { userid: userId }).distinctOn(['currencies.CoinGeckoId','currencies.symbol'])
+        .distinctOn(['currencies.CoinGeckoId','currencies.symbol'])
         .getMany()
     }
 
