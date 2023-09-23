@@ -3,14 +3,15 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
-import {ethers, InfuraProvider, Provider} from "ethers";
+import {ethers, Provider} from "ethers";
 import { HttpService } from '@nestjs/axios';
+import { Providers } from '../providers';
 
 
 @Injectable()
 export class CurrencyService {
     private readonly tokenABI = ['function decimals() view returns (uint8)'];
-    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>) {}
+    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>, private httpService: HttpService) {}
     public async getAllCurrencies(): Promise<Currency[]> {
         return await this.currencyRepo.find();
     }
@@ -121,7 +122,6 @@ export class CurrencyService {
         const queryStringValues = this.setqueryStringValues(coins);
         const response = await this.httpService.get(process.env.COINGECKOID_URL + '/simple/price',{params:queryStringValues}).toPromise();
         const data = coins.map((coin) => {
-            console.log(coin)
             return {
                 ...coin,
                 usd: response.data[coin.CoinGeckoId].usd,
