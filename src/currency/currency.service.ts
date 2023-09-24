@@ -3,17 +3,20 @@ import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import {Currency} from '../database/entities/Currency.entity';
 import {CreateCurrencyDto, CreateTokenDto, GetCurrenciesResponseDto, UpdateCurrencyDto} from './dto/Currency.dto';
-import {ethers,Provider} from "ethers";
-import {Providers} from "../providers";
+import {ethers, Provider} from "ethers";
+import { HttpService } from '@nestjs/axios';
+import { Providers } from '../providers';
+
 
 @Injectable()
 export class CurrencyService {
     private readonly tokenABI = ['function decimals() view returns (uint8)'];
-    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>) {}
+    constructor(@InjectRepository(Currency) private currencyRepo: Repository<Currency>, private httpService: HttpService) {}
     public async getAllCurrencies(): Promise<Currency[]> {
         return await this.currencyRepo.find();
     }
     public async getCurrencyById(id: number): Promise<Currency> {
+        console.log(1)
         const currency = await this.currencyRepo.findOne({
             where: { id: id },
         });
@@ -113,4 +116,34 @@ export class CurrencyService {
     public selectEvmProvider(network: string): Provider {
         return Providers.selectEvmProvider(network);
     }
+
+    public async getPrice(){
+        const coins = await this.getUserCurrencies();
+        const queryStringValues = this.setqueryStringValues(coins);
+        const response = await this.httpService.get(process.env.COINGECKOID_URL + '/simple/price',{params:queryStringValues}).toPromise();
+        const data = coins.map((coin) => {
+            return {
+                ...coin,
+                usd: response.data[coin.CoinGeckoId].usd,
+            };
+        });
+        return data
+    }
+
+    private setqueryStringValues(coins: Currency[]) {
+        const coinsToSend = [];
+        for(const coinId of coins){
+            coinsToSend.push(coinId.CoinGeckoId);
+        }
+        const vs_currencies = 'usd';
+        return { ids: coinsToSend.join(','), vs_currencies: vs_currencies}
+    }
+
+    public async getUserCurrencies() {
+        return await this.currencyRepo.createQueryBuilder('currencies')
+        .select(['currencies.CoinGeckoId','currencies.symbol'])
+        .distinctOn(['currencies.CoinGeckoId','currencies.symbol'])
+        .getMany()
+    }
+
 }
