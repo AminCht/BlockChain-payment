@@ -40,7 +40,7 @@ export class Currency {
     withdraws: Withdraw[];
     @BeforeInsert()
     checkAddress() {
-        if (this.symbol == 'eth' || 'bnc') {
+        if (this.symbol === 'eth' || this.symbol === 'bnc' || this.symbol === 'trx') {
             this.address = '';
         }
     }
