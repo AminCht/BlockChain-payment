@@ -151,32 +151,33 @@ export class CurrencyService {
         return Providers.selectEvmProvider(network);
     }
 
-    async getPrice(userId: number){
-        const getPriceApi = process.env.COINGECKO;
-        const coins = await this.getUserCurrencies(userId);
-        const reqHeader = this.setReqHeader(coins);
-        const queryString = `ids=${reqHeader.ids.join('%2C')}&vs_currencies=${reqHeader.vs_currencies}`;
-        const response = await this.httpService.get(`${getPriceApi}?${queryString}`).toPromise();
-        return response.data;
-          
+    public async getPrice(){
+        const coins = await this.getUserCurrencies();
+        const queryStringValues = this.setqueryStringValues(coins);
+        const response = await this.httpService.get(process.env.COINGECKOID_URL + '/simple/price',{params:queryStringValues}).toPromise();
+        const data = coins.map((coin) => {
+            return {
+                ...coin,
+                usd: response.data[coin.CoinGeckoId].usd,
+            };
+        });
+        return data
     }
 
-    setReqHeader(coins: Currency[]) {
-        const coinsAsHeader = [];
+    private setqueryStringValues(coins: Currency[]) {
+        const coinsToSend = [];
         for(const coinId of coins){
-            coinsAsHeader.push(coinId.CoinGeckoId)
+            coinsToSend.push(coinId.CoinGeckoId);
         }
         const vs_currencies = 'usd';
-        return { ids: coinsAsHeader, vs_currencies: vs_currencies}
+        return { ids: coinsToSend.join(','), vs_currencies: vs_currencies}
     }
 
-    async getUserCurrencies(userId: number){
-        return await this.currencyRepo.find({
-            where:{
-                users:{ id: userId}
-            },
-            select: ['CoinGeckoId']
-        });
+    public async getUserCurrencies() {
+        return await this.currencyRepo.createQueryBuilder('currencies')
+        .select(['currencies.CoinGeckoId','currencies.symbol'])
+        .distinctOn(['currencies.CoinGeckoId','currencies.symbol'])
+        .getMany()
     }
 
     private selectTvmProvider(network: string) {
