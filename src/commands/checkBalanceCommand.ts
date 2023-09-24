@@ -50,18 +50,18 @@ export class CheckBalanceCommand extends CommandRunner {
         const now = new Date();
         let currentBalance;
         if (
-            transaction.currency.symbol == 'eth' &&
+            transaction.currency.symbol == 'eth' &&(
             transaction.currency.network == 'ethereum'||
             transaction.currency.network == 'sepolia' ||
-            transaction.currency.network == 'bsc'
+            transaction.currency.network == 'bsc')
         ) {
             const provider = this.selectEvmProvider(transaction.currency.network);
             currentBalance = await this.getEthBalance(transaction.wallet.address, provider);
         } else if (
-            transaction.currency.symbol != 'eth' &&
+            transaction.currency.symbol != 'eth' &&(
             transaction.currency.network == 'ethereum'||
             transaction.currency.network == 'sepolia' ||
-            transaction.currency.network == 'bsc'
+            transaction.currency.network == 'bsc')
         ) {
             const provider = this.selectEvmProvider(transaction.currency.network);
             currentBalance = await this.getEthTokenBalance(
@@ -125,6 +125,8 @@ export class CheckBalanceCommand extends CommandRunner {
     async getEthTokenBalance(address: string, currencyAddress: string, provider): Promise<string> {
         await this.createTokenContract(currencyAddress, provider);
         const balance = await this.tokenContract.balanceOf(address, provider);
+        console.log({address})
+        console.log({currencyAddress})
         return balance.toString();
     }
     async createTokenContract(currencyAddress: string,provider) {

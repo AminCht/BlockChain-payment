@@ -8,7 +8,7 @@ export class BalanceController {
     constructor(private balanceService: BalanceService) {}
     @Get()
     @UseGuards(AuthGuard(['jwt']))
-    private async getAllBalances(@Param('id') id: string, @Req() req: Request) {
+    private async getAllBalances(@Req() req: Request) {
         return await this.balanceService.getAllBalances(req['user'].id);
     }
     @Get(':id')
