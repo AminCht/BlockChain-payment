@@ -29,7 +29,7 @@ export class TransactionService {
                 transactionResponseDto.amount = GetTransactionByIdResponseDto.convertAmount(transaction.amount, transaction.currency.decimals);
                 transactionResponseDto.status = transactionStatus;
                 transactionResponseDto.created_date = transaction.created_date;
-                transactionResponseDto.expireTime = transaction.expireTime;
+                transactionResponseDto.expireTime = transaction.expireTime;//
                 return transactionResponseDto;
             }
             await this.sleep(4);
