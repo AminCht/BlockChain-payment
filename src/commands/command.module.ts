@@ -15,10 +15,11 @@ import { AuthService } from '../auth/auth.service';
 import { AddAccessCommand } from './addAccessCommand';
 import { EndPointAccess } from '../database/entities/endpoint_acess.entity';
 import {Withdraw} from "../database/entities/withdraw.entity";
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [databaseModule, TypeOrmModule.forFeature([Wallet,Transaction,User,Currency, EndPointAccess,Withdraw]),
-    JwtModule.register({secret: process.env.JWT_SECRET,signOptions: { expiresIn: '20d' }}),
+    JwtModule.register({secret: process.env.JWT_SECRET,signOptions: { expiresIn: '20d' }}), HttpModule
     ],
   providers: [CreateWalletCommand, CheckBalanceCommand, TestSeederCommand, AdminService,AuthService, CreateAdminCommand, AddAccessCommand],
 })

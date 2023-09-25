@@ -6,6 +6,7 @@ import {Contract, ethers,Provider} from 'ethers';
 import {DataSource, Repository} from "typeorm";
 import {Providers} from "../providers";
 import { TronWeb } from 'tronweb';
+import { HttpService } from '@nestjs/axios';
 
 @Command({ name: 'check-balance' })
 export class CheckBalanceCommand extends CommandRunner {
@@ -36,6 +37,7 @@ export class CheckBalanceCommand extends CommandRunner {
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
         private dataSource: DataSource,
+        private httpService: HttpService
     ) {
         super();
     }
@@ -81,7 +83,11 @@ export class CheckBalanceCommand extends CommandRunner {
         ) {
             const provider = this.selectTvmProvider(transaction.currency.network);
             currentBalance = await this.getTrxTokenBalance(transaction.wallet.address,transaction.currency.address, provider);
-        } else { return; }
+        } else if(
+            transaction.currency.symbol == 'btc' &&
+            transaction.currency.network =='bitcoin'|| 'bitcoin testnet') {
+                currentBalance = await this.getBitcoinBalance(transaction.wallet);
+         }
         const expectedAmount = BigInt(transaction.amount);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
         if (now >= transaction.expireTime) {
@@ -160,5 +166,13 @@ export class CheckBalanceCommand extends CommandRunner {
     }
     public selectTvmProvider(network: string): TronWeb {
         return Providers.selectTvmProvider(network);
+    }
+    public async getBitcoinBalance(wallet: Wallet){
+        if(wallet[0].wallet_network =='bitcoin'){
+            const response = await this.httpService.get(`${process.env.BITCOINMAINBALANCEAPI}${wallet[0].address}`).toPromise();
+            return response.data['balance'];
+        }
+        const response = await this.httpService.get(`${process.env.BITCOINTESTBALANCEAPI}${wallet[0].address}`).toPromise();
+        return response.data['balance']; 
     }
 }
