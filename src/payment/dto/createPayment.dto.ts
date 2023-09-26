@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDecimal, IsNotEmpty, IsNumberString } from 'class-validator';
+import { IsDecimal, IsNotEmpty, IsNumberString, IsOptional } from "class-validator";
 
 export class CreatePaymentRequestDto {
     @ApiProperty()
@@ -10,6 +10,10 @@ export class CreatePaymentRequestDto {
     @IsDecimal()
     @IsNumberString()
     amount: string;
+
+    @ApiProperty()
+    @IsOptional()
+    description?: string;
 }
 
 export class CreatePaymentResponseDto {
