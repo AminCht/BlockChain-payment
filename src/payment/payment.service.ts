@@ -304,7 +304,7 @@ export class PaymentService {
     }
 
     private async createBtcTransaction(amount: string, balance:string, wallet:Wallet, user: User): Promise<Transaction>{
-        const satoshi =  Number(amount) * Math.pow(10, user.tokens[0].decimals);
+        const satoshi =  BigInt(amount) * BigInt(Math.pow(10, user.tokens[0].decimals));
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
