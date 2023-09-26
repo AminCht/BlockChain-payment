@@ -279,7 +279,7 @@ export class PaymentService {
     }
 
     private createTrxTransaction(amount:string, balance: string,wallet: Wallet, user: User) {
-        const sunValue = BigInt(amount) * BigInt(Math.pow(10, user.tokens[0].decimals));
+        const sunValue = BigInt(amount) * BigInt(user.tokens[0].decimals) ** BigInt(10);
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
@@ -304,7 +304,7 @@ export class PaymentService {
     }
 
     private async createBtcTransaction(amount: string, balance:string, wallet:Wallet, user: User): Promise<Transaction>{
-        const satoshi =  BigInt(amount) * BigInt(Math.pow(10, user.tokens[0].decimals));
+        const satoshi =  BigInt(amount) * BigInt(user.tokens[0].decimals) ** BigInt(10);
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
