@@ -24,12 +24,7 @@ export class TransactionService {
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
-                const transactionStatus = GetTransactionByIdResponseDto.convertStatusNumber(transaction.status);
-                const transactionResponseDto= new GetTransactionByIdResponseDto();
-                transactionResponseDto.amount = GetTransactionByIdResponseDto.convertAmount(transaction.amount, transaction.currency.decimals);
-                transactionResponseDto.status = transactionStatus;
-                transactionResponseDto.created_date = transaction.created_date;
-                transactionResponseDto.expireTime = transaction.expireTime;
+                const transactionResponseDto= GetTransactionByIdResponseDto.ResponseToDto(transaction);
                 return transactionResponseDto;
             }
             await this.sleep(4);

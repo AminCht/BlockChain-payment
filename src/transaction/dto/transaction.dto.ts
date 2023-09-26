@@ -1,3 +1,12 @@
+import { Transaction } from "../../database/entities/Transaction.entity";
+
+
+export enum Status {
+    PENDING = 'Pending',
+    SUCCESSFUL = 'Successful',
+    FAILED = 'Failed'
+}
+
 export class GetTransactionByIdResponseDto{
     amount: string
 
@@ -8,18 +17,27 @@ export class GetTransactionByIdResponseDto{
     expireTime: Date
 
 
-    public static convertAmount(amount: string, decimal: number){
+    static ResponseToDto(transaction: Transaction){
+        const responseDto = new GetTransactionByIdResponseDto(); 
+        responseDto.amount  = responseDto.convertAmount(transaction.amount,transaction.currency.decimals);
+        responseDto.status = responseDto.convertStatusNumber(transaction.status);
+        responseDto.created_date = transaction.created_date;
+        responseDto.expireTime =  transaction.expireTime;
+        return responseDto;
+    }
+
+    public convertAmount(amount: string, decimal: number){
         const convertedAmount =BigInt(amount) / BigInt(10) ** BigInt(decimal);
         return String(convertedAmount);
     }
-    public static convertStatusNumber(status: number): string{
+    public convertStatusNumber(status: number): string{
         if(status == 0){
-            return 'Pending'
+            return Status.PENDING
         }
         else if(status == 1){
-            return 'Sucssesful'
+            return Status.SUCCESSFUL
         }
-        return 'Failed'
+        return Status.FAILED
     }
 
 }
