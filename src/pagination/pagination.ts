@@ -15,7 +15,6 @@ export class Pagination {
         query = query.where(condition);
         const pageCount = await query.getCount();
         const data = await query.skip(skip).take(take).getMany();
-        console.log(data[0])
         if(mapper){ 
             return { data: data.map((d)=> {
             return mapper(d);
