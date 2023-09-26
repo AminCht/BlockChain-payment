@@ -279,7 +279,7 @@ export class PaymentService {
     }
 
     private createTrxTransaction(amount:string, balance: string,wallet: Wallet, user: User) {
-        const sunValue = Number(amount) * Math.pow(10, user.tokens[0].decimals);
+        const sunValue = BigInt(amount) * BigInt(Math.pow(10, user.tokens[0].decimals));
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
@@ -297,10 +297,10 @@ export class PaymentService {
     public async getBitcoinBalance(wallet: Wallet){
         if(wallet[0].wallet_network =='bitcoin'){
             const response = await this.httpService.get(`${process.env.BITCOINMAINBALANCEAPI}${wallet[0].address}`).toPromise();
-            return response.data['final_balance'];
+            return response.data['balance'];
         }
         const response = await this.httpService.get(`${process.env.BITCOINTESTBALANCEAPI}${wallet[0].address}`).toPromise();
-        return response.data['final_balance']; 
+        return response.data['balance']; 
     }
 
     private async createBtcTransaction(amount: string, balance:string, wallet:Wallet, user: User): Promise<Transaction>{
