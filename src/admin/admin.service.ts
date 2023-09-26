@@ -13,6 +13,7 @@ import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { TransactionService } from '../transaction/transaction.service';
 import { GetTransactionResponseDto } from './dto/transaction.dto';
+import { GetWalletResponseDto } from './dto/wallet.dto';
 @Injectable()
 export class AdminService {
     constructor(
@@ -102,23 +103,18 @@ export class AdminService {
     }
 
     public async getWallets(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.walletRepo, paginationDto);
+        return await Pagination.paginate(this.walletRepo, paginationDto, this.getWalletMapper);
     }
     public async getTransactions(paginationDto: PaginationDto<any>){
         return await Pagination.paginate(this.transactionRepo, paginationDto, this.getTransactionmapper, [{name: 'currency', type: 'left'}]);
     }
 
     public getTransactionmapper(data){
-        data.amount = GetTransactionResponseDto.convertAmount(data.amount, data.currency.decimals);
-        data.wallet_balacne_before = GetTransactionResponseDto.convertAmount(data.wallet_balance_before, data.currency.decimals);
-        data.wallet_balacne_after = GetTransactionResponseDto.convertAmount(data.wallet_balance_after, data.currency.decimals);
-        const getTransactioResponseDto = new GetTransactionResponseDto();
-        getTransactioResponseDto.amount  = data.amount;
-        getTransactioResponseDto.status = GetTransactionResponseDto.convertStatusNumber(data.status);
-        getTransactioResponseDto.wallet_balacne_before = data.wallet_balacne_before
-        getTransactioResponseDto.wallet_balacne_after = data.wallet_balacne_after
-        getTransactioResponseDto.created_date = data.created_date;
-        getTransactioResponseDto.expireTime =  data.expireTime;
+        const getTransactioResponseDto = GetTransactionResponseDto.ResponseToDto(data)
         return getTransactioResponseDto;
+    }
+    public getWalletMapper(data){
+        const getWalletRespnseDto = GetWalletResponseDto.ResponseToDto(data);
+        return getWalletRespnseDto;
     }
 }
