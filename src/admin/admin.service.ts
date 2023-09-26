@@ -11,6 +11,8 @@ import { Withdraw } from '../database/entities/withdraw.entity';
 import { Pagination } from '../pagination/pagination';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
+import { TransactionService } from '../transaction/transaction.service';
+import { GetTransactionResponseDto } from './dto/transaction.dto';
 @Injectable()
 export class AdminService {
     constructor(
@@ -20,6 +22,7 @@ export class AdminService {
         @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
         private jwt: JwtService,
         private authService: AuthService,
+        private transactionService: TransactionService
     ){}
     
     public async createAdmin(dto: AdminRequestDto): Promise<CreateAdminResponseDto> {
@@ -95,17 +98,27 @@ export class AdminService {
     }
 
     public async getAllWithdraws(paginationDto: PaginationDto<any>){
-        const onlySelectedColumns = '';
-        return await Pagination.paginate(this.withdrawRepo, paginationDto, onlySelectedColumns);
+        return await Pagination.paginate(this.withdrawRepo, paginationDto);
     }
 
     public async getWallets(paginationDto: PaginationDto<any>){
-        const onlySelectedColumns = ['Wallet.id','Wallet.address', 'Wallet.wallet_network', 'Wallet.type', 'Wallet.lock', 'Wallet.status'];
-        return await Pagination.paginate(this.walletRepo, paginationDto, onlySelectedColumns);
+        return await Pagination.paginate(this.walletRepo, paginationDto);
     }
     public async getTransactions(paginationDto: PaginationDto<any>){
-        const onlySelectedColumns = '';
-        return await Pagination.paginate(this.transactionRepo, paginationDto, onlySelectedColumns);
+        return await Pagination.paginate(this.transactionRepo, paginationDto, this.getTransactionmapper, [{name: 'currency', type: 'left'}]);
     }
 
+    public getTransactionmapper(data){
+        data.amount = GetTransactionResponseDto.convertAmount(data.amount, data.currency.decimals);
+        data.wallet_balacne_before = GetTransactionResponseDto.convertAmount(data.wallet_balance_before, data.currency.decimals);
+        data.wallet_balacne_after = GetTransactionResponseDto.convertAmount(data.wallet_balance_after, data.currency.decimals);
+        const getTransactioResponseDto = new GetTransactionResponseDto();
+        getTransactioResponseDto.amount  = data.amount;
+        getTransactioResponseDto.status = GetTransactionResponseDto.convertStatusNumber(data.status);
+        getTransactioResponseDto.wallet_balacne_before = data.wallet_balacne_before
+        getTransactioResponseDto.wallet_balacne_after = data.wallet_balacne_after
+        getTransactioResponseDto.created_date = data.created_date;
+        getTransactioResponseDto.expireTime =  data.expireTime;
+        return getTransactioResponseDto;
+    }
 }
