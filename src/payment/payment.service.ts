@@ -9,6 +9,7 @@ import {User} from '../database/entities/User.entity';
 import {Providers} from '../providers';
 import { TronWeb } from 'tronweb';
 import { HttpService } from '@nestjs/axios';
+import { raw } from "express";
 
 @Injectable()
 export class PaymentService {
@@ -98,7 +99,8 @@ export class PaymentService {
             if (wallet.length == 1) {
                 const provider = this.selectEvmProvider(user.tokens[0].network);
                 const balance = await this.getEthBalanceByType(type, wallet, user.tokens[0].address,provider);
-                const transaction = this.createEthTransaction(createPaymentDto.amount, balance,wallet,user);
+                const transaction = this.createEthTransaction(
+                createPaymentDto.amount,createPaymentDto.description, balance,wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -136,7 +138,8 @@ export class PaymentService {
             if (wallet.length == 1) {
                 const provider = this.selectTvmProvider(user.tokens[0].network);
                 const balance = await this.getTrxBalanceByType(type, wallet, user.tokens[0].address,provider);
-                const transaction = this.createTrxTransaction(createPaymentDto.amount, balance,wallet,user);
+                const transaction = this.createTrxTransaction(
+                  createPaymentDto.amount,createPaymentDto.description, balance,wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -174,7 +177,8 @@ export class PaymentService {
             const wallet = await this.findWallet(type ,user.tokens[0].network,queryRunner);
             if (wallet.length == 1) {
                 const balance = await this.getBitcoinBalance(wallet);
-                const transaction = await this.createBtcTransaction(createPaymentDto.amount, balance,wallet,user);
+                const transaction = await this.createBtcTransaction(
+                  createPaymentDto.amount,createPaymentDto.description, balance,wallet,user);
                 await queryRunner.manager.save(transaction);
                 await queryRunner.manager.update(
                     Wallet,
@@ -236,15 +240,9 @@ export class PaymentService {
         const balance = await contract.balanceOf(address);
         return balance.toString();
     }
-    private createEthTransaction(amount: string, balance:string,wallet:Wallet, user: User) {
+    private createEthTransaction(amount: string,description:string|null, balance:string,wallet:Wallet, user: User) {
         const weiAmount = ethers.parseUnits(amount, user.tokens[0].decimals);
-        return this.transactionRepo.create({
-            wallet: wallet[0],
-            user: user,
-            amount: weiAmount.toString(),
-            currency: user.tokens[0],
-            wallet_balance_before: balance,
-        });
+        return this.createTransaction(String(weiAmount),description,balance,wallet,user);
     }
     private async findWallet(type: 'main' | 'token', network: string,queryRunner:QueryRunner) {
         return await queryRunner.query(
@@ -278,15 +276,10 @@ export class PaymentService {
         }
     }
 
-    private createTrxTransaction(amount:string, balance: string,wallet: Wallet, user: User) {
+    private createTrxTransaction(amount:string,description:string|null, balance: string,wallet: Wallet, user: User) {
         const sunValue = BigInt(amount) * BigInt(user.tokens[0].decimals) ** BigInt(10);
-        return this.transactionRepo.create({
-            wallet: wallet[0],
-            user: user,
-            amount:String(sunValue),
-            currency: user.tokens[0],
-            wallet_balance_before: balance,
-        });
+        return this.createTransaction(String(sunValue),description,balance,wallet,user);
+
     }
     public async getWalletByAddress(address: string): Promise<Wallet> {
         const wallet = await this.walletRepo.findOne({
@@ -300,17 +293,25 @@ export class PaymentService {
             return response.data['balance'];
         }
         const response = await this.httpService.get(`${process.env.BITCOINTESTBALANCEAPI}${wallet[0].address}`).toPromise();
-        return response.data['balance']; 
+        return response.data['balance'];
     }
 
-    private async createBtcTransaction(amount: string, balance:string, wallet:Wallet, user: User): Promise<Transaction>{
+    private createBtcTransaction(
+      amount: string,description:string|null,
+      balance:string, wallet:Wallet, user: User): Transaction {
         const satoshi =  BigInt(amount) * BigInt(user.tokens[0].decimals) ** BigInt(10);
+        return this.createTransaction(String(satoshi),description,balance,wallet,user);
+    }
+    private createTransaction(
+      convertedAmount: string,description:string|null,
+      balance:string, wallet:Wallet, user: User):Transaction{
         return this.transactionRepo.create({
             wallet: wallet[0],
             user: user,
-            amount:String(satoshi),
+            amount: convertedAmount,
             currency: user.tokens[0],
             wallet_balance_before: balance,
+            description: description,
         });
     }
 }
