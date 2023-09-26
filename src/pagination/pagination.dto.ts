@@ -47,3 +47,8 @@ export class PaginationDto<G extends ICondition> {
 
     conditionMaker: G;
 }
+
+export class RelationDto{
+    name: string
+    type: 'left' | 'inner'
+}
