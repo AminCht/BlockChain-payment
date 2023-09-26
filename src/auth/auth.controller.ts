@@ -31,7 +31,9 @@ export class AuthController {
         res.send({message: 'You have successfully logged in'});
     }
     private setCookie(res: Response, token: string){
+        const currentDate = new Date();
         res.cookie('accessToken', token, {
+            expires: new Date(currentDate.getTime() + 365 * 24 * 60 * 60 * 1000),
             httpOnly: true,
         });
     }

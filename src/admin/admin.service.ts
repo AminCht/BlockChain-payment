@@ -95,13 +95,17 @@ export class AdminService {
     }
 
     public async getAllWithdraws(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.withdrawRepo, paginationDto);
+        const onlySelectedColumns = '';
+        return await Pagination.paginate(this.withdrawRepo, paginationDto, onlySelectedColumns);
     }
 
     public async getWallets(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.walletRepo, paginationDto);
+        const onlySelectedColumns = ['Wallet.id','Wallet.address', 'Wallet.wallet_network', 'Wallet.type', 'Wallet.lock', 'Wallet.status'];
+        return await Pagination.paginate(this.walletRepo, paginationDto, onlySelectedColumns);
     }
     public async getTransactions(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.transactionRepo, paginationDto);
+        const onlySelectedColumns = '';
+        return await Pagination.paginate(this.transactionRepo, paginationDto, onlySelectedColumns);
     }
+
 }
