@@ -277,7 +277,7 @@ export class PaymentService {
     }
 
     private createTrxTransaction(amount:string,description:string|null, balance: string,wallet: Wallet, user: User) {
-        const sunValue = BigInt(amount) * BigInt(user.tokens[0].decimals) ** BigInt(10);
+        const sunValue =  BigInt(amount) * ( BigInt(10) ** BigInt(user.tokens[0].decimals));
         return this.createTransaction(String(sunValue),description,balance,wallet,user);
 
     }
@@ -299,7 +299,7 @@ export class PaymentService {
     private createBtcTransaction(
       amount: string,description:string|null,
       balance:string, wallet:Wallet, user: User): Transaction {
-        const satoshi =  BigInt(amount) * BigInt(user.tokens[0].decimals) ** BigInt(10);
+        const satoshi =  BigInt(amount) * ( BigInt(10) ** BigInt(user.tokens[0].decimals));
         return this.createTransaction(String(satoshi),description,balance,wallet,user);
     }
     private createTransaction(
