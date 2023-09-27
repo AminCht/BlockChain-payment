@@ -80,7 +80,8 @@ export class PaymentService {
             return await this.createTrxPayment(createPaymentDto, 'token', user);
         } else if (currency.symbol != 'trx' && currency.network == 'tron') {
             return await this.createTrxPayment(createPaymentDto, 'token', user);
-        } else if (currency.symbol == 'btc' && currency.network == 'bitcoin'|| 'bitcoin test'){
+        } else if (currency.symbol == 'btc' &&
+          currency.network == 'bitcoin'|| currency.network== 'bitcoin test'){
             return await this.createBtcPayment(createPaymentDto, 'main', user);
         }
     }
