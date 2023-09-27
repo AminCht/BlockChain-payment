@@ -5,11 +5,6 @@ import { Repository } from 'typeorm';
 import { TransactionNotFoundException } from './exceptions/transactionNotFound';
 import { User } from '../database/entities/User.entity';
 import { GetTransactionByIdResponseDto } from './dto/transaction.dto';
-enum Statuss {
-    Pending = 'Pending',
-    Successful = 'Successful',
-    Failed = 'Failed',
-  }
 @Injectable()
 export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
@@ -24,7 +19,7 @@ export class TransactionService {
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
-                const transactionResponseDto= GetTransactionByIdResponseDto.ResponseToDto(transaction);
+                const transactionResponseDto= GetTransactionByIdResponseDto.entityToDto(transaction);
                 return transactionResponseDto;
             }
             await this.sleep(4);

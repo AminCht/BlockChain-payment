@@ -18,7 +18,7 @@ export class GetTransactionByIdResponseDto{
     expireTime: Date
 
 
-    static ResponseToDto(transaction: Transaction){
+    static entityToDto(transaction: Transaction){
         const responseDto = new GetTransactionByIdResponseDto(); 
         responseDto.amount  = responseDto.convertAmount(transaction.amount,transaction.currency.decimals);
         responseDto.status = responseDto.convertStatusNumber(transaction.status);
@@ -27,8 +27,8 @@ export class GetTransactionByIdResponseDto{
         return responseDto;
     }
 //todo: use ethers library to convert amount & change name to entitytodto
-    public convertAmount(amount: string, decimal: number){
-        const convertedAmount = ethers.parseUnits(amount, decimal);
+    public convertAmount(amount: string, decimal: number) {
+        const convertedAmount = ethers.formatUnits(amount, decimal);
         return String(convertedAmount);
     }
     public convertStatusNumber(status: number): string{

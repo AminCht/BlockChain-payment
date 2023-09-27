@@ -280,7 +280,7 @@ export class PaymentService {
     }
 
     private createTrxTransaction(amount:string,description:string|null, balance: string,wallet: Wallet, user: User) {
-        const sunValue =  BigInt(amount) * ( BigInt(10) ** BigInt(user.tokens[0].decimals));
+        const sunValue = ethers.parseUnits(amount,user.tokens[0].decimals)
         return this.createTransaction(String(sunValue),description,balance,wallet,user);
 
     }
