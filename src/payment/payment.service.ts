@@ -314,7 +314,7 @@ export class PaymentService {
             amount: convertedAmount,
             currency: user.tokens[0],
             wallet_balance_before: balance,
-            //description: description,
+            description: description,
         });
     }
 }
