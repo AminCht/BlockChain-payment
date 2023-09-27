@@ -26,8 +26,8 @@ export class Transaction{
     @Column({ nullable: true })
     wallet_balance_after: string;
 
-    @Column({ nullable: true })
-    description: string;
+    //@Column({ nullable: true })
+    //description: string;
 
     @Column()
     created_date: Date;

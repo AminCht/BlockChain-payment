@@ -12,7 +12,7 @@ export class GetWalletResponseDto{
 
     status: boolean
 
-    static ResponseToDto(wallet: Wallet){
+    static entityToDto(wallet: Wallet){
         const responseDto = new GetWalletResponseDto();
         responseDto.address = wallet.address;
         responseDto.wallet_network = wallet.wallet_network;

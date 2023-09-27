@@ -103,18 +103,9 @@ export class AdminService {
     }
 
     public async getWallets(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.walletRepo, paginationDto, this.getWalletMapper);
+        return await Pagination.paginate(this.walletRepo, paginationDto,GetWalletResponseDto.entityToDto);
     }
     public async getTransactions(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.transactionRepo, paginationDto, this.getTransactionmapper, [{name: 'currency', type: 'left'}]);
-    }
-
-    public getTransactionmapper(data){
-        const getTransactioResponseDto = GetTransactionResponseDto.ResponseToDto(data)
-        return getTransactioResponseDto;
-    }
-    public getWalletMapper(data){
-        const getWalletRespnseDto = GetWalletResponseDto.ResponseToDto(data);
-        return getWalletRespnseDto;
+        return await Pagination.paginate(this.transactionRepo, paginationDto, GetTransactionResponseDto.entityToDto, [{name: 'currency', type: 'left'}]);
     }
 }

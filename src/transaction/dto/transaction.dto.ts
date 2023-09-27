@@ -25,7 +25,7 @@ export class GetTransactionByIdResponseDto{
         responseDto.expireTime =  transaction.expireTime;
         return responseDto;
     }
-
+//todo: use ethers library to convert amount & change name to entitytodto
     public convertAmount(amount: string, decimal: number){
         const convertedAmount =BigInt(amount) / BigInt(10) ** BigInt(decimal);
         return String(convertedAmount);
