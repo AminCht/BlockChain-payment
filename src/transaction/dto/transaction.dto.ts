@@ -1,4 +1,5 @@
 import { Transaction } from "../../database/entities/Transaction.entity";
+import {ethers} from "ethers";
 
 
 export enum Status {
@@ -27,7 +28,7 @@ export class GetTransactionByIdResponseDto{
     }
 //todo: use ethers library to convert amount & change name to entitytodto
     public convertAmount(amount: string, decimal: number){
-        const convertedAmount =BigInt(amount) / BigInt(10) ** BigInt(decimal);
+        const convertedAmount = ethers.parseUnits(amount, decimal);
         return String(convertedAmount);
     }
     public convertStatusNumber(status: number): string{
