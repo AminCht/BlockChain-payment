@@ -9,8 +9,6 @@ import {User} from '../database/entities/User.entity';
 import {Providers} from '../providers';
 import { TronWeb } from 'tronweb';
 import { HttpService } from '@nestjs/axios';
-import { raw } from "express";
-
 @Injectable()
 export class PaymentService {
     private readonly ethereumTokenABI = ['function balanceOf(address owner) view returns (uint256)'];

@@ -31,7 +31,6 @@ export class CurrencyService {
         return await this.currencyRepo.find();
     }
     public async getCurrencyById(id: number): Promise<Currency> {
-        console.log(1)
         const currency = await this.currencyRepo.findOne({
             where: { id: id },
         });
@@ -42,7 +41,7 @@ export class CurrencyService {
     }
     public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<GetCurrenciesResponseDto> {
         try {
-            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto ,decimals:18});
+            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto});
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
             const responseDto: GetCurrenciesResponseDto = {
                 id: savedCurrency.id,
@@ -51,6 +50,7 @@ export class CurrencyService {
                 symbol: savedCurrency.symbol,
                 status: savedCurrency.status,
                 address: '',
+                decimals: savedCurrency.decimals,
             };
             return responseDto;
 
@@ -100,7 +100,8 @@ export class CurrencyService {
                 name: savedCurrency.name,
                 symbol: savedCurrency.symbol,
                 status: savedCurrency.status,
-                address: createTokenDto.address,
+                address: savedCurrency.address,
+                decimals: savedCurrency.decimals,
             };
             return responseDto;
 

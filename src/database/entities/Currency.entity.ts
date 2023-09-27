@@ -21,7 +21,7 @@ export class Currency {
     @Column({ default: true })
     status: boolean;
     
-    @Column({ default: 18 })
+    @Column()
     decimals: number;
     @Column()
     address: string;
