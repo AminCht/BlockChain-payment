@@ -75,14 +75,16 @@ export class CheckBalanceCommand extends CommandRunner {
                 provider,
             );
         } else if (
-            transaction.currency.symbol == 'trx' &&
-            transaction.currency.network == 'nile'
+            transaction.currency.symbol == 'trx' &&(
+            transaction.currency.network == 'nile' ||
+            transaction.currency.network == 'tron')
         ) {
             const provider = this.selectTvmProvider(transaction.currency.network);
             currentBalance = await this.paymentService.getTrxBalance(transaction.wallet.address, provider);
         } else if (
-            transaction.currency.symbol != 'trx' &&
-            transaction.currency.network == 'nile'
+            transaction.currency.symbol != 'trx' &&(
+            transaction.currency.network == 'nile' ||
+            transaction.currency.network == 'tron')
         ) {
             const provider = this.selectTvmProvider(transaction.currency.network);
             currentBalance = await this.paymentService.getTrxTokenBalance(transaction.wallet.address,transaction.currency.address, provider);

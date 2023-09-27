@@ -9,8 +9,6 @@ import {User} from '../database/entities/User.entity';
 import {Providers} from '../providers';
 import { TronWeb } from 'tronweb';
 import { HttpService } from '@nestjs/axios';
-import { raw } from "express";
-
 @Injectable()
 export class PaymentService {
     private readonly ethereumTokenABI = ['function balanceOf(address owner) view returns (uint256)'];
@@ -77,6 +75,10 @@ export class PaymentService {
         } else if (currency.symbol == 'trx' && currency.network == 'nile') {
             return await this.createTrxPayment(createPaymentDto, 'main', user);
         } else if (currency.symbol != 'trx' && currency.network == 'nile') {
+            return await this.createTrxPayment(createPaymentDto, 'token', user);
+        } else if (currency.symbol == 'trx' && currency.network == 'tron') {
+            return await this.createTrxPayment(createPaymentDto, 'token', user);
+        } else if (currency.symbol != 'trx' && currency.network == 'tron') {
             return await this.createTrxPayment(createPaymentDto, 'token', user);
         } else if (currency.symbol == 'btc' && currency.network == 'bitcoin'|| 'bitcoin test'){
             return await this.createBtcPayment(createPaymentDto, 'main', user);

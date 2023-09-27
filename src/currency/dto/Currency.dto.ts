@@ -15,6 +15,10 @@ export class CreateCurrencyDto {
     symbol: string;
 
     @ApiProperty()
+    @IsNotEmpty()
+    decimals: number;
+
+    @ApiProperty()
     @IsOptional()
     status?: boolean;
     @ApiProperty()
@@ -89,6 +93,9 @@ export class GetCurrenciesResponseDto{
     address: string;
     @ApiProperty()
     CoinGeckoId?: string;
+
+    @ApiProperty()
+    decimals: number;
 }
 
 export class UnAuthorizeResponseDto{
