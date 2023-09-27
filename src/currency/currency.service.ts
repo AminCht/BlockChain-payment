@@ -77,7 +77,7 @@ export class CurrencyService {
                     } catch (error) {
                         throw new Error(`Error fetching token decimals: ${error.message}`);
                     }
-                } else if (createTokenDto.network == 'nile') {
+                } else if (createTokenDto.network == 'nile' || createTokenDto.network == 'tron' ) {
                     try {
                         const provider = this.selectTvmProvider(createTokenDto.network);
                         provider.setAddress(createTokenDto.address);

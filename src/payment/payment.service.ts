@@ -76,6 +76,10 @@ export class PaymentService {
             return await this.createTrxPayment(createPaymentDto, 'main', user);
         } else if (currency.symbol != 'trx' && currency.network == 'nile') {
             return await this.createTrxPayment(createPaymentDto, 'token', user);
+        } else if (currency.symbol == 'trx' && currency.network == 'tron') {
+            return await this.createTrxPayment(createPaymentDto, 'token', user);
+        } else if (currency.symbol != 'trx' && currency.network == 'tron') {
+            return await this.createTrxPayment(createPaymentDto, 'token', user);
         } else if (currency.symbol == 'btc' && currency.network == 'bitcoin'|| 'bitcoin test'){
             return await this.createBtcPayment(createPaymentDto, 'main', user);
         }
