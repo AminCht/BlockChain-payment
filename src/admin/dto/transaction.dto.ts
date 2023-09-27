@@ -19,7 +19,7 @@ export class GetTransactionResponseDto{
 
     expireTime: Date
 
-    static ResponseToDto(transaction: Transaction){
+    static entityToDto(transaction: Transaction){
         const responseDto = new GetTransactionResponseDto(); 
         responseDto.amount  = responseDto.convertAmount(transaction.amount,transaction.currency.decimals);
         responseDto.status = responseDto.convertStatusNumber(transaction.status);

@@ -302,7 +302,7 @@ export class PaymentService {
     private createBtcTransaction(
       amount: string,description:string|null,
       balance:string, wallet:Wallet, user: User): Transaction {
-        const satoshi =  BigInt(amount) * ( BigInt(10) ** BigInt(user.tokens[0].decimals));
+        const satoshi = ethers.parseUnits(amount,user.tokens[0].decimals);
         return this.createTransaction(String(satoshi),description,balance,wallet,user);
     }
     private createTransaction(
@@ -314,7 +314,7 @@ export class PaymentService {
             amount: convertedAmount,
             currency: user.tokens[0],
             wallet_balance_before: balance,
-            description: description,
+            //description: description,
         });
     }
 }
