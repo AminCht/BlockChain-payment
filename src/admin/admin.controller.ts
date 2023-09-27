@@ -78,12 +78,14 @@ export class AdminController {
     }
 
     @Get('wallets')
+    @UseGuards(JwtAdminAuthGuard)
     public async getWallets(@Req() req: Request){
         const pagination = new PaginationDto<WalletCondition>(WalletCondition, req.query)
         return await this.adminService.getWallets(pagination);
     }
 
     @Get('transactions')
+    @UseGuards(JwtAdminAuthGuard)
     public async getTransactions(@Req() req: Request){
         const pagination = new PaginationDto<TransactionCondition>(TransactionCondition, req.query);
         return await this.adminService.getTransactions(pagination);
