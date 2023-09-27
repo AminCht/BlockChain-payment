@@ -41,7 +41,7 @@ export class CurrencyService {
     }
     public async addCurrency(createCurrnecyDto: CreateCurrencyDto): Promise<GetCurrenciesResponseDto> {
         try {
-            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto});
+            const createdCurrency = this.currencyRepo.create({...createCurrnecyDto,address:''});
             const savedCurrency = await this.currencyRepo.save(createdCurrency);
             const responseDto: GetCurrenciesResponseDto = {
                 id: savedCurrency.id,

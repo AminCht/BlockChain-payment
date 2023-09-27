@@ -38,10 +38,4 @@ export class Currency {
 
     @OneToMany(() => Withdraw, (withdraw) => withdraw.currency)
     withdraws: Withdraw[];
-    @BeforeInsert()
-    checkAddress() {
-        if (this.symbol === 'eth' || this.symbol === 'bnc' || this.symbol === 'trx') {
-            this.address = '';
-        }
-    }
 }
