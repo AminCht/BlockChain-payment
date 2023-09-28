@@ -272,6 +272,7 @@ export class PaymentService {
         try {
             provider.setAddress(currencyAddress);
             const contract = await provider.contract(this.tronTokenABI).at(currencyAddress);
+            console.log('c'+contract)
             const balance = await contract.balanceOf(address).call();
             return balance.toString();
         } catch (error) {
@@ -292,10 +293,10 @@ export class PaymentService {
     }
     public async getBitcoinBalance(wallet: Wallet){
         if(wallet.wallet_network =='bitcoin'){
-            const response = await this.httpService.get(`${process.env.BITCOINMAINBALANCEAPI}${wallet.address}`).toPromise();
+            const response = await this.httpService.get(`${process.env.BITCOIN_MAIN_BALANCE_API}${wallet.address}`).toPromise();
             return response.data['balance'];
         }
-        const response = await this.httpService.get(`${process.env.BITCOINTESTBALANCEAPI}${wallet.address}`).toPromise();
+        const response = await this.httpService.get(`${process.env.BITCOIN_TEST_BALANCE_API}${wallet.address}`).toPromise();
         return response.data['balance'];
     }
 

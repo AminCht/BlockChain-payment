@@ -1,4 +1,5 @@
 import { Transaction } from "../../database/entities/Transaction.entity"
+import {ethers} from "ethers";
 
 export enum Status {
     PENDING = 'Pending',
@@ -6,6 +7,7 @@ export enum Status {
     FAILED = 'Failed'
 }
 export class GetTransactionResponseDto{
+    id: number
     amount: string
 
     status: string
@@ -27,11 +29,13 @@ export class GetTransactionResponseDto{
         responseDto.wallet_balacne_after = responseDto.convertAmount(transaction.wallet_balance_after,transaction.currency.decimals);
         responseDto.created_date = transaction.created_date;
         responseDto.expireTime =  transaction.expireTime;
+        responseDto.id = transaction.id;
         return responseDto;
     }
 
     public convertAmount(amount: string, decimal: number){
-        const convertedAmount =BigInt(amount) / BigInt(10) ** BigInt(decimal);
+        if (!amount) return null;
+        const convertedAmount = ethers.formatUnits(amount, decimal);
         return String(convertedAmount);
     }
     public convertStatusNumber(status: number): string{

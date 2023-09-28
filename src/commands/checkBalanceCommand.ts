@@ -90,11 +90,14 @@ export class CheckBalanceCommand extends CommandRunner {
             currentBalance = await this.paymentService.getTrxTokenBalance(transaction.wallet.address,transaction.currency.address, provider);
         } else if(
             transaction.currency.symbol == 'btc' &&
-            transaction.currency.network =='bitcoin'|| 'bitcoin testnet') {
+            transaction.currency.network =='bitcoin'||
+            transaction.currency.network == 'bitcoin test') {
                 currentBalance = await this.paymentService.getBitcoinBalance(transaction.wallet);
          }
         const expectedAmount = BigInt(transaction.amount);
+        console.log(expectedAmount);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
+        console.log()
         if (now >= transaction.expireTime) {
            await this.changeTransactionStatus(transaction,Status.FAILED , currentBalance);
         } else if (receivedAmount >= expectedAmount) {
@@ -136,8 +139,6 @@ export class CheckBalanceCommand extends CommandRunner {
     async getEthTokenBalance(address: string, currencyAddress: string, provider): Promise<string> {
         await this.createTokenContract(currencyAddress, provider);
         const balance = await this.tokenContract.balanceOf(address, provider);
-        console.log({address})
-        console.log({currencyAddress})
         return balance.toString();
     }
     async createTokenContract(currencyAddress: string,provider) {
