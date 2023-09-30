@@ -6,6 +6,9 @@ import {Contract, ethers,Provider} from 'ethers';
 import {DataSource, Repository} from "typeorm";
 import {Providers} from "../providers";
 import { TronWeb } from 'tronweb';
+import { HttpService } from '@nestjs/axios';
+import { TransactionService } from '../transaction/transaction.service';
+import { PaymentService } from '../payment/payment.service';
 
 @Command({ name: 'check-balance' })
 export class CheckBalanceCommand extends CommandRunner {
@@ -36,6 +39,8 @@ export class CheckBalanceCommand extends CommandRunner {
         @InjectRepository(Transaction)
         private readonly transactionRepo: Repository<Transaction>,
         private dataSource: DataSource,
+        private httpService: HttpService,
+        private paymentService: PaymentService
     ) {
         super();
     }
@@ -70,20 +75,29 @@ export class CheckBalanceCommand extends CommandRunner {
                 provider,
             );
         } else if (
-            transaction.currency.symbol == 'trx' &&
-            transaction.currency.network == 'nile'
+            transaction.currency.symbol == 'trx' &&(
+            transaction.currency.network == 'nile' ||
+            transaction.currency.network == 'tron')
         ) {
             const provider = this.selectTvmProvider(transaction.currency.network);
-            currentBalance = await this.getTrxBalance(transaction.wallet.address, provider);
+            currentBalance = await this.paymentService.getTrxBalance(transaction.wallet.address, provider);
         } else if (
-            transaction.currency.symbol != 'trx' &&
-            transaction.currency.network == 'nile'
+            transaction.currency.symbol != 'trx' &&(
+            transaction.currency.network == 'nile' ||
+            transaction.currency.network == 'tron')
         ) {
             const provider = this.selectTvmProvider(transaction.currency.network);
-            currentBalance = await this.getTrxTokenBalance(transaction.wallet.address,transaction.currency.address, provider);
-        } else { return; }
+            currentBalance = await this.paymentService.getTrxTokenBalance(transaction.wallet.address,transaction.currency.address, provider);
+        } else if(
+            transaction.currency.symbol == 'btc' &&
+            transaction.currency.network =='bitcoin'||
+            transaction.currency.network == 'bitcoin test') {
+                currentBalance = await this.paymentService.getBitcoinBalance(transaction.wallet);
+         }
         const expectedAmount = BigInt(transaction.amount);
+        console.log(expectedAmount);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
+        console.log()
         if (now >= transaction.expireTime) {
            await this.changeTransactionStatus(transaction,Status.FAILED , currentBalance);
         } else if (receivedAmount >= expectedAmount) {
@@ -125,8 +139,6 @@ export class CheckBalanceCommand extends CommandRunner {
     async getEthTokenBalance(address: string, currencyAddress: string, provider): Promise<string> {
         await this.createTokenContract(currencyAddress, provider);
         const balance = await this.tokenContract.balanceOf(address, provider);
-        console.log({address})
-        console.log({currencyAddress})
         return balance.toString();
     }
     async createTokenContract(currencyAddress: string,provider) {
@@ -136,24 +148,6 @@ export class CheckBalanceCommand extends CommandRunner {
             provider,
         );
     }
-    private async getTrxTokenBalance(address, currencyAddress, provider: TronWeb) {
-        try {
-            provider.setAddress(currencyAddress);
-            const contract = await provider.contract(this.tronTokenABI).at(currencyAddress);
-            const balance = await contract.balanceOf(address).call();
-            return balance.toString();
-        } catch (error) {
-            throw new Error(`Error fetching token balance: ${error.message}`);
-        }
-    }
-    private async getTrxBalance(address, provider: TronWeb) {
-        try {
-            const balance = await provider.trx.getBalance(address);
-            return balance.toString();
-        } catch (error) {
-            throw new Error(`Error fetching balance: ${error.message}`);
-        }
-    }
     private selectEvmProvider(network: string): Provider {
         return Providers.selectEvmProvider(network);
 
@@ -161,4 +155,5 @@ export class CheckBalanceCommand extends CommandRunner {
     public selectTvmProvider(network: string): TronWeb {
         return Providers.selectTvmProvider(network);
     }
+
 }

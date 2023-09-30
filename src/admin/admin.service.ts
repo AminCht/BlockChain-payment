@@ -11,6 +11,9 @@ import { Withdraw } from '../database/entities/withdraw.entity';
 import { Pagination } from '../pagination/pagination';
 import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
+import { TransactionService } from '../transaction/transaction.service';
+import { GetTransactionResponseDto } from './dto/transaction.dto';
+import { GetWalletResponseDto } from './dto/wallet.dto';
 @Injectable()
 export class AdminService {
     constructor(
@@ -20,6 +23,7 @@ export class AdminService {
         @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
         private jwt: JwtService,
         private authService: AuthService,
+        private transactionService: TransactionService
     ){}
     
     public async createAdmin(dto: AdminRequestDto): Promise<CreateAdminResponseDto> {
@@ -99,9 +103,9 @@ export class AdminService {
     }
 
     public async getWallets(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.walletRepo, paginationDto);
+        return await Pagination.paginate(this.walletRepo, paginationDto,GetWalletResponseDto.entityToDto);
     }
     public async getTransactions(paginationDto: PaginationDto<any>){
-        return await Pagination.paginate(this.transactionRepo, paginationDto);
+        return await Pagination.paginate(this.transactionRepo, paginationDto, GetTransactionResponseDto.entityToDto, [{name: 'currency', type: 'left'}]);
     }
 }

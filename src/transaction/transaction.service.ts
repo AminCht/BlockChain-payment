@@ -4,23 +4,23 @@ import { Status, Transaction } from '../database/entities/Transaction.entity';
 import { Repository } from 'typeorm';
 import { TransactionNotFoundException } from './exceptions/transactionNotFound';
 import { User } from '../database/entities/User.entity';
-
+import { GetTransactionByIdResponseDto } from './dto/transaction.dto';
 @Injectable()
 export class TransactionService {
     constructor(@InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,){}
-    public async getTransactionById(user: User, transactionId: number): Promise<Transaction> {
+    public async getTransactionById(user: User, transactionId: number): Promise<Object> {
         while (true) {
             const transaction = await this.transactionRepo
-            .createQueryBuilder('transaction')
+            .createQueryBuilder('transaction').leftJoinAndSelect('transaction.currency', 'currency')
             .where('transaction.userId=:userId',{userId: user.id}).andWhere('transaction.id=:id', {id: transactionId})
-            .select(['transaction'])
+            .select(['transaction', 'currency.decimals'])
             .getOne();
             if(!transaction){
                 throw new TransactionNotFoundException(transactionId);
             }
             if(transaction.status == Status.FAILED || transaction.status == Status.SUCCESSFUL){
-                delete transaction.user;
-                return transaction;
+                const transactionResponseDto= GetTransactionByIdResponseDto.entityToDto(transaction);
+                return transactionResponseDto;
             }
             await this.sleep(4);
         }
@@ -33,4 +33,6 @@ export class TransactionService {
             }, duration*1000);
         });
     }
+    
+    
 }

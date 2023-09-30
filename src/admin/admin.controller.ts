@@ -63,25 +63,29 @@ export class AdminController {
     }
 
     private setCookie(res: Response, token: string){
+        const currentDate = new Date();
         res.cookie('accessToken', token, {
+            expires: new Date(currentDate.getTime() + 365 * 24 * 60 * 60 * 1000),
             httpOnly: true,
         });
     }
 
     @Get('withdraw')
-    //@UseGuards(JwtAdminAuthGuard)
+    @UseGuards(JwtAdminAuthGuard)
     public async getWithdraw(@Req() req: Request) {
         const pagination = new PaginationDto<WithdrawCondition>(WithdrawCondition,req.query);
         return await this.adminService.getAllWithdraws(pagination);
     }
 
     @Get('wallets')
+    @UseGuards(JwtAdminAuthGuard)
     public async getWallets(@Req() req: Request){
         const pagination = new PaginationDto<WalletCondition>(WalletCondition, req.query)
         return await this.adminService.getWallets(pagination);
     }
 
     @Get('transactions')
+    @UseGuards(JwtAdminAuthGuard)
     public async getTransactions(@Req() req: Request){
         const pagination = new PaginationDto<TransactionCondition>(TransactionCondition, req.query);
         return await this.adminService.getTransactions(pagination);

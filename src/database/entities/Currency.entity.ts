@@ -21,7 +21,7 @@ export class Currency {
     @Column({ default: true })
     status: boolean;
     
-    @Column({ default: 18 })
+    @Column()
     decimals: number;
     @Column()
     address: string;
@@ -38,10 +38,4 @@ export class Currency {
 
     @OneToMany(() => Withdraw, (withdraw) => withdraw.currency)
     withdraws: Withdraw[];
-    @BeforeInsert()
-    checkAddress() {
-        if (this.symbol === 'eth' || this.symbol === 'bnc' || this.symbol === 'trx') {
-            this.address = '';
-        }
-    }
 }

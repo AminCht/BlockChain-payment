@@ -15,7 +15,7 @@ export class PaginationDto<G extends ICondition> {
         if (query.pageSize) {
             this.pageSize = query.pageSize;
         } else {
-            this.pageSize = 4;
+            this.pageSize = 20;
         }
         if (query.orderBy) {
             this.orderBy = query.orderBy;
@@ -46,4 +46,9 @@ export class PaginationDto<G extends ICondition> {
     condition: ObjectLiteral;
 
     conditionMaker: G;
+}
+
+export class RelationDto{
+    name: string
+    type: 'left' | 'inner'
 }
