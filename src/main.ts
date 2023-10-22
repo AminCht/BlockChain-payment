@@ -13,6 +13,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser());
+  app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
     .setTitle('BlockChain Payment')
     .setDescription('The BlockChain Payment API description')

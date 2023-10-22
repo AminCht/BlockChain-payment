@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Ticket } from "./Ticket.entity";
 
 
@@ -15,8 +15,14 @@ export class Message{
     senderId: number
 
     @Column()
-    recieverId: number
+    text: string
 
     @Column()
-    text: string
+    createdAt: Date
+
+    @BeforeInsert()
+    setDates() {
+        const date = new Date();
+        this.createdAt = date;
+    }
 }

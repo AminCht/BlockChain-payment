@@ -11,10 +11,12 @@ import { Wallet } from '../database/entities/Wallet.entity';
 import { Transaction } from '../database/entities/Transaction.entity';
 import { Currency } from '../database/entities/Currency.entity';
 import { TransactionService } from '../transaction/transaction.service';
+import { Ticket } from '../database/entities/Ticket.entity';
+import { Message } from '../database/entities/Message.entity';
 
 @Module({
   imports:[JwtModule.register({secret: process.env.JWT_SECRET_ADMIN, signOptions: { expiresIn: '20d' }}),
-  TypeOrmModule.forFeature([User, Withdraw, Wallet, Transaction, Currency])],
+  TypeOrmModule.forFeature([User, Withdraw, Wallet, Transaction, Currency, Ticket, Message])],
   controllers: [AdminController],
   providers: [AdminService,JwtAdminStrategy, AuthService, TransactionService]
 })
