@@ -8,8 +8,7 @@ export class ProfileController {
 
     @UseGuards(AuthGuard(['jwt']))
     @Get('me')
-    async getProfile(@Req() req: Request){
+    async getProfile(@Req() req: Request) {
         return await this.profileService.getProfile(req['user'].id);
     }
-
 }
