@@ -1,11 +1,11 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {ApiKey} from '../database/entities/apikey.entity';
-import {ApiKeyRequestDto, ApiKeyUpdateDto} from './dto/apikey.dto';
-import {User} from '../database/entities/User.entity';
-import * as crypto from 'crypto';
-import {EndPointAccess} from '../database/entities/endpoint_acess.entity';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { ApiKey } from "../database/entities/apikey.entity";
+import { ApiKeyRequestDto, ApiKeyUpdateDto } from "./dto/apikey.dto";
+import { User } from "../database/entities/User.entity";
+import * as crypto from "crypto";
+import { EndPointAccess } from "../database/entities/endpoint_acess.entity";
 
 @Injectable()
 export class ApikeyService {
@@ -70,10 +70,12 @@ export class ApikeyService {
         }
         return endPoints;
     }
+    public async getAllEndPoints(): Promise<EndPointAccess[]> {
+        return await this.endPointsRepo.find();
+    }
     private generateRandomHashedString(): string {
         const randomBytes = crypto.randomBytes(25);
         const hash = crypto.createHash('sha256').update(randomBytes).digest('hex');
         return hash;
     }
-
 }
