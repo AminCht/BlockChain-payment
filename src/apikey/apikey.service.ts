@@ -35,11 +35,16 @@ export class ApikeyService {
     }
     public async createApiKey(user: User, apiKeyRequestDto: ApiKeyRequestDto): Promise<ApiKey> {
         const endPoints = await this.getEndPoints(apiKeyRequestDto.endPointList);
-        console.log('user:' + user.username);
+        const expireTime = new Date();
+
+        console.log('date:' + apiKeyRequestDto.expireDate);
+        if (!apiKeyRequestDto.expireDate) {
+            expireTime.setDate(expireTime.getDate() + 20);
+        }
         const createdApiKey = this.apiKeyRepo.create({
             user: user,
             accesses: endPoints,
-            expireTime: apiKeyRequestDto.expireDate,
+            expireTime: apiKeyRequestDto.expireDate ?? expireTime,
             key: this.generateRandomHashedString(),
         });
         const savedApiKey = await this.apiKeyRepo.save(createdApiKey);

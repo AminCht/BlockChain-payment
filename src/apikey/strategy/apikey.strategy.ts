@@ -30,7 +30,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'ApiKey-Strategy'
         }
         return done(null, key);
     }
-    async checkUrl(partialReq: { url: string; method: string }){
+    async checkUrl(partialReq: { url: string; method: string }) {
         if (partialReq.url[partialReq.url.length - 1] != '/') {
             partialReq.url = partialReq.url + '/';
         }
