@@ -30,6 +30,8 @@ export class TicketController {
         return await this.ticketService.getUserTickets(req['user']);
     }
 
+    @ApiOperation({ summary: 'Get Ticket By id' })
+    @ApiResponse({ status: 200, type: CreateTicketResponseDto })
     @ApiCookieAuth('accessToken')
     @UseGuards(AuthGuard(['jwt']))
     @Get(':id')

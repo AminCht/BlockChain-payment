@@ -5,6 +5,10 @@ import { Role } from "../../database/entities/User.entity";
 export class ChangePasswordDto{
     @ApiProperty()
     @IsNotEmpty()
+    oldPassword: string
+
+    @ApiProperty()
+    @IsNotEmpty()
     newPassword: string
 }
 
