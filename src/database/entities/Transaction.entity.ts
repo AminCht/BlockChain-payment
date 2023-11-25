@@ -20,6 +20,9 @@ export class Transaction{
     @Column({ default: Status.PENDING })
     status: Status;
 
+    @Column({nullable: true})
+    callbackUrl: string
+
     @Column({ nullable: false })
     wallet_balance_before: string;
 
