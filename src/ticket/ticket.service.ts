@@ -21,7 +21,7 @@ export class TicketService {
     }
     //todo pagination
     async getUserTickets(user: User){
-        const ticket = await this.ticketRepo.find({ where: {user: {id: user.id}}});
+        const ticket = await this.ticketRepo.find({ where: {user: {id: user.id}}, relations:['messages']});
         return ticket;
     }
 
@@ -42,11 +42,11 @@ export class TicketService {
     async sendMessage(dto: SendMessageRequestDto, ticketId: number, user: User){
         
         const ticket = await this.ticketRepo.findOne({where: {id: ticketId, user:{id: user.id}}});
-        if(ticket || user.role ==Role.ADMIN){
+        if(ticket){
             const message = this.messageRepo.create({ticket: {id: ticketId}, senderId: user.id, text: dto.text});
             return await this.messageRepo.save(message);
         }
-        throw new ForbiddenException();
+        throw new NotFoundException(`Ticket with id ${ticketId} not found`);
     }
 
 
