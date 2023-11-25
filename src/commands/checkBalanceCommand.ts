@@ -95,14 +95,15 @@ export class CheckBalanceCommand extends CommandRunner {
                 currentBalance = await this.paymentService.getBitcoinBalance(transaction.wallet);
          }
         const expectedAmount = BigInt(transaction.amount);
-        console.log(expectedAmount);
         const receivedAmount = BigInt(currentBalance) - BigInt(transaction.wallet_balance_before);
-        console.log()
         if (now >= transaction.expireTime) {
            await this.changeTransactionStatus(transaction,Status.FAILED , currentBalance);
         } else if (receivedAmount >= expectedAmount) {
-            await this.changeTransactionStatus(transaction, Status.SUCCESSFUL, currentBalance);}
-        else {await this.changeTransactionStatus(transaction, Status.PENDING, currentBalance);}
+            await this.changeTransactionStatus(transaction, Status.SUCCESSFUL, currentBalance);
+        }
+        else {
+            await this.changeTransactionStatus(transaction, Status.PENDING, currentBalance);
+        }
     }
 
     async changeTransactionStatus(transaction: Transaction, status: Status, afterBalance: string) {
@@ -130,6 +131,9 @@ export class CheckBalanceCommand extends CommandRunner {
             throw error;
         } finally {
             await queryRunner.release();
+            if(status != Status.PENDING){
+                await this.sendPostRequestToUrl(transaction.callbackUrl, transaction);
+            }
         }
     }
     async getEthBalance(address: string, provider): Promise<string> {
@@ -154,6 +158,11 @@ export class CheckBalanceCommand extends CommandRunner {
     }
     public selectTvmProvider(network: string): TronWeb {
         return Providers.selectTvmProvider(network);
+    }
+
+    async sendPostRequestToUrl(callbackUrl: string, transaction: Transaction){
+        const body = { trasnactionId: transaction.id, amount: transaction.amount, created_Date: transaction.created_date, status: transaction.status};
+        await this.httpService.post(callbackUrl, body);
     }
 
 }
