@@ -17,7 +17,6 @@ export class ApikeyController {
     @ApiResponse({ status: 201, description: 'create an apikey and return it', type: ApiKeyResponseDto})
     @UseGuards(AuthGuard(['jwt']))
     async createApiKey(@Req() req: Request, @Body() dto: ApiKeyRequestDto){
-        console.log('date'+dto.expireDate);
         return await this.apikeyService.createApiKey(req['user'], dto);
     }
     @Patch(':id')

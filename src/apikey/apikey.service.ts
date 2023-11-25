@@ -37,7 +37,6 @@ export class ApikeyService {
         const endPoints = await this.getEndPoints(apiKeyRequestDto.endPointList);
         const expireTime = new Date();
 
-        console.log('date:' + apiKeyRequestDto.expireDate);
         if (!apiKeyRequestDto.expireDate) {
             expireTime.setDate(expireTime.getDate() + 20);
         }
