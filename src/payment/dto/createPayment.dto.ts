@@ -14,6 +14,10 @@ export class CreatePaymentRequestDto {
     @ApiProperty()
     @IsOptional()
     description?: string;
+
+    @ApiProperty()
+    @IsOptional()
+    callbackUrl ?: string
 }
 
 export class CreatePaymentResponseDto {
