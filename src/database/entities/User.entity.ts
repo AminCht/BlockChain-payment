@@ -10,6 +10,7 @@ import { Transaction } from './Transaction.entity';
 import { Currency } from './Currency.entity';
 import { ApiKey } from './apikey.entity';
 import { Withdraw } from './withdraw.entity';
+import { Ticket } from './Ticket.entity';
 
 export enum Role{
     USER = 'User',
@@ -47,6 +48,9 @@ export class User {
 
     @OneToMany(()=> Withdraw, (withdraw)=> withdraw.user)
     withdraws: Withdraw[]
+
+    @OneToMany(() => Ticket, (ticket) => ticket.user)
+    tickets: Ticket[];
     
     @BeforeInsert()
     setDates() {

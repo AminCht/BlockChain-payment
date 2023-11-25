@@ -9,6 +9,7 @@ import { JwtAdminAuthGuard } from '../auth/guards/jwt.admin.guard';
 import { PaginationDto } from 'src/pagination/pagination.dto';
 import { WalletCondition } from './dto/walletCondition';
 import { TransactionCondition } from './dto/transactionCondition';
+import { TicketCondition } from './dto/ticketCondition';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -89,5 +90,12 @@ export class AdminController {
     public async getTransactions(@Req() req: Request){
         const pagination = new PaginationDto<TransactionCondition>(TransactionCondition, req.query);
         return await this.adminService.getTransactions(pagination);
+    }
+
+    @Get('tickets')
+    @UseGuards(JwtAdminAuthGuard)
+    public async getTickets(@Req() req: Request){
+        const pagination = new PaginationDto<TicketCondition>(TicketCondition, req.query);
+        return await this.adminService.getTickets(pagination);
     }
 }

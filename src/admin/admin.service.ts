@@ -14,6 +14,8 @@ import { Transaction } from '../database/entities/Transaction.entity';
 import { TransactionService } from '../transaction/transaction.service';
 import { GetTransactionResponseDto } from './dto/transaction.dto';
 import { GetWalletResponseDto } from './dto/wallet.dto';
+import { Ticket } from '../database/entities/Ticket.entity';
+import { GetTicketResponseDto } from './dto/ticket.dto';
 @Injectable()
 export class AdminService {
     constructor(
@@ -21,6 +23,7 @@ export class AdminService {
         @InjectRepository(Withdraw) private withdrawRepo: Repository<Withdraw>,
         @InjectRepository(Wallet) private walletRepo: Repository<Wallet>,
         @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
+        @InjectRepository(Ticket) private ticketRepo: Repository<Ticket>,
         private jwt: JwtService,
         private authService: AuthService,
         private transactionService: TransactionService
@@ -107,5 +110,8 @@ export class AdminService {
     }
     public async getTransactions(paginationDto: PaginationDto<any>){
         return await Pagination.paginate(this.transactionRepo, paginationDto, GetTransactionResponseDto.entityToDto, [{name: 'currency', type: 'left'}]);
+    }
+    public async getTickets(paginationDto: PaginationDto<any>){
+        return await Pagination.paginate(this.ticketRepo, paginationDto,GetTicketResponseDto.entityToDto ,[{name: 'messages', type: 'left'}, {name: 'user', type: 'left'}]);
     }
 }

@@ -2,7 +2,7 @@
 /development.env
 /test.env
 /stage.env
-
+/DBbackup.sql
 
 
 # compiled output

@@ -27,6 +27,11 @@ export class ApikeyController {
     async updateApiKey(@Req() req: Request, @Body() dto: ApiKeyUpdateDto,@Param('id') id: number){
         return await this.apikeyService.updateApiKey(req['user'].id, dto, id);
     }
+    @Get('endpoints')
+    @ApiOperation({summary: 'Get all endpoints'})
+    async getAllEndpoints() {
+        return await this.apikeyService.getAllEndPoints();
+    }
 
     @Get()
     @ApiOperation({summary: 'Get token of apikey'})
