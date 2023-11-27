@@ -1,0 +1,10 @@
+[
+    {
+        "network": "nile",
+        "name": "eth",
+        "symbol": "eth",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    }
+]
