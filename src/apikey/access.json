@@ -1,39 +1,83 @@
 [
-{
-    "patterns": [
-        {
-            "urlPattern": "^\\/payment\\/$",
-            "method": "POST"
-        }
-    ],
-    "accessName": "createPayment"
-},
-{
-    "patterns": [
-        {
-            "urlPattern": "^\\/apikey\\/access\\/$",
-            "method": "GET"
-        }
-    ],
-    "accessName": "getApiKey"
-},
-{
-    "patterns": [
-        {
-            "urlPattern": "^\\/payment\\/transaction\\/([^\\/]+)\\/$",
-            "method": "GET"
-        }
-    ],
-    "accessName": "getTransaction"
-},
-{
-    "patterns": [
-        {
-            "urlPattern": "^\\/apikey\\/([^\\/]+)\\/$",
-            "method": "PUT"
-        }
-    ],
-    "accessName": "updateApiKey"
-}
-
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/payment\\/$",
+                "method": "POST"
+            }
+        ],
+        "accessName": "createPayment"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/apikey\\/access\\/$",
+                "method": "GET"
+            }
+        ],
+        "accessName": "getApiKey"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/apikey\\/([^\\/]+)\\/$",
+                "method": "PUT"
+            }
+        ],
+        "accessName": "updateApiKey"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/apikey\\/([^\\/]+)\\/$",
+                "method": "DELETE"
+            }
+        ],
+        "accessName": "deleteApikey"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/payment\\/transaction\\/([^\\/]+)\\/$",
+                "method": "GET"
+            }
+        ],
+        "accessName": "getTransaction"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/withdraw\\/$",
+                "method": "POST"
+            }
+        ],
+        "accessName": "createWithdraw"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/withdraw\\/$",
+                "method": "GET"
+            }
+        ],
+        "accessName": "getWithdraw"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/withdraw\\/([^\\/]+)\\/$",
+                "method": "PUT"
+            }
+        ],
+        "accessName": "updateWithdraw"
+    },
+    {
+        "patterns": [
+            {
+                "urlPattern": "^\\/withdraw\\/([^\\/]+)\\/$",
+                "method": "PATCH"
+            }
+        ],
+        "accessName": "cancelWithdraw"
+    }
 ]
