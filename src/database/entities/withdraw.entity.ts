@@ -3,10 +3,10 @@ import { User } from "./User.entity";
 import { Currency } from "./Currency.entity";
 
 export enum Status{
-    SUCCESSFUL = 0,
-    PENDING = 1,
+    PENDING = 0,
+    SUCCESSFUL = 1,
     CANCEL = 2,
-    APPROVED = 3
+    APPROVED = 3,
 }
 
 @Entity({name: 'Withdraws'})
