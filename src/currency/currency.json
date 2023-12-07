@@ -1,8 +1,168 @@
 [
     {
-        "network": "nile",
-        "name": "eth",
+        "network": "BSC",
+        "name": "wbnb",
+        "symbol": "wbnb",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "bnb",
+        "symbol": "bnb",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "usdt",
+        "symbol": "usdt",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "busd",
+        "symbol": "busd",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "usdc",
+        "symbol": "usdc",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "ethereum",
         "symbol": "eth",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "bitcoin",
+        "symbol": "btc",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "BSC",
+        "name": "dogecoin",
+        "symbol": "doge",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "ethereum",
+        "symbol": "eth",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "weth",
+        "symbol": "weth",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "bnb",
+        "symbol": "bnb",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "usdt",
+        "symbol": "usdt",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "usdc",
+        "symbol": "usdc",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "dogecoin",
+        "symbol": "doge",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Ethereum",
+        "name": "bitcoin",
+        "symbol": "btc",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Sepolia",
+        "name": "ethereum",
+        "symbol": "eth",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Sepolia",
+        "name": "usdt",
+        "symbol": "usdt",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Tron",
+        "name": "Tron",
+        "symbol": "trx",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Tron",
+        "name": "usdt",
+        "symbol": "usdt",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Bitcoin",
+        "name": "mainnet",
+        "symbol": "btc",
+        "status": true,
+        "address": " ",
+        "decimals": 10
+    },
+    {
+        "network": "Bitcoin",
+        "name": "testnet",
+        "symbol": "btc",
         "status": true,
         "address": " ",
         "decimals": 10
