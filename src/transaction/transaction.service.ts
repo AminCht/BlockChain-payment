@@ -25,6 +25,21 @@ export class TransactionService {
             await this.sleep(4);
         }
     }
+
+    public async getTransactions(user: User): Promise<Transaction[]> {
+        const transactions = await this.transactionRepo
+          .createQueryBuilder('transaction').leftJoinAndSelect('transaction.currency', 'currency')
+          .where('transaction.userId=:userId',{userId: user.id})
+          .select(['transaction', 'currency.name', 'currency.decimals'])
+          .getMany();
+        let transactionResponseDto=[];
+        for(const transaction of transactions){
+            console.log(transaction)
+            transactionResponseDto.push(GetTransactionByIdResponseDto.entityToDto(transaction));
+        }
+        return transactionResponseDto;
+    }
+
     private async sleep(duration: number): Promise<void> {
         return new Promise<void>((resolve) => {
             setTimeout(() => {
