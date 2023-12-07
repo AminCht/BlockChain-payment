@@ -1,12 +1,12 @@
-import {BadRequestException, Injectable, InternalServerErrorException, NotFoundException} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Status as withdrawStatus, Withdraw} from '../database/entities/withdraw.entity';
-import {Repository} from 'typeorm';
-import {CreateWithdrawDto, UpdateWithdrawRequestDto} from './dto/withdraw.dto';
-import {User} from '../database/entities/User.entity';
-import {Status, Transaction} from '../database/entities/Transaction.entity';
-import {Currency} from "../database/entities/Currency.entity";
-import {Contract, ethers, InfuraProvider} from "ethers";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Status as withdrawStatus, Withdraw } from "../database/entities/withdraw.entity";
+import { Repository } from "typeorm";
+import { CreateWithdrawDto, UpdateWithdrawRequestDto } from "./dto/withdraw.dto";
+import { User } from "../database/entities/User.entity";
+import { Status, Transaction } from "../database/entities/Transaction.entity";
+import { Currency } from "../database/entities/Currency.entity";
+import { ethers } from "ethers";
 
 @Injectable()
 export class WithdrawService {
@@ -37,6 +37,7 @@ export class WithdrawService {
                 currency: currency,
                 dst_wallet: dto.dst_wallet,
                 user: user,
+                status: withdrawStatus.PENDING,
             });
             return await this.withdrawRepo.save(withdraw);
         }
