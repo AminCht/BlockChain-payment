@@ -31,9 +31,6 @@ export class WithdrawService {
         const currency = await this.currencyRepo.findOneById(dto.currencyId);
         const allowedAmount = await this.getAllowedAmount(dto.currencyId, user);
         const requestedAmount = ethers.parseUnits(dto.amount, currency.decimals);
-        console.log('allowed',allowedAmount);
-        console.log('reqqqqq',requestedAmount);
-        console.log(user);
         if (BigInt(requestedAmount) <= BigInt(allowedAmount)) {
             const withdraw = this.withdrawRepo.create({
                 amount: String(requestedAmount),
