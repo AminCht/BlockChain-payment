@@ -50,7 +50,7 @@ export class ApikeyController {
         return await this.apikeyService.getApiKeysById(req['user'].id, id);
     }
 
-    @Delete('id')
+    @Delete(':id')
     @ApiOperation({summary: 'Delete Apikey'})
     @UseGuards(AuthGuard(['jwt']))
     async deleteApiKey(@Req() req: Request, @Param('id') id: number){
