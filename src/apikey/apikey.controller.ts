@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Patch, Post, Put, Req, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post, Put, Req, UseGuards} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { ApiKeyAuthGuard } from './guard/apikey.guard';
@@ -49,6 +49,14 @@ export class ApikeyController {
     async getApiKeysById(@Req() req: Request, @Param('id') id: number) {
         return await this.apikeyService.getApiKeysById(req['user'].id, id);
     }
+
+    @Delete('id')
+    @ApiOperation({summary: 'Delete Apikey'})
+    @UseGuards(AuthGuard(['jwt']))
+    async deleteApiKey(@Req() req: Request, @Param('id') id: number){
+        return await this.apikeyService.deleteApiKey(req['user'].id, id);
+    }
+
     @ApiOperation({summary: 'Get token of apikey'})
     @ApiResponse({ status: 401, description: 'unAuthorized and return a message', type: UnAuthorizedResponseDto})
     @ApiResponse({ status: 200, description: 'Update apikey with given id and return it', type: [GetAccessResponseDto]})
