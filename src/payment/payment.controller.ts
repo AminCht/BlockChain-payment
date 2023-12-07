@@ -40,4 +40,15 @@ export class PaymentController {
     return await this.transactionService.getTransactionById(req['user'], Number(id));
   }
 
+  @Get('Transactions')
+  @UseFilters(TransactionNotFoundExceptionFilter)
+  @ApiOperation({ summary: 'Get Transactions' })
+  @ApiResponse({ status: 404, description: 'Transactions not found', type: TransactionNotFoundResponseDto})
+  @ApiResponse({ status: 200, description: 'Transactions found',type: GetTransactionByIdResponseDto})
+  @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
+  @UseGuards(EitherGuard)
+  async getTransactions(@Req() req:Request ){
+    return await this.paymentService.getTransactions(req['user']);
+  }
+
 }

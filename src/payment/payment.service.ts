@@ -259,6 +259,15 @@ export class PaymentService {
         const transaction = await this.transactionRepo.findOneById(id);
         return transaction;
     }
+
+    public async getTransactions(user: User): Promise<Transaction[]> {
+        const transaction = await this.transactionRepo
+          .createQueryBuilder('transaction').leftJoinAndSelect('transaction.currency', 'currency')
+          .where('transaction.userId=:userId',{userId: user.id})
+          .select(['transaction', 'currency.name'])
+          .getMany();
+        return transaction;
+    }
     public async getTrxBalance(address, provider: TronWeb) {
         try {
             const balance = await provider.trx.getBalance(address);
