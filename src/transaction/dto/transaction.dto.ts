@@ -1,3 +1,4 @@
+import { Currency } from "../../database/entities/Currency.entity";
 import { Transaction } from "../../database/entities/Transaction.entity";
 import {ethers} from "ethers";
 
@@ -9,6 +10,9 @@ export enum Status {
 }
 
 export class GetTransactionByIdResponseDto{
+
+    id: number
+
     amount: string
 
     status: string
@@ -17,13 +21,19 @@ export class GetTransactionByIdResponseDto{
 
     expireTime: Date
 
+    currency?: Currency
 
     static entityToDto(transaction: Transaction){
-        const responseDto = new GetTransactionByIdResponseDto(); 
+        const responseDto = new GetTransactionByIdResponseDto();
+        responseDto.id = transaction.id; 
         responseDto.amount  = responseDto.convertAmount(transaction.amount,transaction.currency.decimals);
         responseDto.status = responseDto.convertStatusNumber(transaction.status);
         responseDto.created_date = transaction.created_date;
         responseDto.expireTime =  transaction.expireTime;
+        if(transaction.currency){
+            responseDto.currency = transaction.currency;
+            delete responseDto.currency.decimals;
+        }
         return responseDto;
     }
     public convertAmount(amount: string, decimal: number) {

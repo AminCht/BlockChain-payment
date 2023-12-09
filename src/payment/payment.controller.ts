@@ -48,7 +48,7 @@ export class PaymentController {
   @ApiResponse({ status: 401, description: 'unAuthorized', type: UnAuthorizeResponseDto })
   @UseGuards(EitherGuard)
   async getTransactions(@Req() req:Request ){
-    return await this.paymentService.getTransactions(req['user']);
+    return await this.transactionService.getTransactions(req['user']);
   }
 
 }
